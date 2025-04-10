@@ -1,0 +1,586 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Estilo global */
+body {
+    font-family: Arial, sans-serif;
+    /* Mesma fonte usada no header */
+    background-color: #f4f4f4;
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    /* Garante que o footer fique no final da página */
+}
+
+/* Header */
+header {
+    background-color: black;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px;
+    position: relative;
+}
+
+header .logo {
+    margin-left: 20px;
+    /* Espaçamento para trazer a logo mais para dentro */
+}
+
+header .logo img {
+    height: 80px;
+    cursor: pointer;
+}
+
+header nav {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+    /* Centraliza os menus no espaço restante */
+}
+
+header nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 30px;
+    /* Aumenta o espaçamento entre os itens do menu */
+    font-size: 16px;
+    padding: 8px 12px;
+    /* Adiciona espaçamento interno para destacar os links */
+    border-radius: 4px;
+    /* Borda arredondada para melhorar a aparência */
+    transition: all 0.3s ease;
+    /* Animação suave para hover e estado ativo */
+}
+
+header nav a:hover {
+    background-color: #333;
+    /* Efeito ao passar o mouse */
+}
+
+/* Estilo para o item do menu ativo */
+header nav a.active {
+    background-color: yellow;
+    /* Fundo amarelo para o item ativo */
+    border: 2px solid #00bfff;
+    /* Contorno azul-celeste */
+    color: black;
+    /* Cor do texto para contraste */
+    font-weight: bold;
+    /* Destaca o texto em negrito */
+}
+
+header nav .dropdown {
+    margin-left: 30px;
+    position: relative;
+    display: inline-block;
+}
+
+header nav .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: black;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+header nav .dropdown-content a {
+    color: rgb(255, 255, 255);
+    padding: 10px;
+    text-decoration: none;
+    display: block;
+}
+
+header nav .dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Estilo para o span "Perfil" */
+header nav .dropdown span {
+    color: white;
+    font-size: 16px;
+    padding: 8px 12px;
+    /* Mesmo padding dos links para consistência */
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+/* Destaque para o span "Perfil" quando ativo */
+header nav .dropdown span.active {
+    background-color: yellow;
+    /* Fundo amarelo para o item ativo */
+    border: 2px solid #00bfff;
+    /* Contorno azul-celeste */
+    color: black;
+    /* Cor do texto para contraste */
+    font-weight: bold;
+    /* Destaca o texto em negrito */
+}
+
+/* Hover para o span "Perfil" */
+header nav .dropdown span:hover {
+    background-color: #333;
+    /* Efeito ao passar o mouse */
+}
+
+/* Container principal */
+.container {
+    flex: 1;
+    /* Faz o container ocupar o espaço disponível */
+    padding: 20px;
+    margin: 20px;
+    /* Margem geral ao redor do conteúdo */
+    background-color: rgb(207, 207, 207);
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 2);
+    font-family: Arial, sans-serif;
+    /* Mesma fonte usada no header */
+}
+
+/* Cards */
+.cards {
+    display: flex;
+    justify-content: center;
+    /* Centraliza os cards horizontalmente */
+    gap: 40px;
+    /* Distância maior entre os cards */
+    margin-top: 20px;
+}
+
+.card {
+    background-color: #00bfff;
+    /* Azul-celeste */
+    color: black;
+    /* Letras pretas */
+    padding: 20px;
+    border-radius: 15px;
+    /* Bordas arredondadas */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    /* Sombra suave */
+    width: 200px;
+    /* Largura fixa */
+    height: 100px;
+    /* Altura fixa (proporção 1:2) */
+    text-align: center;
+    line-height: 60px;
+    /* Centraliza verticalmente o texto */
+    font-size: 20px;
+    /* Tamanho da fonte */
+    font-weight: bold;
+    /* Negrito para destaque */
+    text-decoration: none;
+    /* Remove sublinhado */
+    transition: all 0.3s ease;
+    /* Animação suave */
+    cursor: pointer;
+    /* Cursor de clique */
+    border: 2px solid transparent;
+    /* Borda transparente inicial */
+    font-family: Arial, sans-serif;
+    /* Mesma fonte usada no header */
+}
+
+.card:hover {
+    transform: scale(1.05);
+    /* Zoom leve ao passar o mouse */
+    border: 2px solid yellow;
+    /* Borda amarela ao passar o mouse */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    /* Sombra mais pronunciada */
+}
+
+@media (max-width: 768px) {
+    .cards {
+        flex-direction: column;
+        /* Empilha os cards verticalmente em telas pequenas */
+        align-items: center;
+        /* Centraliza os cards */
+    }
+}
+
+/* Footer */
+footer {
+    background-color: #fbff00;
+    color: rgb(10, 9, 63);
+    text-align: center;
+    padding: 15px;
+    margin-top: auto;
+    /* Garante que o footer fique no final da página */
+    font-family: Arial, sans-serif;
+    /* Mesma fonte usada no header */
+    font-weight: bold;
+    /* Texto em negrito */
+}
+
+footer p {
+    font-size: 14px;
+}
+
+/* Botão de busca CEP */
+#buscar-cep-btn {
+    margin-left: 10px;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+    /* Mesma fonte usada no header */
+}
+
+#buscar-cep-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Mensagens de sucesso/erro */
+.success {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border: 1px solid #c3e6cb;
+    font-family: Arial, sans-serif;
+    /* Mesma fonte usada no header */
+}
+
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border: 1px solid #f5c6cb;
+    font-family: Arial, sans-serif;
+    /* Mesma fonte usada no header */
+}
+
+/* Imagens pequenas */
+.small-image {
+    width: 50px;
+    height: auto;
+    border-radius: 50%;
+    /* Deixa a imagem circular */
+    object-fit: cover;
+    /* Garante que a imagem seja cortada adequadamente */
+    margin-bottom: 10px;
+}
+
+/* Estilo do modal */
+.modal {
+    display: none; /* Oculto por padrão */
+    position: fixed; /* Fixa o modal na tela */
+    z-index: 1000; /* Garante que o modal fique acima de outros elementos */
+    left: 0%;
+    top: 0%;
+    width: 100%; /* Ocupa toda a largura da tela */
+    height: 100%; /* Ocupa toda a altura da tela */
+    background-color: rgba(0, 0, 0, 0.8); /* Fundo escuro semi-transparente */
+    justify-content: center; /* Centraliza horizontalmente */
+    align-items: center; /* Centraliza verticalmente */
+    overflow: auto; /* Permite rolagem se necessário */
+}
+
+/* Conteúdo do modal (imagem ampliada) */
+.modal-content {
+    max-width: 80%; /* Largura máxima da imagem */
+    max-height: 80%; /* Altura máxima da imagem */
+    object-fit: contain; /* Garante que a imagem seja exibida proporcionalmente */
+    border: 2px solid white; /* Borda branca para destacar a imagem */
+    border-radius: 8px; /* Bordas arredondadas */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra para dar profundidade */
+    left: 0%;
+    top: 50%;
+}
+
+/* Botão de fechar */
+.close {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    color: white;
+    font-size: 30px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 1001; /* Garante que o botão fique acima da imagem */
+}
+
+.close:hover {
+    color: red;
+}
+
+/* Estilo para os botões de ação */
+.actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.left-actions,
+.right-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* Botão Voltar */
+.btn.voltar {
+    background-color: #5cb85c;
+    /* Verde */
+    border: 2px solid #4cae4c;
+}
+
+.btn.voltar:hover {
+    background-color: #449d44;
+    /* Verde escuro */
+}
+
+/* Botão Novo Ritual */
+.btn.novo-ritual {
+    background-color: #00bfff;
+    /* Azul-celeste */
+    border: 2px solid #00a2e6;
+}
+
+.btn.novo-ritual:hover {
+    background-color: #0093cc;
+    /* Azul mais escuro */
+}
+
+/* Estilo para a tabela */
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.styled-table thead {
+    background-color: #00bfff;
+    color: black;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 5px 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.styled-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.styled-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Larguras personalizadas para as colunas */
+.col-foto {
+    width: 5%;
+    /* Foto (pequena) */
+}
+
+.col-nome {
+    width: 30%;
+    /* Nome (maior importância) */
+}
+
+.col-data {
+    width: 8%;
+    /* Data */
+}
+
+.col-padrinho {
+    width: 8%;
+    /* Padrinho/Madrinha */
+}
+
+.col-inscritos {
+    width: 7%;
+    /* Inscritos (número pequeno) */
+}
+
+.col-acoes {
+    width: 7%;
+    /* Ações (ícones) */
+}
+
+/* Estilo para a imagem quadrada */
+.square-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border: 0px solid #ddd;
+    border-radius: 4px;
+}
+
+.square-image.clickable {
+    cursor: pointer;
+}
+
+/* Estilo para os ícones de ação */
+.action-icon {
+    font-size: 18px;
+    margin-right: 10px;
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    position: relative;
+    cursor: pointer;
+}
+
+.action-icon:hover {
+    color: #0056b3;
+}
+
+.action-icon:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgb(77, 76, 76);
+    color: white;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 13px;
+    white-space: nowrap;
+    z-index: 1;
+}
+
+.action-icon.danger {
+    color: red;
+}
+
+.action-icon.danger:hover {
+    color: darkred;
+}
+
+/* Estilo para a paginação */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.pagination a {
+    padding: 8px 12px;
+    background-color: #00bfff;
+    color: black;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.pagination a.active {
+    background-color: yellow;
+    border: 2px solid #00bfff;
+    font-weight: bold;
+}
+
+.pagination a:hover {
+    background-color: #333;
+    color: white;
+}
+
+/* Filtros */
+.filters {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-group label {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.filter-group input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.filters button {
+    padding: 8px 16px;
+    background-color: #00bfff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.filters button:hover {
+    background-color: #0093cc;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10x;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.filter-btn:hover {
+    opacity: 0.9;
+}
+
+/* Botão Filtrar */
+.filter-btn:first-child {
+    background-color: #00bfff;
+    /* Azul-celeste */
+    color: white;
+}
+
+/* Botão Limpar Filtro */
+.clear-btn {
+    background-color: #ff4d4d;
+    /* Vermelho claro */
+    color: white;
+    text-decoration: none;
+    /* Remove sublinhado do link */
+}
+
+.clear-btn:hover {
+    background-color: #cc0000;
+    /* Vermelho mais escuro */
+}
