@@ -277,45 +277,117 @@ footer p {
 
 /* Estilo do modal */
 .modal {
-    display: none; /* Oculto por padrão */
-    position: fixed; /* Fixa o modal na tela */
-    z-index: 1000; /* Garante que o modal fique acima de outros elementos */
-    left: 0%;
-    top: 0%;
-    width: 100%; /* Ocupa toda a largura da tela */
-    height: 100%; /* Ocupa toda a altura da tela */
-    background-color: rgba(0, 0, 0, 0.8); /* Fundo escuro semi-transparente */
-    justify-content: center; /* Centraliza horizontalmente */
-    align-items: center; /* Centraliza verticalmente */
-    overflow: auto; /* Permite rolagem se necessário */
+    display: none;
+    /* Oculto por padrão */
+    position: fixed;
+    /* Fixa o modal na tela */
+    z-index: 1000;
+    /* Garante que o modal fique acima de outros elementos */
+    left: 0;
+    top: 0;
+    width: 100%;
+    /* Ocupa toda a largura da tela */
+    height: 100%;
+    /* Ocupa toda a altura da tela */
+    background-color: rgba(0, 0, 0, 0.8);
+    /* Fundo escuro semi-transparente */
+    justify-content: center;
+    /* Centraliza horizontalmente */
+    align-items: center;
+    /* Centraliza verticalmente */
 }
 
-/* Conteúdo do modal (imagem ampliada) */
+/* Contêiner do modal */
+.modal-dialog {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80%;
+    /* Largura fixa da modal */
+    max-width: 600px;
+    /* Tamanho máximo da modal */
+    margin: auto;
+    /* Centraliza a modal */
+    padding: 20px;
+}
+
+/* Estilo do modal */
+.modal {
+    display: none;    /* Oculto por padrão */
+    position: fixed;    /* Fixa o modal na tela */
+    z-index: 1000;    /* Garante que o modal fique acima de outros elementos */
+    left: 0;
+    top: 0;
+    width: 100%;    /* Ocupa toda a largura da tela */
+    height: 100%;    /* Ocupa toda a altura da tela */
+    background-color: rgba(0, 0, 0, 0.8);    /* Fundo escuro semi-transparente */
+    justify-content: center;    /* Centraliza horizontalmente */
+    align-items: center;    /* Centraliza verticalmente */
+}
+
+/* Contêiner do modal */
+.modal-dialog {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 80%;    /* Largura fixa da modal */
+    max-width: 600px;    /* Tamanho máximo da modal */
+    margin: auto;    /* Centraliza a modal */
+    padding: 20px;
+}
+
+/* Conteúdo do modal */
 .modal-content {
-    max-width: 80%; /* Largura máxima da imagem */
-    max-height: 80%; /* Altura máxima da imagem */
-    object-fit: contain; /* Garante que a imagem seja exibida proporcionalmente */
-    border: 2px solid white; /* Borda branca para destacar a imagem */
-    border-radius: 8px; /* Bordas arredondadas */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3); /* Sombra para dar profundidade */
-    left: 0%;
-    top: 50%;
+    position: relative;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    text-align: center;    /* Centraliza o conteúdo */
+    overflow: hidden;    /* Evita que o conteúdo transborde */
 }
 
 /* Botão de fechar */
 .close {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    color: white;
-    font-size: 30px;
-    font-weight: bold;
-    cursor: pointer;
-    z-index: 1001; /* Garante que o botão fique acima da imagem */
+    position: absolute;    /* Posiciona o botão em relação ao .modal-content */
+    top: 10px;    /* Distância do topo */
+    right: 10px;    /* Distância da direita */
+    width: 30px;    /* Largura do círculo */
+    height: 30px;    /* Altura do círculo */
+    background-color: rgb(150, 150, 150);    /* Cor de fundo do círculo */
+    color: black;    /* Cor do texto */
+    font-size: 20px;    /* Tamanho do ícone */
+    font-weight: bold;    /* Negrito */
+    border-radius: 50%;    /* Transforma o quadrado em um círculo */
+    display: flex;    /* Centraliza o ícone no círculo */
+    justify-content: center;    /* Alinha horizontalmente */
+    align-items: center;    /* Alinha verticalmente */
+    cursor: pointer;    /* Cursor de clique */
+    z-index: 1001;    /* Garante que o botão fique acima da imagem */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);    /* Sombra para destacar o círculo */
 }
 
 .close:hover {
-    color: red;
+    background-color: #ff4d4d;    /* Altera a cor do círculo ao passar o mouse */
+    color: white;    /* Altera a cor do texto ao passar o mouse */
+}
+
+/* Imagem dentro da modal */
+.modal-image {
+    max-width: 100%;    /* A imagem não ultrapassa a largura do contêiner */
+    max-height: 400px;    /* Altura máxima da imagem */
+    object-fit: contain;    /* Garante que a imagem seja exibida proporcionalmente */
+    border: 2px solid #ddd;    /* Borda clara para destacar a imagem */
+    border-radius: 8px;    /* Bordas arredondadas */
+}
+
+/* Imagem dentro da modal */
+.modal-image {
+    max-width: 100%;    /* A imagem não ultrapassa a largura do contêiner */
+    max-height: 400px;    /* Altura máxima da imagem */
+    object-fit: contain;    /* Garante que a imagem seja exibida proporcionalmente */
+    border: 2px solid #ddd;    /* Borda clara para destacar a imagem */
+    border-radius: 8px;    /* Bordas arredondadas */
 }
 
 /* Estilo para os botões de ação */
@@ -367,7 +439,7 @@ footer p {
     /* Azul mais escuro */
 }
 
-/* Estilo para a tabela */
+/* Estilo geral da tabela */
 .styled-table {
     width: 100%;
     border-collapse: collapse;
@@ -392,6 +464,27 @@ footer p {
 
 .styled-table tbody tr:hover {
     background-color: #f1f1f1;
+}
+
+/* Estilo dos cabeçalhos clicáveis */
+.styled-table th a {
+    color: black;    /* Cor do texto */
+    text-decoration: none;    /* Remove sublinhado */
+    font-weight: bold;    /* Negrito */
+    display: flex;
+    align-items: center;    /* Alinha o texto e o ícone verticalmente */
+    gap: 5px;    /* Espaçamento entre o texto e o ícone */
+}
+
+.styled-table th a:hover {
+    color: #007bff;    /* Altera a cor ao passar o mouse */
+    text-decoration: underline;    /* Adiciona sublinhado no hover */
+}
+
+/* Ícones de ordenação */
+.styled-table th a .order-icon {
+    font-size: 12px;    /* Tamanho menor para os ícones */
+    color: #555;    /* Cor cinza para os ícones */
 }
 
 /* Larguras personalizadas para as colunas */

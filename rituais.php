@@ -17,6 +17,10 @@ $filtro_nome = isset($_GET['filtro_nome']) ? $_GET['filtro_nome'] : '';
 $data_inicio = isset($_GET['data_inicio']) ? $_GET['data_inicio'] : '';
 $data_fim = isset($_GET['data_fim']) ? $_GET['data_fim'] : '';
 
+// Ordenação
+$order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'data_ritual'; // Coluna padrão: data_ritual
+$order_dir = isset($_GET['order_dir']) ? $_GET['order_dir'] : 'DESC'; // Direção padrão: DESC
+
 $where = "";
 $params = [];
 if (!empty($filtro_nome)) {
@@ -42,7 +46,7 @@ $sql = "
     LEFT JOIN inscricoes i ON r.id = i.ritual_id
     WHERE 1=1 $where
     GROUP BY r.id
-    ORDER BY r.data_ritual DESC
+    ORDER BY $order_by $order_dir
     LIMIT $itens_por_pagina OFFSET $offset
 ";
 $stmt = $pdo->prepare($sql);
@@ -87,10 +91,31 @@ $rituais = $stmt->fetchAll();
         <thead>
             <tr>
                 <th class="col-foto">Foto</th>
-                <th class="col-nome">Nome</th>
-                <th class="col-data">Data</th>
+                <th class="col-nome">
+                    <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>&order_by=nome&order_dir=<?= $order_by === 'nome' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
+                        Nome 
+                        <?php if ($order_by === 'nome'): ?>
+                            <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
+                        <?php endif; ?>
+                    </a>
+                </th>
+                <th class="col-data">
+                    <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>&order_by=data_ritual&order_dir=<?= $order_by === 'data_ritual' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
+                        Data 
+                        <?php if ($order_by === 'data_ritual'): ?>
+                            <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
+                        <?php endif; ?>
+                    </a>
+                </th>
                 <th class="col-padrinho">Padrinho/Madrinha</th>
-                <th class="col-inscritos">Inscritos</th>
+                <th class="col-inscritos">
+                    <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>&order_by=inscritos&order_dir=<?= $order_by === 'inscritos' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
+                        Inscritos 
+                        <?php if ($order_by === 'inscritos'): ?>
+                            <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
+                        <?php endif; ?>
+                    </a>
+                </th>
                 <th class="col-acoes">Ações</th>
             </tr>
         </thead>
@@ -106,7 +131,13 @@ $rituais = $stmt->fetchAll();
                             onerror="this.src='assets/images/no-image.png'; this.onclick=null; this.classList.remove('clickable');">
                     </td>
                     <td class="col-nome"><?= htmlspecialchars($ritual['nome']) ?></td>
-                    <td class="col-data"><?= htmlspecialchars($ritual['data_ritual']) ?></td>
+                    <td class="col-data">
+                        <?php
+                        // Formata a data para DD/MM/AAAA
+                        $data_ritual = new DateTime($ritual['data_ritual']);
+                        echo $data_ritual->format('d/m/Y');
+                        ?>
+                    </td>
                     <td class="col-padrinho"><?= htmlspecialchars($ritual['padrinho_madrinha']) ?></td>
                     <td class="col-inscritos"><?= htmlspecialchars($ritual['inscritos']) ?></td>
                     <td class="col-acoes">
@@ -120,8 +151,12 @@ $rituais = $stmt->fetchAll();
     </table>
     <!-- Modal de Ampliação de Imagem -->
     <div id="image-modal" class="modal">
-        <span class="close" onclick="closeImageModal()">&times;</span>
-        <img id="expanded-image" class="modal-content">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <span class="close" onclick="closeImageModal()">&times;</span>
+                <img id="expanded-image" class="modal-image">
+            </div>
+        </div>
     </div>
 
     <!-- Paginação -->
