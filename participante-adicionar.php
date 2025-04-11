@@ -1,59 +1,40 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    echo json_encode(['success' => false, 'error' => 'Acesso negado']);
     exit;
 }
 require_once 'includes/db.php';
 
-// Verifica se o formulário foi enviado
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $ritual_id = $_POST['ritual_id'];
-    $nome_participante = trim($_POST['nome']);
+$data = json_decode(file_get_contents('php://input'), true);
+$participante_id = $data['participante_id'] ?? null;
+$ritual_id = $data['ritual_id'] ?? null;
 
-    if (empty($nome_participante)) {
-        $_SESSION['error'] = "O campo de pesquisa não pode estar vazio.";
-        header("Location: ritual-visualizar.php?id=$ritual_id");
+if (!$participante_id || !$ritual_id || !is_numeric($participante_id) || !is_numeric($ritual_id)) {
+    echo json_encode(['success' => false, 'error' => 'Parâmetros inválidos']);
+    exit;
+}
+
+try {
+    // Verifica se o participante já está inscrito no ritual
+    $stmt = $pdo->prepare("
+        SELECT id FROM inscricoes 
+        WHERE participante_id = ? AND ritual_id = ?
+    ");
+    $stmt->execute([$participante_id, $ritual_id]);
+    if ($stmt->fetch()) {
+        echo json_encode(['success' => false, 'error' => 'Participante já inscrito neste ritual']);
         exit;
     }
 
-    try {
-        // Verifica se o participante existe
-        $stmt = $pdo->prepare("SELECT id FROM participantes WHERE nome_completo LIKE ?");
-        $stmt->execute(["%$nome_participante%"]);
-        $participante = $stmt->fetch();
+    // Insere o participante no ritual
+    $stmt = $pdo->prepare("
+        INSERT INTO inscricoes (ritual_id, participante_id) 
+        VALUES (?, ?)
+    ");
+    $stmt->execute([$ritual_id, $participante_id]);
 
-        if (!$participante) {
-            $_SESSION['error'] = "Participante não encontrado.";
-            header("Location: ritual-visualizar.php?id=$ritual_id");
-            exit;
-        }
-
-        $participante_id = $participante['id'];
-
-        // Verifica se o participante já está inscrito no ritual
-        $stmt = $pdo->prepare("SELECT id FROM inscricoes WHERE ritual_id = ? AND participante_id = ?");
-        $stmt->execute([$ritual_id, $participante_id]);
-        $inscricao_existente = $stmt->fetch();
-
-        if ($inscricao_existente) {
-            $_SESSION['error'] = "Este participante já está inscrito no ritual.";
-            header("Location: ritual-visualizar.php?id=$ritual_id");
-            exit;
-        }
-
-        // Insere o participante no ritual
-        $stmt = $pdo->prepare("INSERT INTO inscricoes (ritual_id, participante_id, presente) VALUES (?, ?, ?)");
-        $stmt->execute([$ritual_id, $participante_id, 'Não']);
-
-        $_SESSION['success'] = "Participante adicionado com sucesso!";
-    } catch (Exception $e) {
-        $_SESSION['error'] = "Erro ao adicionar participante: " . $e->getMessage();
-    }
-} else {
-    $_SESSION['error'] = "Método de requisição inválido.";
+    echo json_encode(['success' => true]);
+} catch (Exception $e) {
+    echo json_encode(['success' => false, 'error' => 'Erro ao adicionar participante: ' . $e->getMessage()]);
 }
-
-header("Location: ritual-visualizar.php?id=$ritual_id");
-exit;
-?>

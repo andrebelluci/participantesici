@@ -94,7 +94,15 @@ if (!$ritual) {
                     </td>
                     <td class="col-nome-participante"><?= htmlspecialchars($participante['nome_completo']) ?></td>
                     <td class="col-observacao"><?= htmlspecialchars($participante['observacao'] ?? '') ?></td>
-                    <td class="col-presente"><?= htmlspecialchars($participante['presente']) ?></td>
+                    <td class="col-presente">
+                        <button
+                            class="presence-btn <?= $participante['presente'] === 'Sim' ? 'active' : '' ?>"
+                            data-participante-id="<?= $participante['id'] ?>"
+                            data-current-status="<?= $participante['presente'] ?>"
+                            onclick="togglePresenca(this)">
+                            <?= htmlspecialchars($participante['presente']) ?>
+                        </button>
+                    </td>
                     <td class="col-acoes-participante">
                         <a href="#" class="action-icon" title="Detalhes da Inscrição" onclick="abrirModalDetalhes(<?= $participante['id'] ?>)">
                             <i class="fa-solid fa-info-circle"></i>
@@ -116,14 +124,21 @@ if (!$ritual) {
 <div id="modal-adicionar" class="modal">
     <div class="modal-dialog">
         <div class="modal-content">
-            <span class="close" onclick="document.getElementById('modal-adicionar').style.display='none'">&times;</span>
+            <span class="close" onclick="fecharModalAdicionar()">&times;</span>
             <h2>Adicionar Participante</h2>
-            <form method="POST" action="participante-adicionar.php">
+            <form id="pesquisa-participante-form">
                 <input type="hidden" name="ritual_id" value="<?= $id ?>">
-                <label for="nome">Pesquisar Participante:</label>
-                <input type="text" name="nome" placeholder="Digite o nome">
-                <button type="submit">Pesquisar</button>
+                <label for="nome_pesquisa">Pesquisar Participante:</label>
+                <input type="text" id="nome_pesquisa" name="nome_pesquisa" placeholder="Digite o nome">
+                <button type="button" onclick="pesquisarParticipantes()">Pesquisar</button>
             </form>
+            <!-- Área para exibir os resultados da pesquisa -->
+            <div id="resultados-pesquisa" class="scrollable-list" style="display: none;">
+                <h3>Resultados</h3>
+                <ul id="lista-participantes"></ul>
+                <!-- Botão para adicionar nova pessoa -->
+                <button id="btn-adicionar-nova-pessoa" style="display: none;" onclick="adicionarNovaPessoa()">Adicionar Nova Pessoa</button>
+            </div>
         </div>
     </div>
 </div>
@@ -231,6 +246,16 @@ if (!$ritual) {
 <script>
     // Função para abrir o modal de detalhes da inscrição
     function abrirModalDetalhes(participanteId) {
+        // Limpa todos os campos do formulário
+        document.getElementById('id').value = '';
+        document.querySelector('select[name="primeira_vez_instituto"]').value = '';
+        document.querySelector('select[name="primeira_vez_ayahuasca"]').value = '';
+        document.querySelector('select[name="doenca_psiquiatrica"]').value = '';
+        document.querySelector('input[name="nome_doenca"]').value = '';
+        document.querySelector('select[name="uso_medicao"]').value = '';
+        document.querySelector('input[name="nome_medicao"]').value = '';
+        document.querySelector('textarea[name="mensagem"]').value = '';
+
         // Busca o ID da inscrição via AJAX
         fetch(`buscar-id-inscricao.php?participante_id=${participanteId}&ritual_id=<?= $id ?>`)
             .then(response => response.json())
@@ -349,6 +374,127 @@ if (!$ritual) {
     function closeImageModal() {
         const modal = document.getElementById('modal-image');
         modal.style.display = 'none'; // Oculta a modal
+    }
+
+    // Função para alternar a presença (Sim/Não)
+    function togglePresenca(button) {
+        const participanteId = button.getAttribute('data-participante-id'); // ID do participante
+        const currentStatus = button.getAttribute('data-current-status'); // Status atual (Sim/Não)
+        const newStatus = currentStatus === 'Sim' ? 'Não' : 'Sim'; // Alterna entre Sim/Não
+
+        // Busca o ID da inscrição via AJAX
+        fetch(`buscar-id-inscricao.php?participante_id=${participanteId}&ritual_id=<?= $id ?>`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                const inscricaoId = data.inscricao_id;
+
+                // Envia a requisição AJAX para atualizar o status no banco de dados
+                fetch(`atualizar-presenca.php`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            inscricao_id: inscricaoId,
+                            novo_status: newStatus
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Atualiza o botão visualmente
+                            button.textContent = newStatus;
+                            button.classList.toggle('active'); // Alterna a classe CSS
+                            button.setAttribute('data-current-status', newStatus); // Atualiza o atributo
+                        } else {
+                            alert('Erro ao atualizar presença: ' + data.error);
+                        }
+                    })
+                    .catch(error => console.error('Erro ao atualizar presença:', error));
+            })
+            .catch(error => console.error('Erro ao buscar ID da inscrição:', error));
+    }
+
+    // Função para pesquisar participantes
+    function pesquisarParticipantes() {
+        const nomePesquisa = document.getElementById('nome_pesquisa').value.trim();
+        if (!nomePesquisa) {
+            alert("Digite um nome para pesquisar.");
+            return;
+        }
+
+        // Limpa a lista de resultados
+        const listaParticipantes = document.getElementById('lista-participantes');
+        listaParticipantes.innerHTML = '';
+
+        // Exibe a área de resultados
+        document.getElementById('resultados-pesquisa').style.display = 'block';
+
+        // Envia a requisição AJAX para buscar os participantes
+        fetch(`participante-buscar.php?nome=${encodeURIComponent(nomePesquisa)}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert(data.error);
+                    return;
+                }
+
+                if (data.length === 0) {
+                    listaParticipantes.innerHTML = '<li>Nenhum participante encontrado.</li>';
+                    return;
+                }
+
+                // Preenche a lista com os participantes encontrados
+                data.forEach(participante => {
+                    const li = document.createElement('li');
+                    li.innerHTML = `
+                    <img src="${participante.foto || 'assets/images/no-image.png'}" alt="Foto">
+                    <span>${participante.nome_completo}</span>
+                    <button class="add-btn" onclick="adicionarParticipante(${participante.id})">Adicionar</button>
+                `;
+                    listaParticipantes.appendChild(li);
+                });
+            })
+            .catch(error => console.error('Erro ao buscar participantes:', error));
+    }
+
+    // Função para adicionar um participante ao ritual
+    function adicionarParticipante(participanteId) {
+        const ritualId = document.querySelector('#modal-adicionar input[name="ritual_id"]').value;
+
+        // Envia a requisição AJAX para adicionar o participante ao ritual
+        fetch('participante-adicionar.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    participante_id: participanteId,
+                    ritual_id: ritualId
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Participante adicionado com sucesso!');
+                    location.reload(); // Recarrega a página para atualizar a lista de participantes
+                } else {
+                    alert('Erro ao adicionar participante: ' + data.error);
+                }
+            })
+            .catch(error => console.error('Erro ao adicionar participante:', error));
+    }
+
+    // Função para fechar o modal
+    function fecharModalAdicionar() {
+        document.getElementById('modal-adicionar').style.display = 'none';
+        document.getElementById('resultados-pesquisa').style.display = 'none';
+        document.getElementById('lista-participantes').innerHTML = '';
     }
 </script>
 
