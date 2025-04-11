@@ -8,7 +8,7 @@ require_once 'includes/db.php';
 
 // Verifica se o formulário foi enviado
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $inscricao_id = $_POST['inscricao_id'];
+    $inscricao_id = $_POST['id'];
     $primeira_vez_instituto = $_POST['primeira_vez_instituto'];
     $primeira_vez_ayahuasca = $_POST['primeira_vez_ayahuasca'];
     $doenca_psiquiatrica = $_POST['doenca_psiquiatrica'];
@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $mensagem = $_POST['mensagem'] ?? '';
 
     try {
-        // Atualiza os detalhes da inscrição
+        // Atualiza os detalhes da inscrição e registra a data/hora de salvamento
         $stmt = $pdo->prepare("
             UPDATE inscricoes 
             SET 
@@ -28,7 +28,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 nome_doenca = ?,
                 uso_medicao = ?,
                 nome_medicao = ?,
-                mensagem = ?
+                mensagem = ?,
+                salvo_em = NOW()
             WHERE id = ?
         ");
         $stmt->execute([
@@ -46,16 +47,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } catch (Exception $e) {
         $_SESSION['error'] = "Erro ao salvar detalhes da inscrição: " . $e->getMessage();
     }
+
+    // Encontra o ID do ritual associado à inscrição
+    $stmt = $pdo->prepare("SELECT ritual_id FROM inscricoes WHERE id = ?");
+    $stmt->execute([$inscricao_id]);
+    $ritual = $stmt->fetch();
+    $ritual_id = $ritual['ritual_id'];
+
+    // Redireciona de volta para a página do ritual
+    header("Location: ritual-visualizar.php?id=$ritual_id");
+    exit;
 } else {
     $_SESSION['error'] = "Método de requisição inválido.";
+    header("Location: rituais.php");
+    exit;
 }
-
-// Redireciona de volta para a página do ritual
-$stmt = $pdo->prepare("SELECT ritual_id FROM inscricoes WHERE id = ?");
-$stmt->execute([$inscricao_id]);
-$ritual = $stmt->fetch();
-$ritual_id = $ritual['ritual_id'];
-
-header("Location: ritual-visualizar.php?id=$ritual_id");
-exit;
-?>
