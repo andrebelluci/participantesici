@@ -200,6 +200,10 @@ if (!$ritual) {
                 <label for="observacao">Observação:</label>
                 <textarea name="observacao" required></textarea>
 
+                <!-- Data de Salvamento -->
+                <label for="obs_salvo_em">Salvo em:</label>
+                <input type="text" id="obs_salvo_em" name="obs_salvo_em" readonly value="">
+
                 <!-- Botão de envio -->
                 <button type="submit">Salvar</button>
             </form>
@@ -289,6 +293,13 @@ if (!$ritual) {
 
                         // Preenche o campo de observação com o valor salvo no banco
                         document.querySelector('textarea[name="observacao"]').value = detalhes.observacao || '';
+
+                        // Preenche a data de salvamento (se existir)
+                        const obsSalvoEm = detalhes.obs_salvo_em ?
+                            new Date(detalhes.obs_salvo_em).toLocaleDateString('pt-BR') // Formato "DD/MM/YYYY"
+                            :
+                            'Nunca salvo';
+                        document.getElementById('obs_salvo_em').value = obsSalvoEm;
                     })
                     .catch(error => console.error('Erro ao carregar detalhes:', error));
 

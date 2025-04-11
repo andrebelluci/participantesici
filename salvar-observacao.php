@@ -21,7 +21,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Atualiza o campo observacao na tabela inscricoes
         $stmt = $pdo->prepare("
             UPDATE inscricoes 
-            SET observacao = ? 
+            SET observacao = ? ,
+            obs_salvo_em = NOW()
             WHERE id = ?
         ");
         $stmt->execute([$observacao, $inscricao_id]);
