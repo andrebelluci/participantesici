@@ -278,6 +278,20 @@ if (!$ritual) {
                 // Preenche o ID da inscrição no formulário
                 document.getElementById('inscricao_id_observacao').value = inscricaoId;
 
+                // Busca os detalhes da inscrição
+                fetch(`carregar-detalhes-inscricao.php?id=${inscricaoId}`)
+                    .then(response => response.json())
+                    .then(detalhes => {
+                        if (detalhes.error) {
+                            alert(detalhes.error);
+                            return;
+                        }
+
+                        // Preenche o campo de observação com o valor salvo no banco
+                        document.querySelector('textarea[name="observacao"]').value = detalhes.observacao || '';
+                    })
+                    .catch(error => console.error('Erro ao carregar detalhes:', error));
+
                 // Exibe a modal
                 document.getElementById('modal-observacao').style.display = 'block';
             })
