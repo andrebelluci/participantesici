@@ -41,6 +41,8 @@ if (!$ritual) {
             <input type="text" name="filtro_nome" id="filtro_nome" placeholder="Filtrar por nome" value="<?= htmlspecialchars($_GET['filtro_nome'] ?? '') ?>">
         </div>
         <div class="filter-actions">
+            <!-- Campo oculto para enviar o ID do ritual -->
+            <input type="hidden" name="id" value="<?= $id ?>">
             <button type="submit" class="filter-btn">Filtrar</button>
             <a href="ritual-visualizar.php?id=<?= $id ?>" class="filter-btn clear-btn">Limpar Filtro</a>
         </div>
@@ -83,7 +85,12 @@ if (!$ritual) {
             foreach ($participantes as $participante): ?>
                 <tr>
                     <td class="col-foto-participante">
-                        <img src="<?= htmlspecialchars($participante['foto']) ?>" alt="Foto" class="square-image" onerror="this.src='assets/images/no-image.png';">
+                        <img
+                            src="<?= htmlspecialchars($participante['foto']) ?>"
+                            alt="Foto do Participante"
+                            class="square-image clickable"
+                            onclick="openImageModal('<?= htmlspecialchars($participante['foto']) ?>')"
+                            onerror="this.src='assets/images/no-image.png'; this.onclick=null; this.classList.remove('clickable');">
                     </td>
                     <td class="col-nome-participante"><?= htmlspecialchars($participante['nome_completo']) ?></td>
                     <td class="col-observacao"><?= htmlspecialchars($participante['observacao'] ?? '') ?></td>
@@ -211,6 +218,16 @@ if (!$ritual) {
     </div>
 </div>
 
+<!-- Modal de Visualização de Imagem -->
+<div id="modal-image" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <span class="close" onclick="closeImageModal()">&times;</span>
+            <img id="modal-image-content" class="modal-image" alt="Imagem Ampliada">
+        </div>
+    </div>
+</div>
+
 <script>
     // Função para abrir o modal de detalhes da inscrição
     function abrirModalDetalhes(participanteId) {
@@ -318,6 +335,20 @@ if (!$ritual) {
     function ordenarPor(coluna) {
         alert(`Ordenar por ${coluna}`);
         // Implementar lógica de ordenação aqui (pode ser via JavaScript ou PHP)
+    }
+
+    // Função para abrir a modal de imagem
+    function openImageModal(imageSrc) {
+        const modal = document.getElementById('modal-image');
+        const modalImage = document.getElementById('modal-image-content');
+        modalImage.src = imageSrc; // Define a imagem ampliada
+        modal.style.display = 'flex'; // Exibe a modal
+    }
+
+    // Função para fechar a modal de imagem
+    function closeImageModal() {
+        const modal = document.getElementById('modal-image');
+        modal.style.display = 'none'; // Oculta a modal
     }
 </script>
 
