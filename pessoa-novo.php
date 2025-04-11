@@ -8,7 +8,7 @@ require_once 'includes/db.php';
 require_once 'includes/header.php';
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Dados do formulário
+    // Processamento do formulário (mantido igual)
     $foto = null;
     if (!empty($_FILES['foto']['name'])) {
         $foto_nome = uniqid() . '_' . basename($_FILES['foto']['name']);
@@ -34,7 +34,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $estado = $_POST['estado'];
     $bairro = $_POST['bairro'];
 
-    // Inserir no banco
     $stmt = $pdo->prepare("
         INSERT INTO participantes (
             foto, nome_completo, nascimento, sexo, cpf, rg, passaporte, celular, email, como_soube, cep, endereco_rua, endereco_numero, endereco_complemento, cidade, estado, bairro
@@ -42,96 +41,162 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     ");
     $stmt->execute([$foto, $nome_completo, $nascimento, $sexo, $cpf, $rg, $passaporte, $celular, $email, $como_soube, $cep, $endereco_rua, $endereco_numero, $endereco_complemento, $cidade, $estado, $bairro]);
 
-    $novoParticipanteId = $pdo->lastInsertId();
-
-    // Redireciona para a página original, se houver parâmetros de redirecionamento
-    if (isset($_GET['redirect']) && isset($_GET['id'])) {
-        $redirectUrl = $_GET['redirect'];
-        $ritualId = $_GET['id'];
-
-        // Insere o novo participante no ritual
-        $stmt = $pdo->prepare("
-            INSERT INTO inscricoes (ritual_id, participante_id) 
-            VALUES (?, ?)
-        ");
-        $stmt->execute([$ritualId, $novoParticipanteId]);
-
-        echo "<script>alert('Pessoa cadastrada e vinculada ao ritual com sucesso!');</script>";
-        echo "<script>window.location.href = '$redirectUrl?id=$ritualId';</script>";
-        exit;
-    } else {
-        echo "<script>alert('Pessoa cadastrada com sucesso!');</script>";
-        echo "<script>window.location.href = 'pessoas.php';</script>";
-    }
+    echo "<script>alert('Pessoa cadastrada com sucesso!');</script>";
+    echo "<script>window.location.href = 'pessoas.php';</script>";
 }
 ?>
 
 <div class="container">
-    <h1>Nova Pessoa</h1>
+    <h1>👥 Nova Pessoa</h1>
+    <br>
     <div class="actions">
-        <a href="pessoas.php" class="btn">Voltar</a>
+        <a href="pessoas.php" class="btn voltar">Voltar</a>
     </div>
 
-    <form method="POST" enctype="multipart/form-data">
-        <label for="foto">Foto:</label>
-        <input type="file" name="foto" accept="image/*">
+    <form method="POST" enctype="multipart/form-data" class="styled-form">
+        <div class="form-columns">
+            <!-- Coluna 1: Dados Pessoais -->
+            <div class="form-column">
+                <h3>Dados Pessoais</h3>
+                <label for="foto">Foto:</label>
+                <div class="foto-preview-container">
+                    <input type="file" name="foto" id="foto-input" accept="image/*" style="display: none;">
+                    <button type="button" id="adicionar-imagem-btn" class="btn adicionar-imagem">Adicionar Imagem</button>
+                    <div id="preview-container" style="display: none;">
+                        <div class="image-and-button">
+                            <img id="preview-image" src="#" alt="Preview" class="small-preview">
+                            <button type="button" id="excluir-imagem-btn" class="btn excluir-imagem">Excluir Imagem</button>
+                        </div>
+                    </div>
+                </div>
+                <br>
 
-        <label for="nome_completo">Nome Completo:</label>
-        <input type="text" name="nome_completo" required>
+                <label for="nome_completo">Nome Completo:</label>
+                <input type="text" name="nome_completo" id="nome_completo" required>
 
-        <label for="nascimento">Data de Nascimento:</label>
-        <input type="date" name="nascimento" required>
+                <label for="nascimento">Data de Nascimento:</label>
+                <input type="date" name="nascimento" id="nascimento" required>
 
-        <label for="sexo">Sexo:</label>
-        <select name="sexo" required>
-            <option value="M">Masculino</option>
-            <option value="F">Feminino</option>
-        </select>
+                <label for="sexo">Sexo:</label>
+                <select name="sexo" id="sexo" required>
+                    <option value="M">Masculino</option>
+                    <option value="F">Feminino</option>
+                </select>
 
-        <label for="cpf">CPF:</label>
-        <input type="text" name="cpf" required>
+                <label for="cpf">CPF:</label>
+                <input type="text" name="cpf" id="cpf" required>
 
-        <label for="rg">RG:</label>
-        <input type="text" name="rg">
+                <label for="rg">RG:</label>
+                <input type="text" name="rg" id="rg">
 
-        <label for="passaporte">Passaporte:</label>
-        <input type="text" name="passaporte">
+                <label for="passaporte">Passaporte:</label>
+                <input type="text" name="passaporte" id="passaporte">
 
-        <label for="celular">Celular:</label>
-        <input type="text" name="celular" required>
+                <label for="celular">Celular:</label>
+                <input type="text" name="celular" id="celular" required>
 
-        <label for="email">E-mail:</label>
-        <input type="email" name="email">
+                <label for="email">E-mail:</label>
+                <input type="email" name="email" id="email">
+            </div>
 
-        <label for="como_soube">Como soube do Instituto Céu Interior?</label>
-        <textarea name="como_soube"></textarea>
+            <!-- Coluna 2: Endereço -->
+            <div class="form-column">
+                <h3>Endereço</h3>
+                <label for="cep">CEP:</label>
+                <div class="cep-group">
+                    <input type="text" name="cep" id="cep" required>
+                    <button type="button" id="buscar-cep-btn" class="btn buscar-cep">Buscar CEP</button>
+                </div>
 
-        <label for="cep">CEP:</label>
-        <input type="text" name="cep" id="cep" required>
-        <button type="button" id="buscar-cep-btn" class="btn">Buscar CEP</button>
+                <label for="endereco_rua">Rua:</label>
+                <input type="text" name="endereco_rua" id="endereco_rua" required>
 
-        <label for="endereco_rua">Rua:</label>
-        <input type="text" name="endereco_rua" id="endereco_rua" required>
+                <label for="endereco_numero">Número:</label>
+                <input type="text" name="endereco_numero" id="endereco_numero" required>
 
-        <label for="endereco_numero">Número:</label>
-        <input type="text" name="endereco_numero" id="endereco_numero" required>
+                <label for="endereco_complemento">Complemento:</label>
+                <input type="text" name="endereco_complemento" id="endereco_complemento">
 
-        <label for="endereco_complemento">Complemento:</label>
-        <input type="text" name="endereco_complemento" id="endereco_complemento">
+                <label for="cidade">Cidade:</label>
+                <input type="text" name="cidade" id="cidade" required>
 
-        <label for="cidade">Cidade:</label>
-        <input type="text" name="cidade" id="cidade" required>
+                <label for="estado">Estado:</label>
+                <input type="text" name="estado" id="estado" required>
 
-        <label for="estado">Estado:</label>
-        <input type="text" name="estado" id="estado" required>
+                <label for="bairro">Bairro:</label>
+                <input type="text" name="bairro" id="bairro" required>
 
-        <label for="bairro">Bairro:</label>
-        <input type="text" name="bairro" id="bairro" required>
+                <br>
+                <h3>Informações adicionais</h3>
+                <label for="como_soube">Como soube do Instituto Céu Interior?</label>
+                <textarea name="como_soube" id="como_soube"></textarea>
+            </div>
+        </div>
 
-        <button type="submit">Cadastrar</button>
+        <button type="submit" class="btn salvar">Cadastrar</button>
     </form>
+
+    <!-- Modal de Ampliação de Imagem -->
+    <div id="image-modal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <span class="close" onclick="closeImageModal()">&times;</span>
+                <img id="expanded-image" class="modal-image">
+            </div>
+        </div>
+    </div>
 </div>
 
 <?php require_once 'includes/footer.php'; ?>
 
-<script src="assets/js/scripts.js" defer></script>
+<script>
+    // Função para abrir a imagem ampliada
+    function openImageModal(imageSrc) {
+        const modal = document.getElementById('image-modal');
+        const modalImg = document.getElementById('expanded-image');
+        modal.style.display = 'block';
+        modalImg.src = imageSrc;
+    }
+
+    // Função para fechar a imagem ampliada
+    function closeImageModal() {
+        const modal = document.getElementById('image-modal');
+        modal.style.display = 'none';
+    }
+
+    // Preview da imagem
+    const fileInput = document.getElementById('foto-input');
+    const adicionarImagemBtn = document.getElementById('adicionar-imagem-btn');
+    const previewContainer = document.getElementById('preview-container');
+    const previewImage = document.getElementById('preview-image');
+    const excluirImagemBtn = document.getElementById('excluir-imagem-btn');
+
+    adicionarImagemBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+                adicionarImagemBtn.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    excluirImagemBtn.addEventListener('click', () => {
+        previewImage.src = '#';
+        previewContainer.style.display = 'none';
+        adicionarImagemBtn.style.display = 'inline-block';
+        fileInput.value = '';
+    });
+
+    // Abrir modal ao clicar na imagem de preview
+    previewImage.addEventListener('click', () => {
+        openImageModal(previewImage.src);
+    });
+</script>

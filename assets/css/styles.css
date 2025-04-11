@@ -428,13 +428,15 @@ footer p {
 }
 
 /* Botão Novo Ritual */
-.btn.novo-ritual {
+.btn.novo-ritual, 
+.novo-participante {
     background-color: #00bfff;
     /* Azul-celeste */
     border: 2px solid #00a2e6;
 }
 
-.btn.novo-ritual:hover {
+.btn.novo-ritual:hover,
+.novo-participante:hover {
     background-color: #0093cc;
     /* Azul mais escuro */
 }
@@ -489,33 +491,56 @@ footer p {
 
 /* Larguras personalizadas para as colunas */
 .col-foto {
-    width: 5%;
-    /* Foto (pequena) */
+    width: 5%;    /* Foto (pequena) */
 }
 
 .col-nome {
-    width: 30%;
-    /* Nome (maior importância) */
+    width: 30%;    /* Nome (maior importância) */
 }
 
 .col-data {
-    width: 8%;
-    /* Data */
+    width: 8%;    /* Data */
 }
 
 .col-padrinho {
-    width: 8%;
-    /* Padrinho/Madrinha */
+    width: 8%;    /* Padrinho/Madrinha */
 }
 
 .col-inscritos {
-    width: 7%;
-    /* Inscritos (número pequeno) */
+    width: 7%;    /* Inscritos (número pequeno) */
 }
 
 .col-acoes {
-    width: 7%;
-    /* Ações (ícones) */
+    width: 7%;    /* Ações (ícones) */
+}
+
+/* Larguras personalizadas para as colunas da tabela de pessoas */
+.col-foto-pessoa {
+    width: 5%;    /* Foto pequena */
+}
+
+.col-nome-pessoa {
+    width: 20%;    /* Nome (maior importância) */
+}
+
+.col-nascimento {
+    width: 10%;    /* Data de nascimento */
+}
+
+.col-cpf {
+    width: 10%;    /* CPF */
+}
+
+.col-celular {
+    width: 10%;    /* Celular */
+}
+
+.col-rituais-participados {
+    width: 10%;    /* Rituais participados */
+}
+
+.col-acoes-pessoa {
+    width: 10%;    /* Ações (ícones) */
 }
 
 /* Estilo para a imagem quadrada */
@@ -540,6 +565,9 @@ footer p {
     transition: color 0.3s ease;
     position: relative;
     cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
 }
 
 .action-icon:hover {
@@ -935,3 +963,145 @@ footer p {
 .add-new-btn:hover {
     background-color: #218838;
 }
+
+/* Estilo geral para o formulário */
+.styled-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Layout de duas colunas */
+.form-columns {
+    display: flex;
+    gap: 60px;
+}
+
+.form-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Títulos das colunas */
+.form-column h3 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Estilo dos labels */
+.styled-form label {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Estilo dos inputs e selects */
+.styled-form input,
+.styled-form select,
+.styled-form textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+/* Botão Buscar CEP */
+.cep-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+#buscar-cep-btn.buscar-cep {
+    padding: 10px;
+    background-color: #00bfff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+#buscar-cep-btn.buscar-cep:hover {
+    background-color: #0093cc;
+}
+
+/* Botão Salvar */
+.btn.salvar {
+    padding: 10px 20px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+}
+
+.btn.salvar:hover {
+    background-color: #218838;
+}
+
+/* Estilo para o botão de adicionar imagem */
+.btn.adicionar-imagem {
+    background-color: #00bfff;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 5px;
+}
+
+.btn.adicionar-imagem:hover {
+    background-color: #0093cc;
+}
+
+/* Estilo para o botão de excluir imagem */
+.btn.excluir-imagem {
+    background-color: #ff4d4d;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-top: 5px;
+}
+
+.btn.excluir-imagem:hover {
+    background-color: #cc0000;
+}
+
+/* Estilo para o preview da imagem */
+.small-preview {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+/* Contêiner para o preview da imagem e o botão */
+.foto-preview-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+/* Contêiner para a imagem e o botão "Excluir Imagem" */
+.image-and-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+

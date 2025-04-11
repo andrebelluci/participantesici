@@ -12,8 +12,28 @@ $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
 $itens_por_pagina = 10;
 $offset = ($pagina - 1) * $itens_por_pagina;
 
+// Filtros
+$filtro_nome = isset($_GET['filtro_nome']) ? $_GET['filtro_nome'] : '';
+
+// Ordenação
+$order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'nome_completo'; // Coluna padrão: nome_completo
+$order_dir = isset($_GET['order_dir']) ? $_GET['order_dir'] : 'ASC'; // Direção padrão: ASC
+
+$where = "";
+$params = [];
+if (!empty($filtro_nome)) {
+    $where .= " AND nome_completo LIKE ?";
+    $params[] = "%$filtro_nome%";
+}
+if (!empty($data_inicio) && !empty($data_fim)) {
+    $where .= " AND nascimento BETWEEN ? AND ?";
+    $params[] = $data_inicio;
+    $params[] = $data_fim;
+}
+
 // Consulta para contar o total de registros
-$stmt_count = $pdo->query("SELECT COUNT(*) AS total FROM participantes");
+$stmt_count = $pdo->prepare("SELECT COUNT(*) AS total FROM participantes WHERE 1=1 $where");
+$stmt_count->execute($params);
 $total_registros = $stmt_count->fetch()['total'];
 $total_paginas = ceil($total_registros / $itens_por_pagina);
 
@@ -22,48 +42,98 @@ $sql = "
     SELECT p.*, COUNT(i.id) AS rituais_participados
     FROM participantes p
     LEFT JOIN inscricoes i ON p.id = i.participante_id AND i.presente = 'Sim'
+    WHERE 1=1 $where
     GROUP BY p.id
-    ORDER BY p.nome_completo
+    ORDER BY $order_by $order_dir
     LIMIT $itens_por_pagina OFFSET $offset
 ";
-$stmt = $pdo->query($sql);
+$stmt = $pdo->prepare($sql);
+$stmt->execute($params);
 $pessoas = $stmt->fetchAll();
 ?>
 
 <div class="container">
     <h1>👥 Pessoas</h1>
+    <br>
     <div class="actions">
-        <a href="home.php" class="btn">Voltar</a>
-        <a href="pessoa-novo.php" class="btn">Nova Pessoa</a>
+        <div class="left-actions">
+            <a href="home.php" class="btn voltar">Voltar</a>
+        </div>
+        <div class="right-actions">
+            <a href="pessoa-novo.php" class="btn novo-participante">Nova Pessoa</a>
+        </div>
     </div>
 
+    <!-- Filtros -->
+    <form method="GET" class="filters">
+        <div class="filter-group">
+            <label for="filtro_nome">Nome:</label>
+            <input type="text" name="filtro_nome" id="filtro_nome" placeholder="Filtrar por nome" value="<?= htmlspecialchars($filtro_nome) ?>">
+        </div>
+        <div class="filter-actions">
+            <button type="submit" class="filter-btn">Filtrar</button>
+            <a href="pessoas.php" class="filter-btn clear-btn">Limpar Filtro</a>
+        </div>
+    </form>
+
     <!-- Lista de Pessoas -->
-    <table class="table">
+    <table class="styled-table">
         <thead>
             <tr>
-                <th>Foto</th>
-                <th>Nome Completo</th>
-                <th>Nascimento</th>
-                <th>CPF</th>
-                <th>Celular</th>
-                <th>Rituais Participados</th>
-                <th>Ações</th>
+                <th class="col-foto-pessoa">Foto</th>
+                <th class="col-nome-pessoa">
+                    <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>&order_by=nome_completo&order_dir=<?= $order_by === 'nome_completo' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
+                        Nome Completo
+                        <?php if ($order_by === 'nome_completo'): ?>
+                            <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
+                        <?php endif; ?>
+                    </a>
+                </th>
+                <th class="col-nascimento">
+                    <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>&order_by=nascimento&order_dir=<?= $order_by === 'nascimento' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
+                        Nascimento
+                        <?php if ($order_by === 'nascimento'): ?>
+                            <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
+                        <?php endif; ?>
+                    </a>
+                </th>
+                <th class="col-cpf">CPF</th>
+                <th class="col-celular">Celular</th>
+                <th class="col-rituais-participados">
+                    <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>&order_by=rituais_participados&order_dir=<?= $order_by === 'rituais_participados' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
+                        Rituais Participados
+                        <?php if ($order_by === 'rituais_participados'): ?>
+                            <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
+                        <?php endif; ?>
+                    </a>
+                </th>
+                <th class="col-acoes-pessoa">Ações</th>
             </tr>
         </thead>
         <tbody>
             <?php foreach ($pessoas as $pessoa): ?>
                 <tr>
-                    <td><img src="<?= htmlspecialchars($pessoa['foto']) ?>" alt="Foto" class="small-image"></td>
-                    <td><?= htmlspecialchars($pessoa['nome_completo']) ?></td>
-                    <td><?= htmlspecialchars($pessoa['nascimento']) ?></td>
-                    <td><?= htmlspecialchars($pessoa['cpf']) ?></td>
-                    <td><?= htmlspecialchars($pessoa['celular']) ?></td>
-                    <td><?= htmlspecialchars($pessoa['rituais_participados']) ?></td>
-                    <td>
-                        <button class="btn" onclick="document.getElementById('modal-endereco-<?= $pessoa['id'] ?>').style.display='block'">Endereço</button>
-                        <button class="btn" onclick="document.getElementById('modal-rituais-<?= $pessoa['id'] ?>').style.display='block'">Rituais</button>
-                        <a href="pessoa-editar.php?id=<?= $pessoa['id'] ?>" class="btn">Editar</a>
-                        <a href="pessoa-excluir.php?id=<?= $pessoa['id'] ?>" class="btn danger" onclick="return confirm('Tem certeza?')">Excluir</a>
+                    <td class="col-foto-pessoa">
+                        <img src="<?= htmlspecialchars($pessoa['foto']) ?>" alt="Foto" class="square-image" onerror="this.src='assets/images/no-image.png';">
+                    </td>
+                    <td class="col-nome-pessoa"><?= htmlspecialchars($pessoa['nome_completo']) ?></td>
+                    <td class="col-nascimento"><?= htmlspecialchars($pessoa['nascimento']) ?></td>
+                    <td class="col-cpf"><?= htmlspecialchars($pessoa['cpf']) ?></td>
+                    <td class="col-celular"><?= htmlspecialchars($pessoa['celular']) ?></td>
+                    <td class="col-rituais-participados"><?= htmlspecialchars($pessoa['rituais_participados']) ?></td>
+                    <td class="col-acoes-pessoa">
+                        <button class="action-icon" title="Ver Endereço" onclick="document.getElementById('modal-endereco-<?= $pessoa['id'] ?>').style.display='block'">
+                            <i class="fa-solid fa-map-marker-alt"></i>
+                        </button>
+                        <button class="action-icon" title="Ver Rituais" onclick="document.getElementById('modal-rituais-<?= $pessoa['id'] ?>').style.display='block'">
+                            <i class="fa-solid fa-calendar-alt"></i>
+                        </button>
+                        <a href="pessoa-editar.php?id=<?= $pessoa['id'] ?>" class="action-icon" title="Editar">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <a href="pessoa-excluir.php?id=<?= $pessoa['id'] ?>" class="action-icon danger" title="Excluir" onclick="return confirm('Tem certeza?')">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
                     </td>
                 </tr>
 
@@ -120,7 +190,7 @@ $pessoas = $stmt->fetchAll();
     <!-- Paginação -->
     <div class="pagination">
         <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
-            <a href="?pagina=<?= $i ?>" class="<?= $pagina == $i ? 'active' : '' ?>"><?= $i ?></a>
+            <a href="?pagina=<?= $i ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>" class="<?= $pagina == $i ? 'active' : '' ?>"><?= $i ?></a>
         <?php endfor; ?>
     </div>
 </div>
