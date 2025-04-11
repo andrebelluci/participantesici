@@ -35,11 +35,34 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $bairro = $_POST['bairro'];
 
     // Inserir no banco
-    $stmt = $pdo->prepare("INSERT INTO participantes (foto, nome_completo, nascimento, sexo, cpf, rg, passaporte, celular, email, como_soube, cep, endereco_rua, endereco_numero, endereco_complemento, cidade, estado, bairro) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+    $stmt = $pdo->prepare("
+        INSERT INTO participantes (
+            foto, nome_completo, nascimento, sexo, cpf, rg, passaporte, celular, email, como_soube, cep, endereco_rua, endereco_numero, endereco_complemento, cidade, estado, bairro
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    ");
     $stmt->execute([$foto, $nome_completo, $nascimento, $sexo, $cpf, $rg, $passaporte, $celular, $email, $como_soube, $cep, $endereco_rua, $endereco_numero, $endereco_complemento, $cidade, $estado, $bairro]);
 
-    echo "<script>alert('Pessoa cadastrada com sucesso!');</script>";
-    echo "<script>window.location.href = 'pessoas.php';</script>";
+    $novoParticipanteId = $pdo->lastInsertId();
+
+    // Redireciona para a página original, se houver parâmetros de redirecionamento
+    if (isset($_GET['redirect']) && isset($_GET['id'])) {
+        $redirectUrl = $_GET['redirect'];
+        $ritualId = $_GET['id'];
+
+        // Insere o novo participante no ritual
+        $stmt = $pdo->prepare("
+            INSERT INTO inscricoes (ritual_id, participante_id) 
+            VALUES (?, ?)
+        ");
+        $stmt->execute([$ritualId, $novoParticipanteId]);
+
+        echo "<script>alert('Pessoa cadastrada e vinculada ao ritual com sucesso!');</script>";
+        echo "<script>window.location.href = '$redirectUrl?id=$ritualId';</script>";
+        exit;
+    } else {
+        echo "<script>alert('Pessoa cadastrada com sucesso!');</script>";
+        echo "<script>window.location.href = 'pessoas.php';</script>";
+    }
 }
 ?>
 

@@ -23,6 +23,11 @@ try {
     $stmt->execute(["%$nomePesquisa%"]);
     $participantes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    if (empty($participantes)) {
+        echo json_encode([]); // Retorna uma lista vazia se nenhum participante for encontrado
+        exit;
+    }
+
     echo json_encode($participantes);
 } catch (Exception $e) {
     echo json_encode(['error' => 'Erro ao buscar participantes: ' . $e->getMessage()]);

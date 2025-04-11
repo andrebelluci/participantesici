@@ -126,7 +126,7 @@ if (!$ritual) {
         <div class="modal-content">
             <span class="close" onclick="fecharModalAdicionar()">&times;</span>
             <h2>Adicionar Participante</h2>
-            <form id="pesquisa-participante-form">
+            <form id="pesquisa-participante-form" onsubmit="return false;">
                 <input type="hidden" name="ritual_id" value="<?= $id ?>">
                 <label for="nome_pesquisa">Pesquisar Participante:</label>
                 <input type="text" id="nome_pesquisa" name="nome_pesquisa" placeholder="Digite o nome">
@@ -445,7 +445,13 @@ if (!$ritual) {
                 }
 
                 if (data.length === 0) {
-                    listaParticipantes.innerHTML = '<li>Nenhum participante encontrado.</li>';
+                    // Se nenhum participante for encontrado, exibe o botão "Adicionar Nova Pessoa"
+                    listaParticipantes.innerHTML = `
+                    <li>Nenhum participante encontrado.</li>
+                    <li>
+                        <button class="add-new-btn" onclick="adicionarNovaPessoa()">Adicionar Nova Pessoa</button>
+                    </li>
+                `;
                     return;
                 }
 
@@ -461,6 +467,20 @@ if (!$ritual) {
                 });
             })
             .catch(error => console.error('Erro ao buscar participantes:', error));
+    }
+
+    // Função para capturar o evento de pressionar Enter no campo de pesquisa
+    document.getElementById('pesquisa-participante-form').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault(); // Impede o envio do formulário
+            pesquisarParticipantes(); // Chama a função de pesquisa
+        }
+    });
+
+    // Função para redirecionar para a página de cadastro de nova pessoa
+    function adicionarNovaPessoa() {
+        const ritualId = document.querySelector('#modal-adicionar input[name="ritual_id"]').value;
+        window.location.href = `pessoa-novo.php?redirect=ritual-visualizar.php&id=${ritualId}`;
     }
 
     // Função para adicionar um participante ao ritual
