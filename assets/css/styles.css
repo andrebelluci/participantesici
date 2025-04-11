@@ -677,3 +677,172 @@ footer p {
     background-color: #cc0000;
     /* Vermelho mais escuro */
 }
+
+/* Estilo para a seção superior (nome do ritual, botões e detalhes) */
+.ritual-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.ritual-header img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+}
+
+.ritual-header .details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.ritual-header .details h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.ritual-header .details p {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+}
+
+/* Botões no topo */
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.actions .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.actions .btn.voltar {
+    background-color: #5cb85c;
+    /* Verde */
+    border: 2px solid #4cae4c;
+}
+
+.actions .btn.voltar:hover {
+    background-color: #449d44;
+    /* Verde escuro */
+}
+
+.actions .btn.adicionar {
+    background-color: #00bfff;
+    /* Azul-celeste */
+    border: 2px solid #00a2e6;
+}
+
+.actions .btn.adicionar:hover {
+    background-color: #0093cc;
+    /* Azul mais escuro */
+}
+
+/* Modal Adicionar Participante */
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-content form input,
+.modal-content form select,
+.modal-content form textarea {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.modal-content form button {
+    padding: 8px 16px;
+    background-color: #00bfff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.modal-content form button:hover {
+    background-color: #0093cc;
+}
+
+/* Tabela de participantes */
+.participantes-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.participantes-table thead {
+    background-color: #00bfff;
+    color: black;
+}
+
+.participantes-table th,
+.participantes-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.participantes-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.participantes-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Larguras personalizadas para as colunas da tabela de participantes */
+.col-foto-participante {
+    width: 7%;
+    /* Foto pequena */
+}
+
+.col-nome-participante {
+    width: 20%;
+    /* Nome */
+}
+
+.col-observacao {
+    width: 30%;
+    /* Observação */
+}
+
+.col-presente {
+    width: 10%;
+    /* Presente? */
+}
+
+.col-acoes-participante {
+    width: 7%;
+    /* Ações */
+}
+
+/* Filtro por nome */
+.filtro-nome {
+    margin-bottom: 20px;
+}
+
+.filtro-nome input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
