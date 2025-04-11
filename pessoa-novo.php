@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         <a href="pessoas.php" class="btn voltar">Voltar</a>
     </div>
 
-    <form method="POST" enctype="multipart/form-data" class="styled-form">
+    <form method="POST" enctype="multipart/form-data" class="styled-form" id="formulario-pessoa">
         <div class="form-columns">
             <!-- Coluna 1: Dados Pessoais -->
             <div class="form-column">
@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </select>
 
                 <label for="cpf">CPF:</label>
-                <input type="text" name="cpf" id="cpf" required>
+                <input type="text" name="cpf" id="cpf" placeholder="___.___.___-__" required oninput="mascaraCPF(this)">
 
                 <label for="rg">RG:</label>
                 <input type="text" name="rg" id="rg">
@@ -93,7 +93,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <input type="text" name="passaporte" id="passaporte">
 
                 <label for="celular">Celular:</label>
-                <input type="text" name="celular" id="celular" required>
+                <input type="text" name="celular" id="celular" placeholder="(__) _____-____" required oninput="mascaraCelular(this)">
 
                 <label for="email">E-mail:</label>
                 <input type="email" name="email" id="email">
@@ -104,7 +104,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <h3>Endereço</h3>
                 <label for="cep">CEP:</label>
                 <div class="cep-group">
-                    <input type="text" name="cep" id="cep" required>
+                    <input type="text" name="cep" id="cep" placeholder="_____ - ___" required oninput="mascaraCEP(this)">
                     <button type="button" id="buscar-cep-btn" class="btn buscar-cep">Buscar CEP</button>
                 </div>
 
@@ -198,5 +198,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Abrir modal ao clicar na imagem de preview
     previewImage.addEventListener('click', () => {
         openImageModal(previewImage.src);
+    });
+
+    // Máscara para CPF
+    function mascaraCPF(input) {
+        let valor = input.value.replace(/\D/g, ''); // Remove tudo que não é número
+        if (valor.length > 11) valor = valor.slice(0, 11); // Limita a 11 dígitos
+        valor = valor.replace(/(\d{3})(\d)/, '$1.$2'); // Adiciona o primeiro ponto
+        valor = valor.replace(/(\d{3})(\d)/, '$1.$2'); // Adiciona o segundo ponto
+        valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2'); // Adiciona o traço
+        input.value = valor;
+    }
+
+    // Máscara para Celular
+    function mascaraCelular(input) {
+        let valor = input.value.replace(/\D/g, ''); // Remove tudo que não é número
+        if (valor.length > 11) valor = valor.slice(0, 11); // Limita a 11 dígitos
+        valor = valor.replace(/^(\d{2})(\d)/g, '($1) $2'); // Adiciona os parênteses
+        valor = valor.replace(/(\d{5})(\d)/, '$1-$2'); // Adiciona o hífen
+        input.value = valor;
+    }
+
+    // Máscara para CEP
+    function mascaraCEP(input) {
+        let valor = input.value.replace(/\D/g, ''); // Remove tudo que não é número
+        if (valor.length > 8) valor = valor.slice(0, 8); // Limita a 8 dígitos
+        valor = valor.replace(/(\d{5})(\d)/, '$1-$2'); // Adiciona o hífen
+        input.value = valor;
+    }
+
+    // Função para remover máscaras antes de enviar o formulário
+    document.getElementById('formulario-pessoa').addEventListener('submit', function(event) {
+        // Remove máscara do CPF
+        const cpfInput = document.getElementById('cpf');
+        cpfInput.value = cpfInput.value.replace(/\D/g, ''); // Remove tudo que não é número
+
+        // Remove máscara do Celular
+        const celularInput = document.getElementById('celular');
+        celularInput.value = celularInput.value.replace(/\D/g, ''); // Remove tudo que não é número
+
+        // Remove máscara do CEP
+        const cepInput = document.getElementById('cep');
+        cepInput.value = cepInput.value.replace(/\D/g, ''); // Remove tudo que não é número
     });
 </script>

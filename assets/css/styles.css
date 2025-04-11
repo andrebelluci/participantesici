@@ -330,7 +330,7 @@ footer p {
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 80%;    /* Largura fixa da modal */
+    width: 100%;    /* Largura fixa da modal */
     max-width: 600px;    /* Tamanho máximo da modal */
     margin: auto;    /* Centraliza a modal */
     padding: 20px;
@@ -343,15 +343,15 @@ footer p {
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-    text-align: center;    /* Centraliza o conteúdo */
+    text-align: left;    /* Centraliza o conteúdo */
     overflow: hidden;    /* Evita que o conteúdo transborde */
 }
 
 /* Botão de fechar */
 .close {
     position: absolute;    /* Posiciona o botão em relação ao .modal-content */
-    top: 10px;    /* Distância do topo */
-    right: 10px;    /* Distância da direita */
+    top: -2px;    /* Distância do topo */
+    right: -2px;    /* Distância da direita */
     width: 30px;    /* Largura do círculo */
     height: 30px;    /* Altura do círculo */
     background-color: rgb(150, 150, 150);    /* Cor de fundo do círculo */
@@ -394,7 +394,6 @@ footer p {
 .actions {
     display: flex;
     justify-content: space-between;
-    align-items: center;
     margin-bottom: 20px;
 }
 

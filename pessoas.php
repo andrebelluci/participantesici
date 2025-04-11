@@ -50,6 +50,36 @@ $sql = "
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
 $pessoas = $stmt->fetchAll();
+
+function formatarCPF($cpf)
+{
+    // Remove caracteres não numéricos
+    $cpf = preg_replace('/[^0-9]/', '', $cpf);
+    // Aplica a máscara ###.###.###-##
+    return substr($cpf, 0, 3) . '.' .
+        substr($cpf, 3, 3) . '.' .
+        substr($cpf, 6, 3) . '-' .
+        substr($cpf, 9, 2);
+}
+
+// Função para formatar telefone
+function formatarTelefone($telefone)
+{
+    // Remove caracteres não numéricos
+    $telefone = preg_replace('/[^0-9]/', '', $telefone);
+    // Verifica o tamanho do número (fixo ou celular)
+    if (strlen($telefone) === 10) { // Telefone fixo: (##) ####-####
+        return '(' . substr($telefone, 0, 2) . ') ' .
+            substr($telefone, 2, 4) . '-' .
+            substr($telefone, 6, 4);
+    } elseif (strlen($telefone) === 11) { // Celular: (##) #####-####
+        return '(' . substr($telefone, 0, 2) . ') ' .
+            substr($telefone, 2, 5) . '-' .
+            substr($telefone, 7, 4);
+    } else {
+        return $telefone; // Retorna o valor original caso o formato seja inválido
+    }
+}
 ?>
 
 <div class="container">
@@ -117,9 +147,15 @@ $pessoas = $stmt->fetchAll();
                         <img src="<?= htmlspecialchars($pessoa['foto']) ?>" alt="Foto" class="square-image" onerror="this.src='assets/images/no-image.png';">
                     </td>
                     <td class="col-nome-pessoa"><?= htmlspecialchars($pessoa['nome_completo']) ?></td>
-                    <td class="col-nascimento"><?= htmlspecialchars($pessoa['nascimento']) ?></td>
-                    <td class="col-cpf"><?= htmlspecialchars($pessoa['cpf']) ?></td>
-                    <td class="col-celular"><?= htmlspecialchars($pessoa['celular']) ?></td>
+                    <td class="col-nascimento">
+                        <?php
+                        // Formata a data para DD/MM/AAAA
+                        $nascimento = new DateTime($pessoa['nascimento']);
+                        echo $nascimento->format('d/m/Y');
+                        ?>
+                    </td>
+                    <td class="col-cpf"><?= formatarCPF(htmlspecialchars($pessoa['cpf'])) ?></td>
+                    <td class="col-celular"><?= formatarTelefone(htmlspecialchars($pessoa['celular'])) ?></td>
                     <td class="col-rituais-participados"><?= htmlspecialchars($pessoa['rituais_participados']) ?></td>
                     <td class="col-acoes-pessoa">
                         <button class="action-icon" title="Ver Endereço" onclick="document.getElementById('modal-endereco-<?= $pessoa['id'] ?>').style.display='block'">

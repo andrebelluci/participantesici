@@ -40,32 +40,114 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 ?>
 
 <div class="container">
-    <h1>Editar Ritual</h1>
+    <h1>🪵 Editar Ritual</h1>
+    <br>
     <div class="actions">
-        <a href="rituais.php" class="btn">Voltar</a>
+        <a href="rituais.php" class="btn voltar">Voltar</a>
     </div>
 
-    <form method="POST" enctype="multipart/form-data">
-        <label for="nome">Nome do Ritual:</label>
-        <input type="text" name="nome" value="<?= htmlspecialchars($ritual['nome']) ?>" required>
+    <form method="POST" enctype="multipart/form-data" class="styled-form">
+        <div class="form-columns">
+            <!-- Coluna 1: Dados do Ritual -->
+            <div class="form-column">
+                <h3>Dados do Ritual</h3>
+                <label for="nome">Nome do Ritual:</label>
+                <input type="text" name="nome" id="nome" value="<?= htmlspecialchars($ritual['nome']) ?>" required>
 
-        <label for="data_ritual">Data do Ritual:</label>
-        <input type="date" name="data_ritual" value="<?= htmlspecialchars($ritual['data_ritual']) ?>" required>
+                <label for="data_ritual">Data do Ritual:</label>
+                <input type="date" name="data_ritual" id="data_ritual" value="<?= htmlspecialchars($ritual['data_ritual']) ?>" required>
 
-        <label for="foto">Foto do Ritual:</label>
-        <?php if ($ritual['foto']): ?>
-            <img src="<?= htmlspecialchars($ritual['foto']) ?>" alt="Foto Atual" class="small-image">
-        <?php endif; ?>
-        <input type="file" name="foto" accept="image/*">
+                <label for="foto">Foto do Ritual:</label>
+                <div class="foto-preview-container">
+                    <input type="file" name="foto" id="foto-input" accept="image/*" style="display: none;">
+                    <button type="button" id="adicionar-imagem-btn" class="btn adicionar-imagem">Adicionar Imagem</button>
+                    <div id="preview-container" style="<?= $ritual['foto'] ? 'display: block;' : 'display: none;' ?>">
+                        <div class="image-and-button">
+                            <img id="preview-image" src="<?= htmlspecialchars($ritual['foto'] ?? '') ?>" alt="Preview" class="small-preview">
+                            <button type="button" id="excluir-imagem-btn" class="btn excluir-imagem">Excluir Imagem</button>
+                        </div>
+                    </div>
+                </div>
+                <br>
 
-        <label for="padrinho_madrinha">Padrinho ou Madrinha:</label>
-        <select name="padrinho_madrinha" required>
-            <option value="Dirceu" <?= $ritual['padrinho_madrinha'] == 'Dirceu' ? 'selected' : '' ?>>Dirceu</option>
-            <option value="Gabriela" <?= $ritual['padrinho_madrinha'] == 'Gabriela' ? 'selected' : '' ?>>Gabriela</option>
-        </select>
+                <label for="padrinho_madrinha">Padrinho ou Madrinha:</label>
+                <select name="padrinho_madrinha" id="padrinho_madrinha" required>
+                    <option value="Dirceu" <?= $ritual['padrinho_madrinha'] == 'Dirceu' ? 'selected' : '' ?>>Dirceu</option>
+                    <option value="Gabriela" <?= $ritual['padrinho_madrinha'] == 'Gabriela' ? 'selected' : '' ?>>Gabriela</option>
+                </select>
+            </div>
+        </div>
 
-        <button type="submit">Salvar Alterações</button>
+        <button type="submit" class="btn salvar">Salvar Alterações</button>
     </form>
+
+    <!-- Modal de Ampliação de Imagem -->
+    <div id="image-modal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <span class="close" onclick="closeImageModal()">&times;</span>
+                <img id="expanded-image" class="modal-image">
+            </div>
+        </div>
+    </div>
 </div>
 
 <?php require_once 'includes/footer.php'; ?>
+
+<script>
+    // Função para abrir a imagem ampliada
+    function openImageModal(imageSrc) {
+        const modal = document.getElementById('image-modal');
+        const modalImg = document.getElementById('expanded-image');
+        modal.style.display = 'block';
+        modalImg.src = imageSrc;
+    }
+
+    // Função para fechar a imagem ampliada
+    function closeImageModal() {
+        const modal = document.getElementById('image-modal');
+        modal.style.display = 'none';
+    }
+
+    // Preview da imagem
+    const fileInput = document.getElementById('foto-input');
+    const adicionarImagemBtn = document.getElementById('adicionar-imagem-btn');
+    const previewContainer = document.getElementById('preview-container');
+    const previewImage = document.getElementById('preview-image');
+    const excluirImagemBtn = document.getElementById('excluir-imagem-btn');
+
+    // Verifica se já há uma imagem carregada
+    if (previewImage.src && previewImage.src !== '#') {
+        previewContainer.style.display = 'block';
+        adicionarImagemBtn.style.display = 'none';
+    }
+
+    adicionarImagemBtn.addEventListener('click', () => {
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', () => {
+        const file = fileInput.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                previewImage.src = e.target.result;
+                previewContainer.style.display = 'block';
+                adicionarImagemBtn.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    excluirImagemBtn.addEventListener('click', () => {
+        previewImage.src = '#';
+        previewContainer.style.display = 'none';
+        adicionarImagemBtn.style.display = 'inline-block';
+        fileInput.value = '';
+    });
+
+    // Abrir modal ao clicar na imagem de preview
+    previewImage.addEventListener('click', () => {
+        openImageModal(previewImage.src);
+    });
+</script>
