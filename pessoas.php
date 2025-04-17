@@ -119,14 +119,7 @@ function formatarTelefone($telefone)
                         <?php endif; ?>
                     </a>
                 </th>
-                <th class="col-nascimento">
-                    <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>&order_by=nascimento&order_dir=<?= $order_by === 'nascimento' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
-                        Nascimento
-                        <?php if ($order_by === 'nascimento'): ?>
-                            <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
-                        <?php endif; ?>
-                    </a>
-                </th>
+                <th class="col-nascimento">Nascimento</th>
                 <th class="col-cpf">CPF</th>
                 <th class="col-celular">Celular</th>
                 <th class="col-rituais-participados">
@@ -144,7 +137,12 @@ function formatarTelefone($telefone)
             <?php foreach ($pessoas as $pessoa): ?>
                 <tr>
                     <td class="col-foto-pessoa">
-                        <img src="<?= htmlspecialchars($pessoa['foto']) ?>" alt="Foto" class="square-image" onerror="this.src='assets/images/no-image.png';">
+                        <img
+                            src="<?= htmlspecialchars($pessoa['foto']) ?>"
+                            alt="Foto"
+                            class="square-image clickable"
+                            onclick="openImageModal('<?= htmlspecialchars($pessoa['foto']) ?>')"
+                            onerror="this.src='assets/images/no-image.png'; this.onclick=null; this.classList.remove('clickable');">
                     </td>
                     <td class="col-nome-pessoa"><?= htmlspecialchars($pessoa['nome_completo']) ?></td>
                     <td class="col-nascimento">
@@ -222,6 +220,15 @@ function formatarTelefone($telefone)
             <?php endforeach; ?>
         </tbody>
     </table>
+    <!-- Modal de Ampliação de Imagem -->
+    <div id="image-modal" class="modal">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <span class="close" onclick="closeImageModal()">&times;</span>
+                <img id="expanded-image" class="modal-image">
+            </div>
+        </div>
+    </div>
 
     <!-- Paginação -->
     <div class="pagination">
@@ -230,5 +237,21 @@ function formatarTelefone($telefone)
         <?php endfor; ?>
     </div>
 </div>
+
+<script>
+    // Função para abrir a imagem ampliada
+    function openImageModal(imageSrc) {
+        const modal = document.getElementById('image-modal');
+        const modalImg = document.getElementById('expanded-image');
+        modal.style.display = 'block';
+        modalImg.src = imageSrc;
+    }
+
+    // Função para fechar a imagem ampliada
+    function closeImageModal() {
+        const modal = document.getElementById('image-modal');
+        modal.style.display = 'none';
+    }
+</script>
 
 <?php require_once 'includes/footer.php'; ?>

@@ -350,8 +350,8 @@ footer p {
 /* Botão de fechar */
 .close {
     position: absolute;    /* Posiciona o botão em relação ao .modal-content */
-    top: -2px;    /* Distância do topo */
-    right: -2px;    /* Distância da direita */
+    top: 1px;    /* Distância do topo */
+    right: 1px;    /* Distância da direita */
     width: 30px;    /* Largura do círculo */
     height: 30px;    /* Altura do círculo */
     background-color: rgb(150, 150, 150);    /* Cor de fundo do círculo */

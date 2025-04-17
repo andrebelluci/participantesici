@@ -7,9 +7,25 @@ if (!isset($_SESSION['user_id'])) {
 require_once 'includes/db.php';
 require_once 'includes/header.php';
 
+// Obtém o ID da pessoa a ser editada
+$id = $_GET['id'] ?? null;
+if (!$id) {
+    die("ID da pessoa não especificado.");
+}
+
+// Consulta os dados da pessoa no banco de dados
+$stmt = $pdo->prepare("SELECT * FROM participantes WHERE id = ?");
+$stmt->execute([$id]);
+$pessoa = $stmt->fetch();
+
+if (!$pessoa) {
+    die("Pessoa não encontrada.");
+}
+
+// Processamento do formulário de edição
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Processamento do formulário (mantido igual)
-    $foto = null;
+    // Processa a foto (mantém a atual se nenhuma nova for enviada)
+    $foto = $pessoa['foto'];
     if (!empty($_FILES['foto']['name'])) {
         $foto_nome = uniqid() . '_' . basename($_FILES['foto']['name']);
         $foto_destino = 'uploads/' . $foto_nome;
@@ -17,6 +33,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $foto = $foto_destino;
     }
 
+    // Captura os dados do formulário
     $nome_completo = $_POST['nome_completo'];
     $nascimento = $_POST['nascimento'];
     $sexo = $_POST['sexo'];
@@ -34,25 +51,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $estado = $_POST['estado'];
     $bairro = $_POST['bairro'];
 
-    $stmt = $pdo->prepare("
-        INSERT INTO participantes (
-            foto, nome_completo, nascimento, sexo, cpf, rg, passaporte, celular, email, como_soube, cep, endereco_rua, endereco_numero, endereco_complemento, cidade, estado, bairro
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    // Atualiza os dados no banco de dados
+    $stmt_update = $pdo->prepare("
+        UPDATE participantes SET
+            foto = ?, nome_completo = ?, nascimento = ?, sexo = ?, cpf = ?, rg = ?, passaporte = ?,
+            celular = ?, email = ?, como_soube = ?, cep = ?, endereco_rua = ?, endereco_numero = ?,
+            endereco_complemento = ?, cidade = ?, estado = ?, bairro = ?
+        WHERE id = ?
     ");
-    $stmt->execute([$foto, $nome_completo, $nascimento, $sexo, $cpf, $rg, $passaporte, $celular, $email, $como_soube, $cep, $endereco_rua, $endereco_numero, $endereco_complemento, $cidade, $estado, $bairro]);
+    $stmt_update->execute([
+        $foto,
+        $nome_completo,
+        $nascimento,
+        $sexo,
+        $cpf,
+        $rg,
+        $passaporte,
+        $celular,
+        $email,
+        $como_soube,
+        $cep,
+        $endereco_rua,
+        $endereco_numero,
+        $endereco_complemento,
+        $cidade,
+        $estado,
+        $bairro,
+        $id
+    ]);
 
-    echo "<script>alert('Pessoa cadastrada com sucesso!');</script>";
+    echo "<script>alert('Pessoa atualizada com sucesso!');</script>";
     echo "<script>window.location.href = 'pessoas.php';</script>";
 }
 ?>
 
 <div class="container">
-    <h1>👤 Nova Pessoa</h1>
+    <h1>👤 Editar Pessoa</h1>
     <br>
     <div class="actions">
         <a href="pessoas.php" class="btn voltar">Voltar</a>
     </div>
-
     <form method="POST" enctype="multipart/form-data" class="styled-form" id="formulario-pessoa">
         <div class="form-columns">
             <!-- Coluna 1: Dados Pessoais -->
@@ -62,80 +100,62 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="foto-preview-container">
                     <input type="file" name="foto" id="foto-input" accept="image/*" style="display: none;">
                     <button type="button" id="adicionar-imagem-btn" class="btn adicionar-imagem">Adicionar Imagem</button>
-                    <div id="preview-container" style="display: none;">
+                    <div id="preview-container" style="<?= $pessoa['foto'] ? 'display: block;' : 'display: none;' ?>">
                         <div class="image-and-button">
-                            <img id="preview-image" src="#" alt="Preview" class="small-preview">
+                            <img id="preview-image" src="<?= htmlspecialchars($pessoa['foto']) ?>" alt="Preview" class="small-preview" onerror="this.src='assets/images/no-image.png';">
                             <button type="button" id="excluir-imagem-btn" class="btn excluir-imagem">Excluir Imagem</button>
                         </div>
                     </div>
                 </div>
                 <br>
-
                 <label for="nome_completo">Nome Completo:</label>
-                <input type="text" name="nome_completo" id="nome_completo" required>
-
+                <input type="text" name="nome_completo" id="nome_completo" value="<?= htmlspecialchars($pessoa['nome_completo']) ?>" required>
                 <label for="nascimento">Data de Nascimento:</label>
-                <input type="date" name="nascimento" id="nascimento" required>
-
+                <input type="date" name="nascimento" id="nascimento" value="<?= htmlspecialchars($pessoa['nascimento']) ?>" required>
                 <label for="sexo">Sexo:</label>
                 <select name="sexo" id="sexo" required>
-                    <option value="M">Masculino</option>
-                    <option value="F">Feminino</option>
+                    <option value="M" <?= $pessoa['sexo'] === 'M' ? 'selected' : '' ?>>Masculino</option>
+                    <option value="F" <?= $pessoa['sexo'] === 'F' ? 'selected' : '' ?>>Feminino</option>
                 </select>
-
                 <label for="cpf">CPF:</label>
-                <input type="text" name="cpf" id="cpf" placeholder="___.___.___-__" required oninput="mascaraCPF(this)">
-
+                <input type="text" name="cpf" id="cpf" placeholder="___.___.___-__" value="<?= htmlspecialchars($pessoa['cpf']) ?>" required oninput="mascaraCPF(this)">
                 <label for="rg">RG:</label>
-                <input type="text" name="rg" id="rg">
-
+                <input type="text" name="rg" id="rg" value="<?= htmlspecialchars($pessoa['rg']) ?>">
                 <label for="passaporte">Passaporte:</label>
-                <input type="text" name="passaporte" id="passaporte">
-
+                <input type="text" name="passaporte" id="passaporte" value="<?= htmlspecialchars($pessoa['passaporte']) ?>">
                 <label for="celular">Celular:</label>
-                <input type="text" name="celular" id="celular" placeholder="(__) _____-____" required oninput="mascaraCelular(this)">
-
+                <input type="text" name="celular" id="celular" placeholder="(__) _____-____" value="<?= htmlspecialchars($pessoa['celular']) ?>" required oninput="mascaraCelular(this)">
                 <label for="email">E-mail:</label>
-                <input type="email" name="email" id="email">
+                <input type="email" name="email" id="email" value="<?= htmlspecialchars($pessoa['email']) ?>">
             </div>
-
             <!-- Coluna 2: Endereço -->
             <div class="form-column">
                 <h3>Endereço</h3>
                 <label for="cep">CEP:</label>
                 <div class="cep-group">
-                    <input type="text" name="cep" id="cep" placeholder="_____ - ___" required oninput="mascaraCEP(this)">
+                    <input type="text" name="cep" id="cep" placeholder="_____ - ___" value="<?= htmlspecialchars($pessoa['cep']) ?>" required oninput="mascaraCEP(this)">
                     <button type="button" id="buscar-cep-btn" class="btn buscar-cep">Buscar CEP</button>
                 </div>
-
                 <label for="endereco_rua">Rua:</label>
-                <input type="text" name="endereco_rua" id="endereco_rua" required>
-
+                <input type="text" name="endereco_rua" id="endereco_rua" value="<?= htmlspecialchars($pessoa['endereco_rua']) ?>" required>
                 <label for="endereco_numero">Número:</label>
-                <input type="text" name="endereco_numero" id="endereco_numero" required>
-
+                <input type="text" name="endereco_numero" id="endereco_numero" value="<?= htmlspecialchars($pessoa['endereco_numero']) ?>" required>
                 <label for="endereco_complemento">Complemento:</label>
-                <input type="text" name="endereco_complemento" id="endereco_complemento">
-
+                <input type="text" name="endereco_complemento" id="endereco_complemento" value="<?= htmlspecialchars($pessoa['endereco_complemento']) ?>">
                 <label for="cidade">Cidade:</label>
-                <input type="text" name="cidade" id="cidade" required>
-
+                <input type="text" name="cidade" id="cidade" value="<?= htmlspecialchars($pessoa['cidade']) ?>" required>
                 <label for="estado">Estado:</label>
-                <input type="text" name="estado" id="estado" required>
-
+                <input type="text" name="estado" id="estado" value="<?= htmlspecialchars($pessoa['estado']) ?>" required>
                 <label for="bairro">Bairro:</label>
-                <input type="text" name="bairro" id="bairro" required>
-
+                <input type="text" name="bairro" id="bairro" value="<?= htmlspecialchars($pessoa['bairro']) ?>" required>
                 <br>
                 <h3>Informações adicionais</h3>
                 <label for="como_soube">Como soube do Instituto Céu Interior?</label>
-                <textarea name="como_soube" id="como_soube"></textarea>
+                <textarea name="como_soube" id="como_soube"><?= htmlspecialchars($pessoa['como_soube']) ?></textarea>
             </div>
         </div>
-
-        <button type="submit" class="btn salvar">Cadastrar</button>
+        <button type="submit" class="btn salvar">Salvar Alterações</button>
     </form>
-
     <!-- Modal de Ampliação de Imagem -->
     <div id="image-modal" class="modal">
         <div class="modal-dialog">
@@ -146,9 +166,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </div>
 </div>
-
 <?php require_once 'includes/footer.php'; ?>
-
 <script>
     // Função para abrir a imagem ampliada
     function openImageModal(imageSrc) {
@@ -170,6 +188,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     const previewContainer = document.getElementById('preview-container');
     const previewImage = document.getElementById('preview-image');
     const excluirImagemBtn = document.getElementById('excluir-imagem-btn');
+
+    // Verifica se já há uma imagem carregada
+    if (previewImage.src && previewImage.src !== '#') {
+        previewContainer.style.display = 'block';
+        adicionarImagemBtn.style.display = 'none';
+    }
 
     adicionarImagemBtn.addEventListener('click', () => {
         fileInput.click();

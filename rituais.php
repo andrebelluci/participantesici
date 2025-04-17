@@ -56,7 +56,7 @@ $rituais = $stmt->fetchAll();
 
 <div class="container">
     <h1>🔥Rituais</h1>
-    <br>   
+    <br>
     <div class="actions">
         <div class="left-actions">
             <a href="home.php" class="btn voltar">Voltar</a>
@@ -93,7 +93,7 @@ $rituais = $stmt->fetchAll();
                 <th class="col-foto">Foto</th>
                 <th class="col-nome">
                     <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>&order_by=nome&order_dir=<?= $order_by === 'nome' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
-                        Nome 
+                        Nome
                         <?php if ($order_by === 'nome'): ?>
                             <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
                         <?php endif; ?>
@@ -101,7 +101,7 @@ $rituais = $stmt->fetchAll();
                 </th>
                 <th class="col-data">
                     <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>&order_by=data_ritual&order_dir=<?= $order_by === 'data_ritual' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
-                        Data 
+                        Data
                         <?php if ($order_by === 'data_ritual'): ?>
                             <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
                         <?php endif; ?>
@@ -110,7 +110,7 @@ $rituais = $stmt->fetchAll();
                 <th class="col-padrinho">Padrinho/Madrinha</th>
                 <th class="col-inscritos">
                     <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>&order_by=inscritos&order_dir=<?= $order_by === 'inscritos' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
-                        Inscritos 
+                        Inscritos
                         <?php if ($order_by === 'inscritos'): ?>
                             <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
                         <?php endif; ?>
@@ -123,10 +123,10 @@ $rituais = $stmt->fetchAll();
             <?php foreach ($rituais as $ritual): ?>
                 <tr>
                     <td class="col-foto">
-                        <img 
-                            src="<?= htmlspecialchars($ritual['foto']) ?>" 
-                            alt="Foto" 
-                            class="square-image clickable" 
+                        <img
+                            src="<?= htmlspecialchars($ritual['foto']) ?>"
+                            alt="Foto"
+                            class="square-image clickable"
                             onclick="openImageModal('<?= htmlspecialchars($ritual['foto']) ?>')"
                             onerror="this.src='assets/images/no-image.png'; this.onclick=null; this.classList.remove('clickable');">
                     </td>
