@@ -83,14 +83,14 @@ function formatarTelefone($telefone)
 ?>
 
 <div class="container">
-    <h1>👥 Pessoas</h1>
+    <h1>👥 Participantes</h1>
     <br>
     <div class="actions">
         <div class="left-actions">
             <a href="home.php" class="btn voltar">Voltar</a>
         </div>
         <div class="right-actions">
-            <a href="pessoa-novo.php" class="btn novo-participante">Nova Pessoa</a>
+            <a href="participante-novo.php" class="btn novo-participante">Novo Participante</a>
         </div>
     </div>
 
@@ -102,11 +102,11 @@ function formatarTelefone($telefone)
         </div>
         <div class="filter-actions">
             <button type="submit" class="filter-btn">Filtrar</button>
-            <a href="pessoas.php" class="filter-btn clear-btn">Limpar Filtro</a>
+            <a href="participantes.php" class="filter-btn clear-btn">Limpar Filtro</a>
         </div>
     </form>
 
-    <!-- Lista de Pessoas -->
+    <!-- Lista de Participantes -->
     <table class="styled-table">
         <thead>
             <tr>
@@ -162,10 +162,10 @@ function formatarTelefone($telefone)
                         <button class="action-icon" title="Ver Rituais" onclick="document.getElementById('modal-rituais-<?= $pessoa['id'] ?>').style.display='block'">
                             <i class="fa-solid fa-calendar-alt"></i>
                         </button>
-                        <a href="pessoa-editar.php?id=<?= $pessoa['id'] ?>" class="action-icon" title="Editar">
+                        <a href="participante-editar.php?id=<?= $pessoa['id'] ?>" class="action-icon" title="Editar">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </a>
-                        <a href="pessoa-excluir.php?id=<?= $pessoa['id'] ?>" class="action-icon danger" title="Excluir" onclick="return confirm('Tem certeza?')">
+                        <a href="participante-excluir.php?id=<?= $pessoa['id'] ?>" class="action-icon danger" title="Excluir" onclick="return confirm('Tem certeza?')">
                             <i class="fa-solid fa-trash"></i>
                         </a>
                     </td>

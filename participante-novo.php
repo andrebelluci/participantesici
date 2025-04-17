@@ -42,15 +42,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt->execute([$foto, $nome_completo, $nascimento, $sexo, $cpf, $rg, $passaporte, $celular, $email, $como_soube, $cep, $endereco_rua, $endereco_numero, $endereco_complemento, $cidade, $estado, $bairro]);
 
     echo "<script>alert('Pessoa cadastrada com sucesso!');</script>";
-    echo "<script>window.location.href = 'pessoas.php';</script>";
+    echo "<script>window.location.href = 'participantes.php';</script>";
 }
 ?>
 
 <div class="container">
-    <h1>👤 Nova Pessoa</h1>
+    <h1>👤 Novo Participante</h1>
     <br>
     <div class="actions">
-        <a href="pessoas.php" class="btn voltar">Voltar</a>
+        <a href="participantes.php" class="btn voltar">Voltar</a>
     </div>
 
     <form method="POST" enctype="multipart/form-data" class="styled-form" id="formulario-pessoa">

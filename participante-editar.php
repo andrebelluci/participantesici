@@ -81,7 +81,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     ]);
 
     echo "<script>alert('Pessoa atualizada com sucesso!');</script>";
-    echo "<script>window.location.href = 'pessoas.php';</script>";
+    echo "<script>window.location.href = 'participantes.php';</script>";
 }
 ?>
 
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <h1>👤 Editar Pessoa</h1>
     <br>
     <div class="actions">
-        <a href="pessoas.php" class="btn voltar">Voltar</a>
+        <a href="participantes.php" class="btn voltar">Voltar</a>
     </div>
     <form method="POST" enctype="multipart/form-data" class="styled-form" id="formulario-pessoa">
         <div class="form-columns">

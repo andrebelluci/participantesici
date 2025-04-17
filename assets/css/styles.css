@@ -29,7 +29,7 @@ header {
 }
 
 header .logo {
-    margin-left: 20px;
+    margin-left: 80px;
     /* Espaçamento para trazer a logo mais para dentro */
 }
 
@@ -41,7 +41,7 @@ header .logo img {
 header nav {
     display: flex;
     align-items: center;
-    margin-right: 20px;
+    margin-right: 80px;
     /* Centraliza os menus no espaço restante */
 }
 
@@ -131,12 +131,26 @@ header nav .dropdown span:hover {
     /* Efeito ao passar o mouse */
 }
 
+.page-title {
+    flex: 1;
+    /* Faz o container ocupar o espaço disponível */
+    padding: 20px;
+    margin-top: 20px;
+    margin-left: 80px;
+    margin-right: 80px;
+    font-family: Arial, sans-serif;
+    /* Mesma fonte usada no header */
+}
+
 /* Container principal */
 .container {
     flex: 1;
     /* Faz o container ocupar o espaço disponível */
     padding: 20px;
-    margin: 20px;
+    margin-top: 20px;
+    margin-left: 80px;
+    margin-right: 80px;
+    margin-bottom: 20px;
     /* Margem geral ao redor do conteúdo */
     background-color: rgb(207, 207, 207);
     border-radius: 8px;
@@ -273,42 +287,6 @@ footer p {
     object-fit: cover;
     /* Garante que a imagem seja cortada adequadamente */
     margin-bottom: 10px;
-}
-
-/* Estilo do modal */
-.modal {
-    display: none;
-    /* Oculto por padrão */
-    position: fixed;
-    /* Fixa o modal na tela */
-    z-index: 1000;
-    /* Garante que o modal fique acima de outros elementos */
-    left: 0;
-    top: 0;
-    width: 100%;
-    /* Ocupa toda a largura da tela */
-    height: 100%;
-    /* Ocupa toda a altura da tela */
-    background-color: rgba(0, 0, 0, 0.8);
-    /* Fundo escuro semi-transparente */
-    justify-content: center;
-    /* Centraliza horizontalmente */
-    align-items: center;
-    /* Centraliza verticalmente */
-}
-
-/* Contêiner do modal */
-.modal-dialog {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 80%;
-    /* Largura fixa da modal */
-    max-width: 600px;
-    /* Tamanho máximo da modal */
-    margin: auto;
-    /* Centraliza a modal */
-    padding: 20px;
 }
 
 /* Estilo do modal */
@@ -480,6 +458,7 @@ footer p {
 .styled-table th a:hover {
     color: #007bff;    /* Altera a cor ao passar o mouse */
     text-decoration: underline;    /* Adiciona sublinhado no hover */
+    text-decoration: none;
 }
 
 /* Ícones de ordenação */
@@ -490,11 +469,23 @@ footer p {
 
 /* Larguras personalizadas para as colunas */
 .col-foto {
-    width: 5%;    /* Foto (pequena) */
+    width: 4%;    /* Foto (pequena) */
 }
 
 .col-nome {
     width: 30%;    /* Nome (maior importância) */
+}
+
+.col-nome a {
+color: black;    /* Cor do texto */
+text-decoration: none;    /* Remove sublinhado */
+font-weight: bold;    /* Negrito */
+}
+
+.col-nome
+a:hover {
+    color: #007bff;
+    text-decoration: none;
 }
 
 .col-data {
@@ -506,7 +497,7 @@ footer p {
 }
 
 .col-inscritos {
-    width: 7%;    /* Inscritos (número pequeno) */
+    width: 6%;    /* Inscritos (número pequeno) */
 }
 
 .col-acoes {

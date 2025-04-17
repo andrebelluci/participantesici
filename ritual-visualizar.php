@@ -17,7 +17,7 @@ if (!$ritual) {
 }
 ?>
 
-<div class="container">
+<div class="page-title">
     <!-- Cabeçalho com foto, nome, data e padrinho/madrinha -->
     <div class="ritual-header">
         <img src="<?= htmlspecialchars($ritual['foto']) ?>" alt="Foto do Ritual" class="medium-image" onerror="this.src='assets/images/no-image.png';">
@@ -33,7 +33,8 @@ if (!$ritual) {
         <a href="rituais.php" class="btn voltar">Voltar</a>
         <button class="btn adicionar" onclick="document.getElementById('modal-adicionar').style.display='block'">Adicionar Participante</button>
     </div>
-
+</div>
+<div class="container">
     <!-- Filtro por Nome -->
     <form method="GET" class="filters">
         <div class="filter-group">
@@ -137,7 +138,7 @@ if (!$ritual) {
                 <h3>Resultados</h3>
                 <ul id="lista-participantes"></ul>
                 <!-- Botão para adicionar nova pessoa -->
-                <button id="btn-adicionar-nova-pessoa" style="display: none;" onclick="adicionarNovaPessoa()">Adicionar Nova Pessoa</button>
+                <button id="btn-adicionar-nova-pessoa" style="display: none;" onclick="adicionarNovaPessoa()">Adicionar Novo Participante</button>
             </div>
         </div>
     </div>
@@ -445,11 +446,11 @@ if (!$ritual) {
                 }
 
                 if (data.length === 0) {
-                    // Se nenhum participante for encontrado, exibe o botão "Adicionar Nova Pessoa"
+                    // Se nenhum participante for encontrado, exibe o botão "Adicionar Novo Participante"
                     listaParticipantes.innerHTML = `
                     <li>Nenhum participante encontrado.</li>
                     <li>
-                        <button class="add-new-btn" onclick="adicionarNovaPessoa()">Adicionar Nova Pessoa</button>
+                        <button class="add-new-btn" onclick="adicionarNovaPessoa()">Adicionar Novo Participante</button>
                     </li>
                 `;
                     return;
@@ -480,7 +481,7 @@ if (!$ritual) {
     // Função para redirecionar para a página de cadastro de nova pessoa
     function adicionarNovaPessoa() {
         const ritualId = document.querySelector('#modal-adicionar input[name="ritual_id"]').value;
-        window.location.href = `pessoa-novo.php?redirect=ritual-visualizar.php&id=${ritualId}`;
+        window.location.href = `participante-novo.php?redirect=ritual-visualizar.php&id=${ritualId}`;
     }
 
     // Função para adicionar um participante ao ritual

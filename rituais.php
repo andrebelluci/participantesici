@@ -54,7 +54,7 @@ $stmt->execute($params);
 $rituais = $stmt->fetchAll();
 ?>
 
-<div class="container">
+<div class="page-title">
     <h1>🔥Rituais</h1>
     <br>
     <div class="actions">
@@ -65,7 +65,8 @@ $rituais = $stmt->fetchAll();
             <a href="ritual-novo.php" class="btn novo-ritual">Novo Ritual</a>
         </div>
     </div>
-
+</div>
+<div class="container">
     <!-- Filtros -->
     <form method="GET" class="filters">
         <div class="filter-group">
@@ -130,7 +131,9 @@ $rituais = $stmt->fetchAll();
                             onclick="openImageModal('<?= htmlspecialchars($ritual['foto']) ?>')"
                             onerror="this.src='assets/images/no-image.png'; this.onclick=null; this.classList.remove('clickable');">
                     </td>
-                    <td class="col-nome"><?= htmlspecialchars($ritual['nome']) ?></td>
+                    <td class="col-nome">
+                        <a href="ritual-visualizar.php?id=<?= $ritual['id'] ?>"><?= htmlspecialchars($ritual['nome']) ?></a>
+                    </td>
                     <td class="col-data">
                         <?php
                         // Formata a data para DD/MM/AAAA
@@ -141,9 +144,9 @@ $rituais = $stmt->fetchAll();
                     <td class="col-padrinho"><?= htmlspecialchars($ritual['padrinho_madrinha']) ?></td>
                     <td class="col-inscritos"><?= htmlspecialchars($ritual['inscritos']) ?></td>
                     <td class="col-acoes">
-                        <a href="ritual-visualizar.php?id=<?= $ritual['id'] ?>" class="action-icon" title="Visualizar"><i class="fa-solid fa-eye"></i></a>
-                        <a href="ritual-editar.php?id=<?= $ritual['id'] ?>" class="action-icon" title="Editar"><i class="fa-solid fa-pen-to-square"></i></a>
-                        <a href="ritual-excluir.php?id=<?= $ritual['id'] ?>" class="action-icon danger" title="Excluir" onclick="return confirm('Tem certeza?')"><i class="fa-solid fa-trash"></i></a>
+                        <a href="ritual-visualizar.php?id=<?= $ritual['id'] ?>" class="action-icon" title="Gerenciar participantes"><i class="fa-solid fa-circle-user"></i></a>
+                        <a href="ritual-editar.php?id=<?= $ritual['id'] ?>" class="action-icon" title="Editar dados do ritual"><i class="fa-solid fa-pen-to-square"></i></a>
+                        <a href="ritual-excluir.php?id=<?= $ritual['id'] ?>" class="action-icon danger" title="Excluir ritual" onclick="return confirm('Tem certeza?')"><i class="fa-solid fa-trash"></i></a>
                     </td>
                 </tr>
             <?php endforeach; ?>

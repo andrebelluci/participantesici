@@ -39,23 +39,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 ?>
 
-<div class="container">
+<div class="page-title">
     <h1>🪵 Editar Ritual</h1>
     <br>
     <div class="actions">
         <a href="rituais.php" class="btn voltar">Voltar</a>
     </div>
-
+</div>
+<div class="container">
     <form method="POST" enctype="multipart/form-data" class="styled-form">
         <div class="form-columns">
             <!-- Coluna 1: Dados do Ritual -->
             <div class="form-column">
                 <h3>Dados do Ritual</h3>
-                <label for="nome">Nome do Ritual:</label>
-                <input type="text" name="nome" id="nome" value="<?= htmlspecialchars($ritual['nome']) ?>" required>
-
-                <label for="data_ritual">Data do Ritual:</label>
-                <input type="date" name="data_ritual" id="data_ritual" value="<?= htmlspecialchars($ritual['data_ritual']) ?>" required>
 
                 <label for="foto">Foto do Ritual:</label>
                 <div class="foto-preview-container">
@@ -69,6 +65,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
                 </div>
                 <br>
+
+                <label for="nome">Nome do Ritual:</label>
+                <input type="text" name="nome" id="nome" value="<?= htmlspecialchars($ritual['nome']) ?>" required>
+
+                <label for="data_ritual">Data do Ritual:</label>
+                <input type="date" name="data_ritual" id="data_ritual" value="<?= htmlspecialchars($ritual['data_ritual']) ?>" required>
 
                 <label for="padrinho_madrinha">Padrinho ou Madrinha:</label>
                 <select name="padrinho_madrinha" id="padrinho_madrinha" required>
