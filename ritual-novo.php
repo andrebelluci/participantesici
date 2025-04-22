@@ -33,15 +33,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <h1>🪵 Novo Ritual</h1>
     <br>
     <div class="actions">
-        <a href="rituais.php" class="btn voltar">Voltar</a>
+        <div class="left-actions">
+            <a href="rituais.php" class="btn voltar">Voltar</a>
+        </div>
+        <div class="right-actions">
+            <button type="submit" form="formulario-ritual" class="btn salvar">Criar ritual</button>
+        </div>
     </div>
 </div>
 <div class="container">
-    <form method="POST" enctype="multipart/form-data" class="styled-form">
+    <form method="POST" enctype="multipart/form-data" class="styled-form" id="formulario-ritual">
         <div class="form-columns">
             <!-- Coluna 1: Dados do Ritual -->
             <div class="form-column">
-                <h3>Dados do Ritual</h3>
+                <h3>🍃Dados do Ritual</h3>
                 <label for="foto">Foto do Ritual:</label>
                 <div class="foto-preview-container">
                     <input type="file" name="foto" id="foto-input" accept="image/*" style="display: none;">
@@ -54,30 +59,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
                 </div>
                 <br>
+                <div class="horizontal-fields">
+                    <div class="field-group">
+                        <label for="nome">Nome do Ritual:</label>
+                        <input type="text" name="nome" id="nome" required>
+                    </div>
 
-                <label for="nome">Nome do Ritual:</label>
-                <input type="text" name="nome" id="nome" required>
+                    <div class="field-group">
+                        <label for="data_ritual">Data do Ritual:</label>
+                        <input type="date" name="data_ritual" id="data_ritual" required>
+                    </div>
 
-                <label for="data_ritual">Data do Ritual:</label>
-                <input type="date" name="data_ritual" id="data_ritual" required>
-
-                <label for="padrinho_madrinha">Padrinho ou Madrinha:</label>
-                <select name="padrinho_madrinha" id="padrinho_madrinha" required>
-                    <option value="Dirceu">Dirceu</option>
-                    <option value="Gabriela">Gabriela</option>
-                </select>
+                    <div class="field-group">
+                        <label for="padrinho_madrinha">Padrinho ou Madrinha:</label>
+                        <select name="padrinho_madrinha" id="padrinho_madrinha" required>
+                            <option value="Dirceu">Dirceu</option>
+                            <option value="Gabriela">Gabriela</option>
+                            <option value="Dirceu e Gabriela">Dirceu e Gabriela</option>
+                        </select>
+                    </div>
+                </div>
             </div>
         </div>
-
-        <button type="submit" class="btn salvar">Criar Ritual</button>
     </form>
 
     <!-- Modal de Ampliação de Imagem -->
-    <div id="image-modal" class="modal">
+    <div id="modal-image" class="modal">
         <div class="modal-dialog">
             <div class="modal-content">
                 <span class="close" onclick="closeImageModal()">&times;</span>
-                <img id="expanded-image" class="modal-image">
+                <img id="modal-image-content" class="modal-image" alt="Imagem Ampliada">
             </div>
         </div>
     </div>
@@ -86,18 +97,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <?php require_once 'includes/footer.php'; ?>
 
 <script>
-    // Função para abrir a imagem ampliada
+    // Função para abrir a modal de imagem
     function openImageModal(imageSrc) {
-        const modal = document.getElementById('image-modal');
-        const modalImg = document.getElementById('expanded-image');
-        modal.style.display = 'block';
-        modalImg.src = imageSrc;
+        const modal = document.getElementById('modal-image');
+        const modalImage = document.getElementById('modal-image-content');
+        modalImage.src = imageSrc; // Define a imagem ampliada
+        modal.style.display = 'flex'; // Exibe a modal
     }
 
-    // Função para fechar a imagem ampliada
+    // Função para fechar a modal de imagem
     function closeImageModal() {
-        const modal = document.getElementById('image-modal');
-        modal.style.display = 'none';
+        const modal = document.getElementById('modal-image');
+        modal.style.display = 'none'; // Oculta a modal
     }
 
     // Preview da imagem
@@ -134,5 +145,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Abrir modal ao clicar na imagem de preview
     previewImage.addEventListener('click', () => {
         openImageModal(previewImage.src);
+    });
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const modals = document.querySelectorAll(".modal");
+
+        modals.forEach(modal => {
+            modal.addEventListener("click", function(event) {
+                // Verifica se o clique foi fora do .modal-content
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+        });
     });
 </script>

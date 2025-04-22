@@ -6,39 +6,32 @@ if (!isset($_SESSION['user_id'])) {
 }
 require_once 'includes/db.php';
 
-// Verifica se o ID do participante foi fornecido
-if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-    $participante_id = $_GET['id'];
-
-    try {
-        // Encontra o ritual associado ao participante
-        $stmt = $pdo->prepare("SELECT ritual_id FROM inscricoes WHERE participante_id = ?");
-        $stmt->execute([$participante_id]);
-        $inscricao = $stmt->fetch();
-
-        if (!$inscricao) {
-            $_SESSION['error'] = "Participante não encontrado ou já foi removido.";
-            header("Location: rituais.php");
-            exit;
-        }
-
-        $ritual_id = $inscricao['ritual_id'];
-
-        // Remove o participante da tabela de inscrições
-        $stmt = $pdo->prepare("DELETE FROM inscricoes WHERE participante_id = ?");
-        $stmt->execute([$participante_id]);
-
-        $_SESSION['success'] = "Participante removido com sucesso!";
-    } catch (Exception $e) {
-        $_SESSION['error'] = "Erro ao remover participante: " . $e->getMessage();
-    }
-
-    // Redireciona de volta para a página do ritual
-    header("Location: ritual-visualizar.php?id=$ritual_id");
-    exit;
-} else {
-    $_SESSION['error'] = "ID do participante inválido.";
-    header("Location: rituais.php");
-    exit;
+// Verifica se o ID do participante foi passado via GET
+$id = $_GET['id'] ?? null;
+if (!$id) {
+    die("ID do participante não especificado.");
 }
-?>
+
+try {
+    // Inicia uma transação para garantir que todas as operações sejam concluídas com sucesso
+    $pdo->beginTransaction();
+
+    // Exclui todas as inscrições do participante na tabela `inscricoes`
+    $stmt_delete_inscricoes = $pdo->prepare("DELETE FROM inscricoes WHERE participante_id = ?");
+    $stmt_delete_inscricoes->execute([$id]);
+
+    // Exclui o participante da tabela `participantes`
+    $stmt_delete_participante = $pdo->prepare("DELETE FROM participantes WHERE id = ?");
+    $stmt_delete_participante->execute([$id]);
+
+    // Confirma a transação
+    $pdo->commit();
+
+    // Redireciona de volta para a página de participantes com uma mensagem de sucesso
+    echo "<script>alert('Participante excluído com sucesso!');</script>";
+    echo "<script>window.location.href = 'participantes.php';</script>";
+} catch (Exception $e) {
+    // Reverte a transação em caso de erro
+    $pdo->rollBack();
+    die("Erro ao excluir o participante: " . $e->getMessage());
+}

@@ -62,7 +62,7 @@ $rituais = $stmt->fetchAll();
             <a href="home.php" class="btn voltar">Voltar</a>
         </div>
         <div class="right-actions">
-            <a href="ritual-novo.php" class="btn novo-ritual">Novo Ritual</a>
+            <a href="ritual-novo.php" class="btn novo-ritual">Novo ritual</a>
         </div>
     </div>
 </div>
@@ -74,16 +74,16 @@ $rituais = $stmt->fetchAll();
             <input type="text" name="filtro_nome" id="filtro_nome" placeholder="Filtrar por nome" value="<?= htmlspecialchars($filtro_nome) ?>">
         </div>
         <div class="filter-group">
-            <label for="data_inicio">Data Início:</label>
+            <label for="data_inicio">Data início:</label>
             <input type="date" name="data_inicio" id="data_inicio" value="<?= htmlspecialchars($data_inicio) ?>">
         </div>
         <div class="filter-group">
-            <label for="data_fim">Data Fim:</label>
+            <label for="data_fim">Data fim:</label>
             <input type="date" name="data_fim" id="data_fim" value="<?= htmlspecialchars($data_fim) ?>">
         </div>
         <div class="filter-actions">
             <button type="submit" class="filter-btn">Filtrar</button>
-            <a href="rituais.php" class="filter-btn clear-btn">Limpar Filtro</a>
+            <a href="rituais.php" class="filter-btn clear-btn">Limpar filtro</a>
         </div>
     </form>
 
@@ -129,10 +129,11 @@ $rituais = $stmt->fetchAll();
                             alt="Foto"
                             class="square-image clickable"
                             onclick="openImageModal('<?= htmlspecialchars($ritual['foto']) ?>')"
-                            onerror="this.src='assets/images/no-image.png'; this.onclick=null; this.classList.remove('clickable');">
+                            onerror="this.src='assets/images/no-image.png'; this.onclick=null; this.classList.remove('clickable');"
+                            title="Ver foto">
                     </td>
                     <td class="col-nome">
-                        <a href="ritual-visualizar.php?id=<?= $ritual['id'] ?>"><?= htmlspecialchars($ritual['nome']) ?></a>
+                        <a href="ritual-visualizar.php?id=<?= $ritual['id'] ?>" title="Gerenciar participantes"><?= htmlspecialchars($ritual['nome']) ?></a>
                     </td>
                     <td class="col-data">
                         <?php
@@ -146,18 +147,18 @@ $rituais = $stmt->fetchAll();
                     <td class="col-acoes">
                         <a href="ritual-visualizar.php?id=<?= $ritual['id'] ?>" class="action-icon" title="Gerenciar participantes"><i class="fa-solid fa-circle-user"></i></a>
                         <a href="ritual-editar.php?id=<?= $ritual['id'] ?>" class="action-icon" title="Editar dados do ritual"><i class="fa-solid fa-pen-to-square"></i></a>
-                        <a href="ritual-excluir.php?id=<?= $ritual['id'] ?>" class="action-icon danger" title="Excluir ritual" onclick="return confirm('Tem certeza?')"><i class="fa-solid fa-trash"></i></a>
+                        <a href="ritual-excluir.php?id=<?= $ritual['id'] ?>" class="action-icon danger" title="Excluir ritual" onclick="return confirm('ATENÇÃO: Esta ação irá excluir permanentemente este ritual e todos os participantes associados. Deseja continuar?')"><i class="fa-solid fa-trash"></i></a>
                     </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
     </table>
     <!-- Modal de Ampliação de Imagem -->
-    <div id="image-modal" class="modal">
+    <div id="modal-image" class="modal">
         <div class="modal-dialog">
             <div class="modal-content">
                 <span class="close" onclick="closeImageModal()">&times;</span>
-                <img id="expanded-image" class="modal-image">
+                <img id="modal-image-content" class="modal-image" alt="Imagem Ampliada">
             </div>
         </div>
     </div>
@@ -171,19 +172,32 @@ $rituais = $stmt->fetchAll();
 </div>
 
 <script>
-    // Função para abrir a imagem ampliada
+    // Função para abrir a modal de imagem
     function openImageModal(imageSrc) {
-        const modal = document.getElementById('image-modal');
-        const modalImg = document.getElementById('expanded-image');
-        modal.style.display = 'block';
-        modalImg.src = imageSrc;
+        const modal = document.getElementById('modal-image');
+        const modalImage = document.getElementById('modal-image-content');
+        modalImage.src = imageSrc; // Define a imagem ampliada
+        modal.style.display = 'flex'; // Exibe a modal
     }
 
-    // Função para fechar a imagem ampliada
+    // Função para fechar a modal de imagem
     function closeImageModal() {
-        const modal = document.getElementById('image-modal');
-        modal.style.display = 'none';
+        const modal = document.getElementById('modal-image');
+        modal.style.display = 'none'; // Oculta a modal
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const modals = document.querySelectorAll(".modal");
+
+        modals.forEach(modal => {
+            modal.addEventListener("click", function(event) {
+                // Verifica se o clique foi fora do .modal-content
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+        });
+    });
 </script>
 
 <?php require_once 'includes/footer.php'; ?>

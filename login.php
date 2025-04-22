@@ -23,20 +23,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
 <!DOCTYPE html>
 <html lang="pt-br">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login</title>
+    <title>Participantes - ICI</title>
+    <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="assets/css/styles.css">
 </head>
+
 <body>
+    <!-- Vídeo de Fundo -->
+    <div class="video-background">
+        <video autoplay muted loop id="bg-video">
+            <source src="assets/videos/fogueira.mp4" type="video/mp4">
+            Seu navegador não suporta vídeos.
+        </video>
+    </div>
+
+    <!-- Conteúdo da Página -->
     <div class="login-container">
-        <form method="POST">
-            <h2>Login</h2>
+        <div class="logo-container">
+            <img src="assets/images/logo.png" alt="Logo" class="logo">
+        </div>
+        <h2>Gestão de participantes</h2>
+        <form class="login-form" method="POST">
             <input type="text" name="usuario" placeholder="Usuário" required>
             <input type="password" name="senha" placeholder="Senha" required>
-            <button type="submit">Entrar</button>
+            <button class="login-button" type="submit">Entrar</button>
         </form>
     </div>
 </body>
+
 </html>

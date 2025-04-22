@@ -6,21 +6,36 @@ if (!isset($_SESSION['user_id'])) {
 }
 require_once 'includes/db.php';
 
-$nomePesquisa = $_GET['nome'] ?? null;
+$pesquisa = $_GET['nome'] ?? null;
 
-if (!$nomePesquisa) {
-    echo json_encode(['error' => 'Nome inválido']);
+if (!$pesquisa) {
+    echo json_encode(['error' => 'Pesquisa inválida']);
     exit;
 }
 
 try {
-    $stmt = $pdo->prepare("
-        SELECT id, nome_completo, foto 
-        FROM participantes 
-        WHERE nome_completo LIKE ?
-        LIMIT 20
-    ");
-    $stmt->execute(["%$nomePesquisa%"]);
+    // Verifica se a pesquisa é um CPF (11 dígitos numéricos)
+    $pesquisaLimpa = preg_replace('/[^0-9]/', '', $pesquisa); // Remove caracteres não numéricos
+    if (strlen($pesquisaLimpa) === 11) {
+        // Pesquisar por CPF
+        $stmt = $pdo->prepare("
+            SELECT id, nome_completo, foto 
+            FROM participantes 
+            WHERE cpf = ?
+            LIMIT 20
+        ");
+        $stmt->execute([$pesquisaLimpa]);
+    } else {
+        // Pesquisar por nome
+        $stmt = $pdo->prepare("
+            SELECT id, nome_completo, foto 
+            FROM participantes 
+            WHERE nome_completo LIKE ?
+            LIMIT 20
+        ");
+        $stmt->execute(["%$pesquisa%"]);
+    }
+
     $participantes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if (empty($participantes)) {

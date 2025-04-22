@@ -14,6 +14,7 @@ $offset = ($pagina - 1) * $itens_por_pagina;
 
 // Filtros
 $filtro_nome = isset($_GET['filtro_nome']) ? $_GET['filtro_nome'] : '';
+$filtro_cpf = isset($_GET['filtro_cpf']) ? $_GET['filtro_cpf'] : '';
 
 // Ordenação
 $order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'nome_completo'; // Coluna padrão: nome_completo
@@ -25,10 +26,9 @@ if (!empty($filtro_nome)) {
     $where .= " AND nome_completo LIKE ?";
     $params[] = "%$filtro_nome%";
 }
-if (!empty($data_inicio) && !empty($data_fim)) {
-    $where .= " AND nascimento BETWEEN ? AND ?";
-    $params[] = $data_inicio;
-    $params[] = $data_fim;
+if (!empty($filtro_cpf)) {
+    $where .= " AND cpf LIKE ?";
+    $params[] = "%$filtro_cpf%";
 }
 
 // Consulta para contar o total de registros
@@ -82,27 +82,36 @@ function formatarTelefone($telefone)
 }
 ?>
 
-<div class="container">
+<div class="page-title">
     <h1>👥 Participantes</h1>
     <br>
     <div class="actions">
         <div class="left-actions">
-            <a href="home.php" class="btn voltar">Voltar</a>
+            <?php
+            // Verifica se há um parâmetro 'redirect' na URL
+            $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : 'home.php';
+            ?>
+            <a href="<?= $redirect ?>" class="btn voltar">Voltar</a>
         </div>
         <div class="right-actions">
-            <a href="participante-novo.php" class="btn novo-participante">Novo Participante</a>
+            <a href="participante-novo.php" class="btn novo-participante">Novo participante</a>
         </div>
     </div>
-
+</div>
+<div class="container">
     <!-- Filtros -->
     <form method="GET" class="filters">
         <div class="filter-group">
             <label for="filtro_nome">Nome:</label>
             <input type="text" name="filtro_nome" id="filtro_nome" placeholder="Filtrar por nome" value="<?= htmlspecialchars($filtro_nome) ?>">
         </div>
+        <div class="filter-group">
+            <label for="filtro_cpf">CPF:</label>
+            <input type="text" name="filtro_cpf" id="filtro_cpf" placeholder="___.___.___-__" value="<?= htmlspecialchars($filtro_cpf) ?>" oninput="mascaraCPF(this)">
+        </div>
         <div class="filter-actions">
             <button type="submit" class="filter-btn">Filtrar</button>
-            <a href="participantes.php" class="filter-btn clear-btn">Limpar Filtro</a>
+            <a href="participantes.php" class="filter-btn clear-btn">Limpar filtro</a>
         </div>
     </form>
 
@@ -112,7 +121,7 @@ function formatarTelefone($telefone)
             <tr>
                 <th class="col-foto-pessoa">Foto</th>
                 <th class="col-nome-pessoa">
-                    <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>&order_by=nome_completo&order_dir=<?= $order_by === 'nome_completo' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
+                    <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&order_by=nome_completo&order_dir=<?= $order_by === 'nome_completo' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
                         Nome Completo
                         <?php if ($order_by === 'nome_completo'): ?>
                             <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
@@ -123,7 +132,7 @@ function formatarTelefone($telefone)
                 <th class="col-cpf">CPF</th>
                 <th class="col-celular">Celular</th>
                 <th class="col-rituais-participados">
-                    <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>&order_by=rituais_participados&order_dir=<?= $order_by === 'rituais_participados' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
+                    <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&order_by=rituais_participados&order_dir=<?= $order_by === 'rituais_participados' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
                         Rituais Participados
                         <?php if ($order_by === 'rituais_participados'): ?>
                             <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
@@ -165,7 +174,7 @@ function formatarTelefone($telefone)
                         <a href="participante-editar.php?id=<?= $pessoa['id'] ?>" class="action-icon" title="Editar">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </a>
-                        <a href="participante-excluir.php?id=<?= $pessoa['id'] ?>" class="action-icon danger" title="Excluir" onclick="return confirm('Tem certeza?')">
+                        <a href="participante-excluir.php?id=<?= $pessoa['id'] ?>" class="action-icon danger" title="Excluir" onclick="return confirm('Tem certeza que deseja remover este participante permanentemente e excluir de todos os rituais?')">
                             <i class="fa-solid fa-trash"></i>
                         </a>
                     </td>
@@ -252,6 +261,33 @@ function formatarTelefone($telefone)
         const modal = document.getElementById('image-modal');
         modal.style.display = 'none';
     }
+
+    // Função para aplicar máscara no CPF
+    function mascaraCPF(input) {
+        let valor = input.value.replace(/\D/g, ''); // Remove tudo que não é número
+        if (valor.length > 11) valor = valor.slice(0, 11); // Limita a 11 dígitos
+        valor = valor.replace(/(\d{3})(\d)/, '$1.$2'); // Adiciona o primeiro ponto
+        valor = valor.replace(/(\d{3})(\d)/, '$1.$2'); // Adiciona o segundo ponto
+        valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2'); // Adiciona o traço
+        input.value = valor;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const cpfInput = document.getElementById('filtro_cpf');
+        if (cpfInput && cpfInput.value) {
+            // Reaplica a máscara ao valor preenchido
+            cpfInput.value = cpfInput.value.replace(/\D/g, ''); // Remove máscara temporariamente
+            mascaraCPF(cpfInput); // Reaplica a máscara
+        }
+    });
+
+    // Função para remover máscara antes de enviar o formulário
+    document.querySelector('form.filters').addEventListener('submit', function(event) {
+        const cpfInput = document.getElementById('filtro_cpf');
+        if (cpfInput) {
+            cpfInput.value = cpfInput.value.replace(/\D/g, ''); // Remove tudo que não é número
+        }
+    });
 </script>
 
 <?php require_once 'includes/footer.php'; ?>
