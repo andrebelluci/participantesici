@@ -12,8 +12,8 @@ require_once 'includes/header.php';
 <div class="container">
 
     <div class="cards">
-        <a href="rituais.php" class="card">Rituais</a>
         <a href="participantes.php" class="card">Participantes</a>
+        <a href="rituais.php" class="card">Rituais</a>
     </div>
 </div>
 

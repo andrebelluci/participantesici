@@ -124,7 +124,7 @@ function formatarTelefone($telefone)
                     <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&order_by=nome_completo&order_dir=<?= $order_by === 'nome_completo' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
                         Nome Completo
                         <?php if ($order_by === 'nome_completo'): ?>
-                            <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
+                            <span class="order-icon"><?= $order_dir === 'ASC' ? '▼' : '▲' ?></span>
                         <?php endif; ?>
                     </a>
                 </th>
@@ -153,7 +153,9 @@ function formatarTelefone($telefone)
                             onclick="openImageModal('<?= htmlspecialchars($pessoa['foto']) ?>')"
                             onerror="this.src='assets/images/no-image.png'; this.onclick=null; this.classList.remove('clickable');">
                     </td>
-                    <td class="col-nome-pessoa"><?= htmlspecialchars($pessoa['nome_completo']) ?></td>
+                    <td class="col-nome-pessoa">
+                        <a href="participante-visualizar.php?id=<?= $pessoa['id'] ?>" title="Gerenciar rituais"><?= htmlspecialchars($pessoa['nome_completo']) ?></a>
+                    </td>
                     <td class="col-nascimento">
                         <?php
                         // Formata a data para DD/MM/AAAA
@@ -165,67 +167,17 @@ function formatarTelefone($telefone)
                     <td class="col-celular"><?= formatarTelefone(htmlspecialchars($pessoa['celular'])) ?></td>
                     <td class="col-rituais-participados"><?= htmlspecialchars($pessoa['rituais_participados']) ?></td>
                     <td class="col-acoes-pessoa">
-                        <button class="action-icon" title="Ver Endereço" onclick="document.getElementById('modal-endereco-<?= $pessoa['id'] ?>').style.display='block'">
-                            <i class="fa-solid fa-map-marker-alt"></i>
-                        </button>
-                        <button class="action-icon" title="Ver Rituais" onclick="document.getElementById('modal-rituais-<?= $pessoa['id'] ?>').style.display='block'">
-                            <i class="fa-solid fa-calendar-alt"></i>
-                        </button>
-                        <a href="participante-editar.php?id=<?= $pessoa['id'] ?>" class="action-icon" title="Editar">
+                        <a href="participante-visualizar.php?id=<?= $pessoa['id'] ?>" class="action-icon" title="Gerenciar rituais">
+                            <i class="fa-solid fa-list-check"></i>
+                        </a>
+                        <a href="participante-editar.php?id=<?= $pessoa['id'] ?>" class="action-icon" title="Editar dados do participante">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </a>
-                        <a href="participante-excluir.php?id=<?= $pessoa['id'] ?>" class="action-icon danger" title="Excluir" onclick="return confirm('Tem certeza que deseja remover este participante permanentemente e excluir de todos os rituais?')">
+                        <a href="participante-excluir.php?id=<?= $pessoa['id'] ?>" class="action-icon danger" title="Excluir participante" onclick="return confirm('Tem certeza que deseja remover este participante permanentemente e desvincular de todos os rituais?')">
                             <i class="fa-solid fa-trash"></i>
                         </a>
                     </td>
                 </tr>
-
-                <!-- Modal Endereço -->
-                <div id="modal-endereco-<?= $pessoa['id'] ?>" class="modal">
-                    <div class="modal-content">
-                        <span class="close" onclick="document.getElementById('modal-endereco-<?= $pessoa['id'] ?>').style.display='none'">&times;</span>
-                        <h2>Endereço de <?= htmlspecialchars($pessoa['nome_completo']) ?></h2>
-                        <form method="POST" action="atualizar-endereco.php">
-                            <input type="hidden" name="id" value="<?= $pessoa['id'] ?>">
-                            <label for="cep">CEP:</label>
-                            <input type="text" name="cep" id="cep" value="<?= htmlspecialchars($pessoa['cep']) ?>" required>
-                            <label for="endereco_rua">Rua:</label>
-                            <input type="text" name="endereco_rua" value="<?= htmlspecialchars($pessoa['endereco_rua']) ?>" required>
-                            <label for="endereco_numero">Número:</label>
-                            <input type="text" name="endereco_numero" value="<?= htmlspecialchars($pessoa['endereco_numero']) ?>" required>
-                            <label for="endereco_complemento">Complemento:</label>
-                            <input type="text" name="endereco_complemento" value="<?= htmlspecialchars($pessoa['endereco_complemento']) ?>">
-                            <label for="cidade">Cidade:</label>
-                            <input type="text" name="cidade" value="<?= htmlspecialchars($pessoa['cidade']) ?>" required>
-                            <label for="estado">Estado:</label>
-                            <input type="text" name="estado" value="<?= htmlspecialchars($pessoa['estado']) ?>" required>
-                            <label for="bairro">Bairro:</label>
-                            <input type="text" name="bairro" value="<?= htmlspecialchars($pessoa['bairro']) ?>" required>
-                            <button type="submit">Salvar</button>
-                        </form>
-                    </div>
-                </div>
-
-                <!-- Modal Rituais -->
-                <div id="modal-rituais-<?= $pessoa['id'] ?>" class="modal">
-                    <div class="modal-content">
-                        <span class="close" onclick="document.getElementById('modal-rituais-<?= $pessoa['id'] ?>').style.display='none'">&times;</span>
-                        <h2>Rituais de <?= htmlspecialchars($pessoa['nome_completo']) ?></h2>
-                        <ul>
-                            <?php
-                            $stmt_rituais = $pdo->prepare("SELECT r.nome, r.data_ritual, i.presente, i.observacao FROM inscricoes i JOIN rituais r ON i.ritual_id = r.id WHERE i.participante_id = ?");
-                            $stmt_rituais->execute([$pessoa['id']]);
-                            $rituais_pessoa = $stmt_rituais->fetchAll();
-                            foreach ($rituais_pessoa as $ritual): ?>
-                                <li>
-                                    <strong><?= htmlspecialchars($ritual['nome']) ?></strong> (<?= htmlspecialchars($ritual['data_ritual']) ?>)
-                                    <p>Presente: <?= htmlspecialchars($ritual['presente']) ?></p>
-                                    <p>Observação: <?= htmlspecialchars($ritual['observacao']) ?></p>
-                                </li>
-                            <?php endforeach; ?>
-                        </ul>
-                    </div>
-                </div>
             <?php endforeach; ?>
         </tbody>
     </table>

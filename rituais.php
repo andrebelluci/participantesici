@@ -96,7 +96,7 @@ $rituais = $stmt->fetchAll();
                     <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>&order_by=nome&order_dir=<?= $order_by === 'nome' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
                         Nome
                         <?php if ($order_by === 'nome'): ?>
-                            <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
+                            <span class="order-icon"><?= $order_dir === 'ASC' ? '▼' : '▲' ?></span>
                         <?php endif; ?>
                     </a>
                 </th>
@@ -104,7 +104,7 @@ $rituais = $stmt->fetchAll();
                     <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>&order_by=data_ritual&order_dir=<?= $order_by === 'data_ritual' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
                         Data
                         <?php if ($order_by === 'data_ritual'): ?>
-                            <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
+                            <span class="order-icon"><?= $order_dir === 'ASC' ? '▼' : '▲' ?></span>
                         <?php endif; ?>
                     </a>
                 </th>
@@ -113,7 +113,7 @@ $rituais = $stmt->fetchAll();
                     <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>&order_by=inscritos&order_dir=<?= $order_by === 'inscritos' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>" class="sortable-header">
                         Inscritos
                         <?php if ($order_by === 'inscritos'): ?>
-                            <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
+                            <span class="order-icon"><?= $order_dir === 'ASC' ? '▼' : '▲' ?></span>
                         <?php endif; ?>
                     </a>
                 </th>

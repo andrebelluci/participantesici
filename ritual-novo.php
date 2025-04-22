@@ -24,8 +24,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt = $pdo->prepare("INSERT INTO rituais (nome, data_ritual, foto, padrinho_madrinha) VALUES (?, ?, ?, ?)");
     $stmt->execute([$nome, $data_ritual, $foto, $padrinho_madrinha]);
 
-    echo "<script>alert('Ritual criado com sucesso!');</script>";
-    echo "<script>window.location.href = 'rituais.php';</script>";
+    $novoRitualId = $pdo->lastInsertId();
+
+    if (isset($_GET['redirect']) && isset($_GET['id'])) {
+        $redirectUrl = $_GET['redirect'];
+        $participanteId = $_GET['id'];
+
+        // Insere o novo ritual ao participante
+        $stmt = $pdo->prepare("
+            INSERT INTO inscricoes (ritual_id, participante_id) 
+            VALUES (?, ?)
+        ");
+        $stmt->execute([$novoRitualId, $participanteId]);
+
+        echo "<script>alert('Ritual criado e vinculado ao participante com sucesso!');</script>";
+        echo "<script>window.location.href = '$redirectUrl?id=$participanteId';</script>";
+        exit;
+    } else {
+        echo "<script>alert('Ritual criado com sucesso!');</script>";
+        echo "<script>window.location.href = 'participantes.php';</script>";
+    }
 }
 ?>
 
