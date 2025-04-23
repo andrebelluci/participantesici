@@ -115,11 +115,11 @@ if (!$ritual) {
                         </button>
                     </td>
                     <td class="col-acoes-participante">
-                        <a href="#" class="action-icon" title="Detalhes da inscrição do participante" onclick="abrirModalDetalhes(<?= $participante['id'] ?>)">
-                            <i class="fa-solid fa-info-circle"></i>
-                        </a>
                         <a href="#" class="action-icon" title="Observação do participante neste ritual" onclick="abrirModalObservacao(<?= $participante['id'] ?>)">
                             <i class="fa-solid fa-comment-medical"></i>
+                        </a>
+                        <a href="#" class="action-icon" title="Detalhes da inscrição do participante" onclick="abrirModalDetalhes(<?= $participante['id'] ?>)">
+                            <i class="fa-solid fa-info-circle"></i>
                         </a>
                         <a href="participante-excluir-ritual.php?id=<?= $participante['id'] ?>" class="action-icon danger" title="Remover participante do ritual" onclick="return confirm('Tem certeza que deseja remover este participante do ritual?')">
                             <i class="fa-solid fa-trash"></i>
@@ -168,10 +168,9 @@ if (!$ritual) {
         <div class="modal-content">
             <span class="close" onclick="fecharModalDetalhes()">&times;</span>
             <h2>Detalhes da inscrição</h2>
-            <form method="POST" action="salvar-detalhes-inscricao.php">
+            <form id="form-detalhes-inscricao" method="POST">
                 <!-- Campo oculto para o ID da inscrição -->
                 <input type="hidden" id="id" name="id" value="">
-
                 <!-- Primeira vez no Instituto -->
                 <label for="primeira_vez_instituto">Primeira vez no Instituto?</label>
                 <select name="primeira_vez_instituto" required>
@@ -179,7 +178,6 @@ if (!$ritual) {
                     <option value="Sim">Sim</option>
                     <option value="Não">Não</option>
                 </select>
-
                 <!-- Primeira vez consagrando Ayahuasca -->
                 <label for="primeira_vez_ayahuasca">Primeira vez consagrando Ayahuasca?</label>
                 <select name="primeira_vez_ayahuasca" required>
@@ -187,7 +185,6 @@ if (!$ritual) {
                     <option value="Sim">Sim</option>
                     <option value="Não">Não</option>
                 </select>
-
                 <!-- Doença psiquiátrica diagnosticada -->
                 <label for="doenca_psiquiatrica">Possui doença psiquiátrica diagnosticada?</label>
                 <select name="doenca_psiquiatrica" id="doenca_psiquiatrica" required>
@@ -195,11 +192,9 @@ if (!$ritual) {
                     <option value="Sim">Sim</option>
                     <option value="Não">Não</option>
                 </select>
-
                 <!-- Nome da doença -->
                 <label for="nome_doenca">Se sim, escreva o nome da doença:</label>
                 <input type="text" name="nome_doenca" id="nome_doenca" value="" disabled>
-
                 <!-- Uso de medicação -->
                 <label for="uso_medicao">Faz uso de alguma medicação?</label>
                 <select name="uso_medicao" id="uso_medicao" required>
@@ -207,19 +202,15 @@ if (!$ritual) {
                     <option value="Sim">Sim</option>
                     <option value="Não">Não</option>
                 </select>
-
                 <!-- Nome da medicação -->
                 <label for="nome_medicao">Se sim, escreva o nome da medicação:</label>
                 <input type="text" name="nome_medicao" id="nome_medicao" value="" disabled>
-
                 <!-- Mensagem do participante -->
                 <label for="mensagem">Mensagem do participante:</label>
                 <textarea name="mensagem"></textarea>
-
                 <!-- Data de Salvamento -->
                 <label for="salvo_em">Salvo em:</label>
                 <input type="text" id="salvo_em" name="salvo_em" readonly value="">
-
                 <!-- Botão de envio -->
                 <button type="submit">Salvar</button>
             </form>
@@ -233,18 +224,15 @@ if (!$ritual) {
         <div class="modal-content">
             <span class="close" onclick="fecharModalObservacao()">&times;</span>
             <h2>Adicionar observação</h2>
-            <form method="POST" action="salvar-observacao.php">
+            <form id="form-observacao" method="POST">
                 <!-- Campo oculto para o ID da inscrição -->
-                <input type="hidden" id="inscricao_id_observacao" name="inscricao_id">
-
+                <input type="hidden" id="inscricao_id_observacao" name="inscricao_id" value="">
                 <!-- Campo de Observação -->
                 <label for="observacao">Observação:</label>
                 <textarea name="observacao" required></textarea>
-
                 <!-- Data de Salvamento -->
                 <label for="obs_salvo_em">Salvo em:</label>
                 <input type="text" id="obs_salvo_em" name="obs_salvo_em" readonly value="">
-
                 <!-- Botão de envio -->
                 <button type="submit">Salvar</button>
             </form>
@@ -321,6 +309,39 @@ if (!$ritual) {
         // Exibe a modal
         document.getElementById('modal-detalhes-inscricao').style.display = 'flex';
     }
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById('form-detalhes-inscricao');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Impede o envio tradicional do formulário
+
+            // Captura os dados do formulário
+            const formData = new FormData(form);
+            const inscricaoId = formData.get('id');
+
+            // Envia os dados via AJAX
+            fetch('salvar-detalhes-inscricao.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Detalhes salvos com sucesso!");
+                        // Fecha o modal
+                        document.getElementById('modal-detalhes-inscricao').style.display = 'none';
+                        // Atualiza a tabela (opcional)
+                        location.reload();
+                    } else {
+                        alert("Erro ao salvar detalhes: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao enviar requisição:', error);
+                    alert("Erro ao salvar detalhes. Por favor, tente novamente.");
+                });
+        });
+    });
 
     // Função para fechar o modal de detalhes da inscrição
     function fecharModalDetalhes() {
@@ -369,6 +390,46 @@ if (!$ritual) {
             })
             .catch(error => console.error('Erro ao buscar ID da inscrição:', error));
     }
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById('form-observacao');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Impede o envio tradicional do formulário
+
+            // Captura os dados do formulário
+            const formData = new FormData(form);
+            const inscricaoId = formData.get('inscricao_id');
+            const observacao = formData.get('observacao');
+
+            // Verifica se a observação está vazia
+            if (!observacao.trim()) {
+                alert("A observação não pode estar vazia.");
+                return;
+            }
+
+            // Envia os dados via AJAX
+            fetch('salvar-observacao.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Observação salva com sucesso!");
+                        // Fecha o modal
+                        document.getElementById('modal-observacao').style.display = 'none';
+                        // Atualiza a tabela (opcional)
+                        location.reload();
+                    } else {
+                        alert("Erro ao salvar observação: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao enviar requisição:', error);
+                    alert("Erro ao salvar observação. Por favor, tente novamente.");
+                });
+        });
+    });
 
     // Função para fechar o modal de observação
     function fecharModalObservacao() {
@@ -487,6 +548,13 @@ if (!$ritual) {
                 `;
                     listaParticipantes.appendChild(li);
                 });
+                const li = document.createElement('ul');
+                li.innerHTML = `
+                <br>
+                    <h3>Não encontrou o participante?</h3><br>
+                    <button class="add-new-btn" onclick="adicionarNovaPessoa()">Adicionar Novo Participante</button>                   
+                `;
+                listaParticipantes.appendChild(li);
             })
             .catch(error => console.error('Erro ao buscar participantes:', error));
     }

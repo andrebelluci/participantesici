@@ -12,6 +12,8 @@ $id = $_GET['id'] ?? null;
 if (!$id) {
     die("ID da pessoa não especificado.");
 }
+$redirect = $_GET['redirect'] ?? 'participantes.php'; // Página padrão se não houver redirect
+
 
 // Consulta os dados da pessoa no banco de dados
 $stmt = $pdo->prepare("SELECT * FROM participantes WHERE id = ?");
@@ -95,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     ]);
 
     echo "<script>alert('Pessoa atualizada com sucesso!');</script>";
-    echo "<script>window.location.href = 'participantes.php';</script>";
+    echo "<script>window.location.href = '$redirect?id=$id';</script>";
 }
 ?>
 
@@ -400,3 +402,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             .catch(error => console.error('Erro ao verificar CPF:', error));
     });
 </script>
+<script src="assets/js/buscaCep.js"></script>

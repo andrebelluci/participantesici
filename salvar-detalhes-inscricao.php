@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    echo json_encode(['success' => false, 'error' => 'Sessão expirada.']);
     exit;
 }
 require_once 'includes/db.php';
@@ -43,22 +43,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $inscricao_id
         ]);
 
-        $_SESSION['success'] = "Detalhes da inscrição salvos com sucesso!";
+        echo json_encode(['success' => true]);
+        exit;
     } catch (Exception $e) {
-        $_SESSION['error'] = "Erro ao salvar detalhes da inscrição: " . $e->getMessage();
+        echo json_encode(['success' => false, 'error' => 'Erro ao salvar detalhes da inscrição: ' . $e->getMessage()]);
+        exit;
     }
-
-    // Encontra o ID do ritual associado à inscrição
-    $stmt = $pdo->prepare("SELECT ritual_id FROM inscricoes WHERE id = ?");
-    $stmt->execute([$inscricao_id]);
-    $ritual = $stmt->fetch();
-    $ritual_id = $ritual['ritual_id'];
-
-    // Redireciona de volta para a página do ritual
-    header("Location: ritual-visualizar.php?id=$ritual_id");
-    exit;
 } else {
-    $_SESSION['error'] = "Método de requisição inválido.";
-    header("Location: rituais.php");
+    echo json_encode(['success' => false, 'error' => 'Método de requisição inválido.']);
     exit;
 }

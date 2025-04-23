@@ -79,7 +79,10 @@ $rituais = $stmt_rituais->fetchAll();
     <div class="participant-header">
         <img src="<?= htmlspecialchars($pessoa['foto']) ?>" alt="Foto do Participante" class="medium-image" onerror="this.src='assets/images/no-image.png';">
         <div class="details">
-            <h1><?= htmlspecialchars($pessoa['nome_completo']) ?></h1>
+            <h1>
+                <?= htmlspecialchars($pessoa['nome_completo']) ?>
+                <button class="btn ver-cadastro" onclick="abrirModalCadastro()">Ver cadastro</button>
+            </h1>
             <p><strong>CPF:</strong> <?= formatarCPF(htmlspecialchars($pessoa['cpf'])) ?></p>
             <p><strong>Data de Nascimento:</strong>
                 <?php
@@ -169,13 +172,13 @@ $rituais = $stmt_rituais->fetchAll();
                         </button>
                     </td>
                     <td class="col-acoes-ritual">
-                        <a href="#" class="action-icon" title="Detalhes da inscrição no ritual" onclick="abrirModalDetalhes(<?= $ritual['id'] ?>)">
-                            <i class="fa-solid fa-info-circle"></i>
-                        </a>
                         <a href="#" class="action-icon" title="Observação do participante neste ritual" onclick="abrirModalObservacao(<?= $ritual['id'] ?>)">
                             <i class="fa-solid fa-comment-medical"></i>
                         </a>
-                        <a href="ritual-excluir-participante.php?id=<?= $ritual['id'] ?>" class="action-icon danger" title="Remover participante do ritual" onclick="return confirm('Tem certeza que deseja remover este ritual do participante?')">
+                        <a href="#" class="action-icon" title="Detalhes da inscrição no ritual" onclick="abrirModalDetalhes(<?= $ritual['id'] ?>)">
+                            <i class="fa-solid fa-info-circle"></i>
+                        </a>
+                        <a href="participante-excluir-ritual.php?id=<?= $ritual['id'] ?>" class="action-icon danger" title="Remover participante do ritual" onclick="return confirm('Tem certeza que deseja remover este ritual do participante?')">
                             <i class="fa-solid fa-trash"></i>
                         </a>
                     </td>
@@ -228,7 +231,7 @@ $rituais = $stmt_rituais->fetchAll();
         <div class="modal-content">
             <span class="close" onclick="fecharModalDetalhes()">&times;</span>
             <h2>Detalhes da inscrição</h2>
-            <form method="POST" action="salvar-detalhes-inscricao.php">
+            <form id="form-detalhes-inscricao" method="POST">
                 <!-- Campo oculto para o ID da inscrição -->
                 <input type="hidden" id="id" name="id" value="">
                 <!-- Primeira vez no Instituto -->
@@ -284,9 +287,9 @@ $rituais = $stmt_rituais->fetchAll();
         <div class="modal-content">
             <span class="close" onclick="fecharModalObservacao()">&times;</span>
             <h2>Adicionar observação</h2>
-            <form method="POST" action="salvar-observacao.php">
+            <form id="form-observacao" method="POST">
                 <!-- Campo oculto para o ID da inscrição -->
-                <input type="hidden" id="inscricao_id_observacao" name="inscricao_id">
+                <input type="hidden" id="inscricao_id_observacao" name="inscricao_id" value="">
                 <!-- Campo de Observação -->
                 <label for="observacao">Observação:</label>
                 <textarea name="observacao" required></textarea>
@@ -310,6 +313,57 @@ $rituais = $stmt_rituais->fetchAll();
     </div>
 </div>
 
+<!-- Modal Ver Cadastro -->
+<div id="modal-cadastro" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <span class="close" onclick="fecharModalCadastro()">&times;</span>
+            <h2>Participante: <?= htmlspecialchars($pessoa['nome_completo']) ?></h2>
+            <div class="modal-body">
+                <ul class="styled-list">
+                    <!-- Dados Pessoais -->
+                    <h3><strong>ℹ️ Dados Pessoais</strong></h3>
+                    <li><strong>Nome Completo:</strong> <?= htmlspecialchars($pessoa['nome_completo']) ?></li>
+                    <li><strong>CPF:</strong> <?= formatarCPF(htmlspecialchars($pessoa['cpf'])) ?></li>
+                    <li><strong>Data de Nascimento:</strong>
+                        <?php
+                        // Formata a data para DD/MM/AAAA
+                        $nascimento = new DateTime($pessoa['nascimento']);
+                        echo $nascimento->format('d/m/Y');
+                        ?>
+                    </li>
+                    <li><strong>Sexo:</strong> <?= htmlspecialchars($pessoa['sexo'] === 'M' ? 'Masculino' : 'Feminino') ?></li>
+                    <li><strong>RG:</strong> <?= htmlspecialchars($pessoa['rg']) ?></li>
+                    <li><strong>Passaporte:</strong> <?= htmlspecialchars($pessoa['passaporte']) ?></li>
+                    <li><strong>Celular:</strong> <?= htmlspecialchars($pessoa['celular']) ?></li>
+                    <li><strong>E-mail:</strong> <?= htmlspecialchars($pessoa['email']) ?></li>
+                    <li><strong>Como soube do Instituto:</strong> <?= htmlspecialchars($pessoa['como_soube']) ?></li>
+
+                    <!-- Endereço -->
+                    <h3><strong>📍 Endereço</strong></h3>
+                    <li><strong>CEP:</strong> <?= htmlspecialchars($pessoa['cep']) ?></li>
+                    <li><strong>Rua:</strong> <?= htmlspecialchars($pessoa['endereco_rua']) ?></li>
+                    <li><strong>Número:</strong> <?= htmlspecialchars($pessoa['endereco_numero']) ?></li>
+                    <li><strong>Complemento:</strong> <?= htmlspecialchars($pessoa['endereco_complemento']) ?></li>
+                    <li><strong>Bairro:</strong> <?= htmlspecialchars($pessoa['bairro']) ?></li>
+                    <li><strong>Cidade:</strong> <?= htmlspecialchars($pessoa['cidade']) ?></li>
+                    <li><strong>Estado:</strong> <?= htmlspecialchars($pessoa['estado']) ?></li>
+
+                    <!-- Informações Adicionais -->
+                    <h3><strong>➕ Informações Adicionais</strong></h3>
+                    <li><strong>Como soube do Instituto Céu Interior?</strong> <?= htmlspecialchars($pessoa['como_soube']) ?></li>
+                    <li><strong>Sobre o Participante:</strong> <?= htmlspecialchars($pessoa['sobre_participante']) ?></li>
+                    <br>
+                    <a href="participante-editar.php?id=<?= $pessoa['id'] ?>&redirect=participante-visualizar.php" class="action-icon" title="Editar dados do participante">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                        Editar dados do participante
+                    </a>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     // Função para abrir o modal de detalhes da inscrição
     function abrirModalDetalhes(ritualId) {
@@ -322,6 +376,7 @@ $rituais = $stmt_rituais->fetchAll();
         document.querySelector('select[name="uso_medicao"]').value = '';
         document.querySelector('input[name="nome_medicao"]').value = '';
         document.querySelector('textarea[name="mensagem"]').value = '';
+
         // Busca o ID da inscrição via AJAX
         fetch(`buscar-id-inscricao.php?participante_id=<?= $id ?>&ritual_id=${ritualId}`)
             .then(response => response.json())
@@ -331,8 +386,10 @@ $rituais = $stmt_rituais->fetchAll();
                     return;
                 }
                 const inscricaoId = data.inscricao_id;
+
                 // Preenche o ID da inscrição no formulário
                 document.getElementById('id').value = inscricaoId;
+
                 // Busca os detalhes da inscrição
                 fetch(`carregar-detalhes-inscricao.php?id=${inscricaoId}`)
                     .then(response => response.json())
@@ -341,6 +398,7 @@ $rituais = $stmt_rituais->fetchAll();
                             alert(detalhes.error);
                             return;
                         }
+
                         // Preenche os campos do formulário com os dados retornados
                         document.querySelector('select[name="primeira_vez_instituto"]').value = detalhes.primeira_vez_instituto || '';
                         document.querySelector('select[name="primeira_vez_ayahuasca"]').value = detalhes.primeira_vez_ayahuasca || '';
@@ -349,19 +407,52 @@ $rituais = $stmt_rituais->fetchAll();
                         document.querySelector('select[name="uso_medicao"]').value = detalhes.uso_medicao || '';
                         document.querySelector('input[name="nome_medicao"]').value = detalhes.nome_medicao || '';
                         document.querySelector('textarea[name="mensagem"]').value = detalhes.mensagem || '';
+
                         // Preenche a data de salvamento (se existir)
                         const salvoEm = detalhes.salvo_em ?
-                            new Date(detalhes.salvo_em).toLocaleDateString('pt-BR') // Formato "DD/MM/YYYY"
-                            :
-                            'Nunca salvo';
+                            new Date(detalhes.salvo_em).toLocaleDateString('pt-BR') : 'Nunca salvo';
                         document.getElementById('salvo_em').value = salvoEm;
                     })
                     .catch(error => console.error('Erro ao carregar detalhes:', error));
             })
             .catch(error => console.error('Erro ao buscar ID da inscrição:', error));
+
         // Exibe a modal
         document.getElementById('modal-detalhes-inscricao').style.display = 'flex';
     }
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById('form-detalhes-inscricao');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Impede o envio tradicional do formulário
+
+            // Captura os dados do formulário
+            const formData = new FormData(form);
+            const inscricaoId = formData.get('id');
+
+            // Envia os dados via AJAX
+            fetch('salvar-detalhes-inscricao.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Detalhes salvos com sucesso!");
+                        // Fecha o modal
+                        document.getElementById('modal-detalhes-inscricao').style.display = 'none';
+                        // Atualiza a tabela (opcional)
+                        location.reload();
+                    } else {
+                        alert("Erro ao salvar detalhes: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao enviar requisição:', error);
+                    alert("Erro ao salvar detalhes. Por favor, tente novamente.");
+                });
+        });
+    });
     // Função para fechar o modal de detalhes da inscrição
     function fecharModalDetalhes() {
         document.getElementById('modal-detalhes-inscricao').style.display = 'none';
@@ -402,11 +493,52 @@ $rituais = $stmt_rituais->fetchAll();
             })
             .catch(error => console.error('Erro ao buscar ID da inscrição:', error));
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const form = document.getElementById('form-observacao');
+
+        form.addEventListener('submit', function(event) {
+            event.preventDefault(); // Impede o envio tradicional do formulário
+
+            // Captura os dados do formulário
+            const formData = new FormData(form);
+            const inscricaoId = formData.get('inscricao_id');
+            const observacao = formData.get('observacao');
+
+            // Verifica se a observação está vazia
+            if (!observacao.trim()) {
+                alert("A observação não pode estar vazia.");
+                return;
+            }
+
+            // Envia os dados via AJAX
+            fetch('salvar-observacao.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert("Observação salva com sucesso!");
+                        // Fecha o modal
+                        document.getElementById('modal-observacao').style.display = 'none';
+                        // Atualiza a tabela (opcional)
+                        location.reload();
+                    } else {
+                        alert("Erro ao salvar observação: " + data.error);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao enviar requisição:', error);
+                    alert("Erro ao salvar observação. Por favor, tente novamente.");
+                });
+        });
+    });
     // Função para fechar o modal de observação
     function fecharModalObservacao() {
         document.getElementById('modal-observacao').style.display = 'none';
     }
-    
+
     // Função para abrir a modal de imagem
     function openImageModal(imageSrc) {
         const modal = document.getElementById('modal-image');
@@ -505,6 +637,13 @@ $rituais = $stmt_rituais->fetchAll();
                 `;
                     listaRituais.appendChild(li);
                 });
+                const li = document.createElement('ul');
+                li.innerHTML = `
+                <br>
+                    <h3>Não encontrou o ritual?</h3><br>
+                    <button class="add-new-btn" onclick="adicionarNovoRitual()">Adicionar Novo Ritual</button>                  
+                `;
+                listaRituais.appendChild(li);
             })
             .catch(error => console.error('Erro ao buscar rituais:', error));
     }
@@ -608,6 +747,28 @@ $rituais = $stmt_rituais->fetchAll();
         modals.forEach(modal => {
             modal.addEventListener("click", function(event) {
                 // Verifica se o clique foi fora do .modal-content
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+        });
+    });
+
+    // Função para abrir a modal de cadastro
+    function abrirModalCadastro() {
+        document.getElementById('modal-cadastro').style.display = 'flex';
+    }
+
+    // Função para fechar a modal de cadastro
+    function fecharModalCadastro() {
+        document.getElementById('modal-cadastro').style.display = 'none';
+    }
+
+    // Fechar modal ao clicar fora do conteúdo
+    document.addEventListener("DOMContentLoaded", function() {
+        const modals = document.querySelectorAll(".modal");
+        modals.forEach(modal => {
+            modal.addEventListener("click", function(event) {
                 if (event.target === modal) {
                     modal.style.display = "none";
                 }

@@ -475,6 +475,50 @@ footer p {
     width: auto;
 }
 
+#modal-cadastro .modal-content {
+    width: 500px;
+}
+
+/* Estilo para a lista dentro da modal */
+.modal-body ul.styled-list {
+    list-style-type: none;
+    /* Remove os bullets padrão da lista */
+    padding: 0;
+    /* Remove o padding padrão da lista */
+    margin: 0;
+    /* Remove a margem padrão da lista */
+}
+
+/* Estilo para os títulos (h3) */
+.modal-body h3 {
+    font-size: 1.2em;
+    /* Define um tamanho maior para os títulos */
+    font-weight: bold;
+    /* Deixa os títulos em negrito */
+    margin-top: 15px;
+    /* Espaçamento superior entre as seções */
+    margin-bottom: 10px;
+    /* Espaçamento inferior antes dos itens da lista */
+}
+
+/* Estilo para os itens da lista (li) */
+.modal-body ul.styled-list li {
+    margin-left: 20px;
+    /* Recuo dos itens da lista em relação aos títulos */
+    line-height: 1.6;
+    /* Espaçamento entre as linhas para melhor legibilidade */
+    font-size: 1em;
+    /* Tamanho da fonte dos itens da lista */
+}
+
+/* Estilo para os itens em negrito dentro dos <li> */
+.modal-body ul.styled-list li strong {
+    color: #858585;
+    /* Cor do texto em negrito */
+    font-weight: bold;
+    /* Garante que o texto em negrito seja destacado */
+}
+
 /* Botão de fechar */
 .close {
     position: absolute;    /* Posiciona o botão em relação ao .modal-content */
@@ -559,6 +603,39 @@ footer p {
 .btn.salvar:hover {
     background-color: #0093cc;
     /* Azul mais escuro */
+}
+
+/* Estilo geral do botão */
+.btn.ver-cadastro {
+    background-color: #fbff00;
+    /* Amarelo */
+    color: #000;
+    border: 2px solid #00bfff;
+    /* Letras pretas */
+    padding: 5px 10px;
+    /* Espaçamento interno */
+    font-size: 14px;
+    /* Tamanho da fonte */
+    font-weight: bold;
+    /* Negrito */
+    border-radius: 5px;
+    /* Bordas arredondadas */
+    cursor: pointer;
+    margin-left: 15px;
+    /* Distância do nome */
+    transition: background-color 0.3s ease;
+    /* Transição suave no hover */
+}
+
+/* Hover do botão */
+.btn.ver-cadastro:hover {
+    background-color: #333;
+    color: white;
+}
+
+.details button {
+    display: inline-flex;
+    align-items: flex-start;
 }
 
 /* Estilo geral da tabela */
@@ -1114,7 +1191,7 @@ width: 5%;
     width: 50px;
     height: 50px;
     object-fit: cover;
-    border-radius: 50%;
+    border-radius: 10%;
 }
 
 #lista-participantes .add-btn, #lista-rituais .add-btn {

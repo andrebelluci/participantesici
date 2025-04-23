@@ -153,6 +153,7 @@ $rituais = $stmt->fetchAll();
             <?php endforeach; ?>
         </tbody>
     </table>
+    
     <!-- Modal de Ampliação de Imagem -->
     <div id="modal-image" class="modal">
         <div class="modal-dialog">

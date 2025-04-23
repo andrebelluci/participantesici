@@ -351,3 +351,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             .catch(error => console.error('Erro ao verificar CPF:', error));
     });
 </script>
+<script src="assets/js/buscaCep.js"></script>

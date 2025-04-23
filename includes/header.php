@@ -10,6 +10,21 @@ function is_active($pagina)
 {
     return basename($_SERVER['PHP_SELF']) === $pagina ? 'active' : '';
 }
+
+// Define o tempo limite
+$timeout = 3600;
+
+// Registra o horário da última atividade
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > $timeout)) {
+    // Se o tempo limite for ultrapassado, destrói a sessão e redireciona para o login
+    session_unset();
+    session_destroy();
+    header("Location: login.php?timeout=1"); // Pode adicionar um parâmetro para informar o motivo
+    exit;
+}
+
+// Atualiza o horário da última atividade
+$_SESSION['last_activity'] = time();
 ?>
 
 <!DOCTYPE html>
@@ -26,6 +41,7 @@ function is_active($pagina)
 </head>
 
 <body>
+    <script src="assets/js/global-scripts.js"></script>
     <header id="main-header">
         <div class="logo">
             <!-- Link para a página inicial -->
