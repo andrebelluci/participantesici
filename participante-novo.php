@@ -214,22 +214,46 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </form>
 </div>
 
+<!-- Modal de Ampliação de Imagem -->
+<div id="modal-image" class="modal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <span class="close" onclick="closeImageModal()">&times;</span>
+            <img id="modal-image-content" class="modal-image" alt="Imagem Ampliada">
+        </div>
+    </div>
+</div>
+
 <?php require_once 'includes/footer.php'; ?>
 
 <script>
     // Função para abrir a imagem ampliada
+    // Função para abrir a modal de imagem
     function openImageModal(imageSrc) {
-        const modal = document.getElementById('image-modal');
-        const modalImg = document.getElementById('expanded-image');
-        modal.style.display = 'block';
-        modalImg.src = imageSrc;
+        const modal = document.getElementById('modal-image');
+        const modalImage = document.getElementById('modal-image-content');
+        modalImage.src = imageSrc; // Define a imagem ampliada
+        modal.style.display = 'flex'; // Exibe a modal
     }
 
-    // Função para fechar a imagem ampliada
+    // Função para fechar a modal de imagem
     function closeImageModal() {
-        const modal = document.getElementById('image-modal');
-        modal.style.display = 'none';
+        const modal = document.getElementById('modal-image');
+        modal.style.display = 'none'; // Oculta a modal
     }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const modals = document.querySelectorAll(".modal");
+
+        modals.forEach(modal => {
+            modal.addEventListener("click", function(event) {
+                // Verifica se o clique foi fora do .modal-content
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+        });
+    });
 
     // Preview da imagem
     const fileInput = document.getElementById('foto-input');

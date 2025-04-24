@@ -365,6 +365,18 @@ $rituais = $stmt_rituais->fetchAll();
 </div>
 
 <script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const modals = document.querySelectorAll(".modal");
+
+        modals.forEach(modal => {
+            modal.addEventListener("click", function(event) {
+                // Verifica se o clique foi fora do .modal-content
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+        });
+    });
     // Função para abrir o modal de detalhes da inscrição
     function abrirModalDetalhes(ritualId) {
         // Limpa todos os campos do formulário
