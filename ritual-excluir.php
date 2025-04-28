@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: login");
     exit;
 }
 require_once 'includes/db.php';
@@ -29,7 +29,7 @@ try {
 
     // Redireciona de volta para a página de rituais com uma mensagem de sucesso
     echo "<script>alert('Ritual e participantes associados excluídos com sucesso!');</script>";
-    echo "<script>window.location.href = 'rituais.php';</script>";
+    echo "<script>window.location.href = 'rituais';</script>";
 } catch (Exception $e) {
     // Reverte a transação em caso de erro
     $pdo->rollBack();

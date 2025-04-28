@@ -47,7 +47,7 @@ $_SESSION['last_activity'] = time();
     <header id="main-header">
         <div class="logo">
             <!-- Link para a página inicial -->
-            <a href="home.php">
+            <a href="home">
                 <img id="logo-image" src="assets/images/logo.png" alt="Logo Instituto Céu Interior">
             </a>
         </div>
@@ -57,14 +57,14 @@ $_SESSION['last_activity'] = time();
         </button>
         <!-- Menu de Navegação -->
         <nav id="main-nav">
-            <a href="home.php" class="<?= is_active('home.php') ?>">Home</a>
-            <a href="participantes.php" class="<?= is_active('participantes.php') ?>">Participantes</a>
-            <a href="rituais.php" class="<?= is_active('rituais.php') ?>">Rituais</a>
+            <a href="home" class="<?= is_active('home.php') ?>">Home</a>
+            <a href="participantes" class="<?= is_active('participantes.php') ?>">Participantes</a>
+            <a href="rituais" class="<?= is_active('rituais.php') ?>">Rituais</a>
             <div class="dropdown">
                 <!-- Aplicar classe .active ao span "Perfil" -->
                 <span class="<?= basename($_SERVER['PHP_SELF']) === 'perfil.php' ? 'active' : '' ?>">Perfil</span>
                 <div class="dropdown-content">
-                    <a href="perfil.php">Alterar Senha</a>
+                    <a href="perfil">Alterar Senha</a>
                 </div>
             </div>
             <a href="logout.php">Sair</a>

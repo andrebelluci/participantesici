@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: login");
     exit;
 }
 require_once 'includes/db.php';
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     } else {
         echo "<script>alert('Ritual criado com sucesso!');</script>";
-        echo "<script>window.location.href = 'participantes.php';</script>";
+        echo "<script>window.location.href = 'rituais';</script>";
     }
 }
 ?>
@@ -52,7 +52,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <br>
     <div class="actions">
         <div class="left-actions">
-            <a href="rituais.php" class="btn voltar">Voltar</a>
+            <a href="rituais" class="btn voltar">Voltar</a>
         </div>
         <div class="right-actions">
             <button type="submit" form="formulario-ritual" class="btn salvar">Criar ritual</button>

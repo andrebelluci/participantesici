@@ -29,7 +29,7 @@ try {
 
     // Redireciona de volta para a página de participantes com uma mensagem de sucesso
     echo "<script>alert('Participante excluído com sucesso!');</script>";
-    echo "<script>window.location.href = 'participantes.php';</script>";
+    echo "<script>window.location.href = 'participantes';</script>";
 } catch (Exception $e) {
     // Reverte a transação em caso de erro
     $pdo->rollBack();

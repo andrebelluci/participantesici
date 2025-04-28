@@ -18,7 +18,7 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
 
         if (!$inscricao) {
             $_SESSION['error'] = "Participante não encontrado ou já foi removido.";
-            header("Location: rituais.php");
+            header("Location: rituais");
             exit;
         }
 
@@ -34,11 +34,11 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     }
 
     // Redireciona de volta para a página do ritual
-    header("Location: ritual-visualizar.php?id=$ritual_id");
+    header("Location: ritual-visualizar?id=$ritual_id");
     exit;
 } else {
     $_SESSION['error'] = "ID do participante inválido.";
-    header("Location: rituais.php");
+    header("Location: rituais");
     exit;
 }
 ?>

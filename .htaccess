@@ -1,0 +1,27 @@
+RewriteEngine On
+RewriteBase /sistema-ici/
+
+# Verifica se o arquivo físico não existe
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+
+# Redireciona automaticamente para o arquivo .php
+RewriteRule ^(.+)$ $1.php [L,QSA]
+
+# --- Variáveis de ambiente do banco de dados ---
+SetEnv DB_HOST localhost
+SetEnv DB_NAME participantesici_sistema
+SetEnv DB_USER participantesici_sistema
+SetEnv DB_PASS HAztRO;b6~.P
+
+# --- Segurança: Bloqueia acesso ao .htaccess ---
+<Files ".htaccess">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# --- Segurança: Bloqueia acesso ao arquivo de conexão ---
+<Files "db.php">
+    Order allow,deny
+    Deny from all
+</Files>

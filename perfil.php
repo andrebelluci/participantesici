@@ -39,7 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <br>
     <div class="actions">
         <div class="left-actions">
-            <a href="home.php" class="btn voltar">Voltar</a>
+            <a href="home" class="btn voltar">Voltar</a>
         </div>
         <div class="right-actions">
             <button type="submit" form="formulario-senha" class="btn salvar">Salvar alterações</button>

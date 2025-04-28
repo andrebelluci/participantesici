@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: login");
     exit;
 }
 require_once 'includes/db.php';
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt_check_cpf = $pdo->prepare("SELECT id FROM participantes WHERE cpf = ?");
     $stmt_check_cpf->execute([$cpf]);
     if ($stmt_check_cpf->rowCount() > 0) {
-        die("<script>alert('Erro: Este CPF já está cadastrado.'); window.location.href = 'participante-novo.php';</script>");
+        die("<script>alert('Erro: Este CPF já está cadastrado.'); window.location.href = 'participante-novo';</script>");
     }
 
     $stmt = $pdo->prepare("
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     } else {
         echo "<script>alert('Pessoa cadastrada com sucesso!');</script>";
-        echo "<script>window.location.href = 'participantes.php';</script>";
+        echo "<script>window.location.href = 'participantes';</script>";
     }
 }
 ?>
@@ -83,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <br>
     <div class="actions">
         <div class="left-actions">
-            <a href="participantes.php" class="btn voltar">Voltar</a>
+            <a href="participantes" class="btn voltar">Voltar</a>
         </div>
         <div class="right-actions">
             <button type="submit" form="formulario-participante" class="btn salvar">Cadastrar</button>

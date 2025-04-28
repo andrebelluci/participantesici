@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: login");
     exit;
 }
 require_once 'includes/db.php';
@@ -36,7 +36,7 @@ if (!$ritual) {
 
     <!-- Botões Voltar e Adicionar Participante -->
     <div class="actions">
-        <a href="rituais.php" class="btn voltar">Voltar</a>
+        <a href="rituais" class="btn voltar">Voltar</a>
         <button class="btn adicionar" onclick="document.getElementById('modal-adicionar').style.display='flex'">Adicionar participante</button>
     </div>
 </div>
@@ -51,7 +51,7 @@ if (!$ritual) {
             <!-- Campo oculto para enviar o ID do ritual -->
             <input type="hidden" name="id" value="<?= $id ?>">
             <button type="submit" class="filter-btn">Filtrar</button>
-            <a href="ritual-visualizar.php?id=<?= $id ?>" class="filter-btn clear-btn">Limpar Filtro</a>
+            <a href="ritual-visualizar?id=<?= $id ?>" class="filter-btn clear-btn">Limpar Filtro</a>
         </div>
     </form>
 
@@ -100,7 +100,7 @@ if (!$ritual) {
                             onerror="this.src='assets/images/no-image.png'; this.onclick=null; this.classList.remove('clickable');">
                     </td>
                     <td class="col-nome-participante">
-                        <a href="participantes.php?pagina=1&filtro_cpf=<?= urlencode(htmlspecialchars($participante['cpf'])) ?>&redirect=ritual-visualizar.php?id=<?= $id ?>">
+                        <a href="participantes?pagina=1&filtro_cpf=<?= urlencode(htmlspecialchars($participante['cpf'])) ?>&redirect=ritual-visualizar?id=<?= $id ?>">
                             <?= htmlspecialchars($participante['nome_completo']) ?>
                         </a>
                     </td>
@@ -121,7 +121,7 @@ if (!$ritual) {
                         <a href="#" class="action-icon" title="Detalhes da inscrição do participante" onclick="abrirModalDetalhes(<?= $participante['id'] ?>)">
                             <i class="fa-solid fa-info-circle"></i>
                         </a>
-                        <a href="participante-excluir-ritual.php?id=<?= $participante['id'] ?>" class="action-icon danger" title="Remover participante do ritual" onclick="return confirm('Tem certeza que deseja remover este participante do ritual?')">
+                        <a href="participante-excluir-ritual?id=<?= $participante['id'] ?>" class="action-icon danger" title="Remover participante do ritual" onclick="return confirm('Tem certeza que deseja remover este participante do ritual?')">
                             <i class="fa-solid fa-trash"></i>
                         </a>
                     </td>
@@ -589,7 +589,7 @@ if (!$ritual) {
     // Função para redirecionar para a página de cadastro de nova pessoa
     function adicionarNovaPessoa() {
         const ritualId = document.querySelector('#modal-adicionar input[name="ritual_id"]').value;
-        window.location.href = `participante-novo.php?redirect=ritual-visualizar.php&id=${ritualId}`;
+        window.location.href = `participante-novo?redirect=ritual-visualizar&id=${ritualId}`;
     }
 
     // Função para adicionar um participante ao ritual

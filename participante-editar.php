@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: login");
     exit;
 }
 require_once 'includes/db.php';
@@ -12,7 +12,7 @@ $id = $_GET['id'] ?? null;
 if (!$id) {
     die("ID da pessoa não especificado.");
 }
-$redirect = $_GET['redirect'] ?? 'participantes.php'; // Página padrão se não houver redirect
+$redirect = $_GET['redirect'] ?? 'participantes'; // Página padrão se não houver redirect
 
 
 // Consulta os dados da pessoa no banco de dados
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt_check_cpf = $pdo->prepare("SELECT id FROM participantes WHERE cpf = ? AND id != ?");
     $stmt_check_cpf->execute([$cpf, $id]); // Passa o CPF e o ID do participante atual
     if ($stmt_check_cpf->rowCount() > 0) {
-        die("<script>alert('Erro: Este CPF já está cadastrado.'); window.location.href = 'participante-editar.php?id=$id';</script>");
+        die("<script>alert('Erro: Este CPF já está cadastrado.'); window.location.href = 'participante-editar?id=$id';</script>");
     }
 
     // Atualiza os dados no banco de dados
@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <br>
     <div class="actions">
         <div class="left-actions">
-            <a href="participantes.php" class="btn voltar">Voltar</a>
+            <a href="participantes" class="btn voltar">Voltar</a>
         </div>
         <div class="right-actions">
             <button type="submit" form="formulario-participante" class="btn salvar">Salvar alterações</button>

@@ -77,7 +77,7 @@ $rituais = $stmt_rituais->fetchAll();
 <div class="page-title">
     <div class="mobile-actions">
         <div class="left-actions">
-            <a href="participantes.php" class="btn-mobile voltar"><i class="fa-solid fa-chevron-left"></i></a>
+            <a href="participantes" class="btn-mobile voltar"><i class="fa-solid fa-chevron-left"></i></a>
         </div>
     </div>
     <!-- Cabeçalho com foto, nome, CPF e data de nascimento -->
@@ -100,7 +100,7 @@ $rituais = $stmt_rituais->fetchAll();
     </div>
     <!-- Botões Voltar e Adicionar Ritual -->
     <div class="actions">
-        <a href="participantes.php" class="btn voltar">Voltar</a>
+        <a href="participantes" class="btn voltar">Voltar</a>
         <button class="btn adicionar" onclick="document.getElementById('modal-adicionar').style.display='flex'">Adicionar ritual</button>
     </div>
 </div>
@@ -115,7 +115,7 @@ $rituais = $stmt_rituais->fetchAll();
             <!-- Campo oculto para enviar o ID do participante -->
             <input type="hidden" name="id" value="<?= $id ?>">
             <button type="submit" class="filter-btn">Filtrar</button>
-            <a href="participante-visualizar.php?id=<?= $id ?>" class="filter-btn clear-btn">Limpar Filtro</a>
+            <a href="participante-visualizar?id=<?= $id ?>" class="filter-btn clear-btn">Limpar Filtro</a>
         </div>
     </form>
     <!-- Filtro para Mobile -->
@@ -265,13 +265,13 @@ $rituais = $stmt_rituais->fetchAll();
 
                 <!-- Ícones de Ação (Botões) -->
                 <div class="card-actions">
-                    <a href="participante-visualizar.php?id=<?= $pessoa['id'] ?>" class="action-icon-mobile" title="Gerenciar rituais">
+                    <a href="participante-visualizar?id=<?= $pessoa['id'] ?>" class="action-icon-mobile" title="Gerenciar rituais">
                         <i class="fa-solid fa-list-check"></i>
                     </a>
-                    <a href="participante-editar.php?id=<?= $pessoa['id'] ?>" class="action-icon-mobile" title="Editar dados do participante">
+                    <a href="participante-editar?id=<?= $pessoa['id'] ?>" class="action-icon-mobile" title="Editar dados do participante">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </a>
-                    <a href="participante-excluir.php?id=<?= $pessoa['id'] ?>" class="action-icon-mobile danger" title="Excluir participante" onclick="return confirm('Tem certeza que deseja remover este participante permanentemente e desvincular de todos os rituais?')">
+                    <a href="participante-excluir?id=<?= $pessoa['id'] ?>" class="action-icon-mobile danger" title="Excluir participante" onclick="return confirm('Tem certeza que deseja remover este participante permanentemente e desvincular de todos os rituais?')">
                         <i class="fa-solid fa-trash"></i>
                     </a>
                 </div>
@@ -289,7 +289,7 @@ $rituais = $stmt_rituais->fetchAll();
 
 <div class="page-bottom">
     <div class="actions">
-        <a href="participantes.php" class="btn voltar">Voltar</a>
+        <a href="participantes" class="btn voltar">Voltar</a>
         <button class="btn adicionar" onclick="document.getElementById('modal-adicionar').style.display='flex'">Adicionar ritual</button>
     </div>
 </div>
@@ -454,7 +454,7 @@ $rituais = $stmt_rituais->fetchAll();
                     <li><strong>Como soube do Instituto Céu Interior?</strong> <?= htmlspecialchars($pessoa['como_soube']) ?></li>
                     <li><strong>Sobre o Participante:</strong> <?= htmlspecialchars($pessoa['sobre_participante']) ?></li>
                     <br>
-                    <a href="participante-editar.php?id=<?= $pessoa['id'] ?>&redirect=participante-visualizar.php" class="action-icon" title="Editar dados do participante">
+                    <a href="participante-editar?id=<?= $pessoa['id'] ?>&redirect=participante-visualizar" class="action-icon" title="Editar dados do participante">
                         <i class="fa-solid fa-pen-to-square"></i>
                         Editar dados do participante
                     </a>
@@ -743,7 +743,7 @@ $rituais = $stmt_rituais->fetchAll();
                 data.forEach(ritual => {
                     const li = document.createElement('li');
                     li.innerHTML = `
-                    <img src="${ritual.foto || 'assets/images/no-image.png'}" alt="Foto">
+                    <img src="${ritual.foto}" onerror="this.src='assets/images/no-image.png';" alt="Foto">
                     <span>${ritual.nome}</span>
                     <button class="add-btn" onclick="adicionarRitual(${ritual.id})">Adicionar</button>
                 `;
@@ -784,7 +784,7 @@ $rituais = $stmt_rituais->fetchAll();
     // Função para redirecionar para a página de cadastro de novo ritual
     function adicionarNovoRitual() {
         const participanteId = document.querySelector('#modal-adicionar input[name="participante_id"]').value;
-        window.location.href = `ritual-novo.php?redirect=participante-visualizar.php&id=${participanteId}`;
+        window.location.href = `ritual-novo?redirect=participante-visualizar&id=${participanteId}`;
     }
 
     // Função para adicionar um ritual ao participante
@@ -930,7 +930,7 @@ $rituais = $stmt_rituais->fetchAll();
         clearBtn.style.display = 'none';
 
         // Redireciona para a página sem parâmetros de filtro
-        location.href = `participante-visualizar.php?id=<?= $id ?>`;
+        location.href = `participante-visualizar?id=<?= $id ?>`;
     }
 
     document.addEventListener("DOMContentLoaded", function() {

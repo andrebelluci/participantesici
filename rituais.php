@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: login");
     exit;
 }
 require_once 'includes/db.php';
@@ -59,10 +59,10 @@ $rituais = $stmt->fetchAll();
     <br>
     <div class="actions">
         <div class="left-actions">
-            <a href="home.php" class="btn voltar">Voltar</a>
+            <a href="home" class="btn voltar">Voltar</a>
         </div>
         <div class="right-actions">
-            <a href="ritual-novo.php" class="btn novo-ritual">Novo ritual</a>
+            <a href="ritual-novo" class="btn novo-ritual">Novo ritual</a>
         </div>
     </div>
 </div>
@@ -83,7 +83,7 @@ $rituais = $stmt->fetchAll();
         </div>
         <div class="filter-actions">
             <button type="submit" class="filter-btn">Filtrar</button>
-            <a href="rituais.php" class="filter-btn clear-btn">Limpar filtro</a>
+            <a href="rituais" class="filter-btn clear-btn">Limpar filtro</a>
         </div>
     </form>
 
@@ -133,7 +133,7 @@ $rituais = $stmt->fetchAll();
                             title="Ver foto">
                     </td>
                     <td class="col-nome">
-                        <a href="ritual-visualizar.php?id=<?= $ritual['id'] ?>" title="Gerenciar participantes"><?= htmlspecialchars($ritual['nome']) ?></a>
+                        <a href="ritual-visualizar?id=<?= $ritual['id'] ?>" title="Gerenciar participantes"><?= htmlspecialchars($ritual['nome']) ?></a>
                     </td>
                     <td class="col-data">
                         <?php
@@ -145,9 +145,9 @@ $rituais = $stmt->fetchAll();
                     <td class="col-padrinho"><?= htmlspecialchars($ritual['padrinho_madrinha']) ?></td>
                     <td class="col-inscritos"><?= htmlspecialchars($ritual['inscritos']) ?></td>
                     <td class="col-acoes">
-                        <a href="ritual-visualizar.php?id=<?= $ritual['id'] ?>" class="action-icon" title="Gerenciar participantes"><i class="fa-solid fa-circle-user"></i></a>
-                        <a href="ritual-editar.php?id=<?= $ritual['id'] ?>" class="action-icon" title="Editar dados do ritual"><i class="fa-solid fa-pen-to-square"></i></a>
-                        <a href="ritual-excluir.php?id=<?= $ritual['id'] ?>" class="action-icon danger" title="Excluir ritual" onclick="return confirm('ATENÇÃO: Esta ação irá excluir permanentemente este ritual e todos os participantes associados. Deseja continuar?')"><i class="fa-solid fa-trash"></i></a>
+                        <a href="ritual-visualizar?id=<?= $ritual['id'] ?>" class="action-icon" title="Gerenciar participantes"><i class="fa-solid fa-circle-user"></i></a>
+                        <a href="ritual-editar?id=<?= $ritual['id'] ?>" class="action-icon" title="Editar dados do ritual"><i class="fa-solid fa-pen-to-square"></i></a>
+                        <a href="ritual-excluir?id=<?= $ritual['id'] ?>" class="action-icon danger" title="Excluir ritual" onclick="return confirm('ATENÇÃO: Esta ação irá excluir permanentemente este ritual e todos os participantes associados. Deseja continuar?')"><i class="fa-solid fa-trash"></i></a>
                     </td>
                 </tr>
             <?php endforeach; ?>

@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: login");
     exit;
 }
 require_once 'includes/db.php';
@@ -94,7 +94,7 @@ function formatarTelefone($telefone)
         <div class="left-actions">
             <?php
             // Verifica se há um parâmetro 'redirect' na URL
-            $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : 'home.php';
+            $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : 'home';
             ?>
             <a href="<?= $redirect ?>" class="btn-mobile voltar"><i class="fa-solid fa-chevron-left"></i></a>
 
@@ -106,12 +106,12 @@ function formatarTelefone($telefone)
         <div class="left-actions">
             <?php
             // Verifica se há um parâmetro 'redirect' na URL
-            $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : 'home.php';
+            $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : 'home';
             ?>
             <a href="<?= $redirect ?>" class="btn voltar">Voltar</a>
         </div>
         <div class="right-actions">
-            <a href="participante-novo.php" class="btn novo-participante">Novo participante</a>
+            <a href="participante-novo" class="btn novo-participante">Novo participante</a>
         </div>
     </div>
 </div>
@@ -128,7 +128,7 @@ function formatarTelefone($telefone)
         </div>
         <div class="filter-actions">
             <button type="submit" class="filter-btn">Filtrar</button>
-            <a href="participantes.php" class="filter-btn clear-btn">Limpar filtro</a>
+            <a href="participantes" class="filter-btn clear-btn">Limpar filtro</a>
         </div>
     </form>
     <!-- Filtro para Mobile -->
@@ -193,7 +193,7 @@ function formatarTelefone($telefone)
                             onerror="this.src='assets/images/no-image.png'; this.onclick=null; this.classList.remove('clickable');">
                     </td>
                     <td class="col-nome-pessoa">
-                        <a href="participante-visualizar.php?id=<?= $pessoa['id'] ?>" title="Gerenciar rituais"><?= htmlspecialchars($pessoa['nome_completo']) ?></a>
+                        <a href="participante-visualizar?id=<?= $pessoa['id'] ?>" title="Gerenciar rituais"><?= htmlspecialchars($pessoa['nome_completo']) ?></a>
                     </td>
                     <td class="col-nascimento">
                         <?php
@@ -206,13 +206,13 @@ function formatarTelefone($telefone)
                     <td class="col-celular"><?= formatarTelefone(htmlspecialchars($pessoa['celular'])) ?></td>
                     <td class="col-rituais-participados"><?= htmlspecialchars($pessoa['rituais_participados']) ?></td>
                     <td class="col-acoes-pessoa">
-                        <a href="participante-visualizar.php?id=<?= $pessoa['id'] ?>" class="action-icon" title="Gerenciar rituais">
+                        <a href="participante-visualizar?id=<?= $pessoa['id'] ?>" class="action-icon" title="Gerenciar rituais">
                             <i class="fa-solid fa-list-check"></i>
                         </a>
-                        <a href="participante-editar.php?id=<?= $pessoa['id'] ?>" class="action-icon" title="Editar dados do participante">
+                        <a href="participante-editar?id=<?= $pessoa['id'] ?>" class="action-icon" title="Editar dados do participante">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </a>
-                        <a href="participante-excluir.php?id=<?= $pessoa['id'] ?>" class="action-icon danger" title="Excluir participante" onclick="return confirm('Tem certeza que deseja remover este participante permanentemente e desvincular de todos os rituais?')">
+                        <a href="participante-excluir?id=<?= $pessoa['id'] ?>" class="action-icon danger" title="Excluir participante" onclick="return confirm('Tem certeza que deseja remover este participante permanentemente e desvincular de todos os rituais?')">
                             <i class="fa-solid fa-trash"></i>
                         </a>
                     </td>
@@ -262,13 +262,13 @@ function formatarTelefone($telefone)
 
                     <!-- Ícones de Ação (Botões) -->
                     <div class="card-actions">
-                        <a href="participante-visualizar.php?id=<?= $pessoa['id'] ?>" class="action-icon-mobile" title="Gerenciar rituais">
+                        <a href="participante-visualizar?id=<?= $pessoa['id'] ?>" class="action-icon-mobile" title="Gerenciar rituais">
                             <i class="fa-solid fa-list-check"></i>
                         </a>
-                        <a href="participante-editar.php?id=<?= $pessoa['id'] ?>" class="action-icon-mobile" title="Editar dados do participante">
+                        <a href="participante-editar?id=<?= $pessoa['id'] ?>" class="action-icon-mobile" title="Editar dados do participante">
                             <i class="fa-solid fa-pen-to-square"></i>
                         </a>
-                        <a href="participante-excluir.php?id=<?= $pessoa['id'] ?>" class="action-icon-mobile danger" title="Excluir participante" onclick="return confirm('Tem certeza que deseja remover este participante permanentemente e desvincular de todos os rituais?')">
+                        <a href="participante-excluir?id=<?= $pessoa['id'] ?>" class="action-icon-mobile danger" title="Excluir participante" onclick="return confirm('Tem certeza que deseja remover este participante permanentemente e desvincular de todos os rituais?')">
                             <i class="fa-solid fa-trash"></i>
                         </a>
                     </div>
@@ -300,12 +300,12 @@ function formatarTelefone($telefone)
             <div class="left-actions">
                 <?php
                 // Verifica se há um parâmetro 'redirect' na URL
-                $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : 'home.php';
+                $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : 'home';
                 ?>
                 <a href="<?= $redirect ?>" class="btn voltar">Voltar</a>
             </div>
             <div class="right-actions">
-                <a href="participante-novo.php" class="btn novo-participante">Novo participante</a>
+                <a href="participante-novo" class="btn novo-participante">Novo participante</a>
             </div>
         </div>
     </div>

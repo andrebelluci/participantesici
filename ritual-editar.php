@@ -1,7 +1,7 @@
 <?php
 session_start();
 if (!isset($_SESSION['user_id'])) {
-    header("Location: login.php");
+    header("Location: login");
     exit;
 }
 require_once 'includes/db.php';
@@ -35,7 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $stmt_update->execute([$nome, $data_ritual, $foto, $padrinho_madrinha, $id]);
 
     echo "<script>alert('Ritual atualizado com sucesso!');</script>";
-    echo "<script>window.location.href = 'rituais.php';</script>";
+    echo "<script>window.location.href = 'rituais';</script>";
 }
 ?>
 
@@ -44,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <br>
     <div class="actions">
         <div class="left-actions">
-            <a href="rituais.php" class="btn voltar">Voltar</a>
+            <a href="rituais" class="btn voltar">Voltar</a>
         </div>
         <div class="right-actions">
             <button type="submit" form="formulario-ritual" class="btn salvar">Salvar alterações</button>
@@ -63,7 +63,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     <button type="button" id="adicionar-imagem-btn" class="btn adicionar-imagem">Adicionar Imagem</button>
                     <div id="preview-container" style="<?= $ritual['foto'] ? 'display: block;' : 'display: none;' ?>">
                         <div class="image-and-button">
-                            <img id="preview-image" src="<?= htmlspecialchars($ritual['foto'] ?? '') ?>" alt="Preview" class="small-preview">
+                            <img id="preview-image" src="<?= htmlspecialchars($ritual['foto'] ?? '') ?>" alt="Preview" class="small-preview" onerror="this.src='assets/images/no-image.png';">
                             <button type="button" id="excluir-imagem-btn" class="btn excluir-imagem">Excluir Imagem</button>
                         </div>
                     </div>
