@@ -75,6 +75,11 @@ $stmt_rituais->execute($params);
 $rituais = $stmt_rituais->fetchAll();
 ?>
 <div class="page-title">
+    <div class="mobile-actions">
+        <div class="left-actions">
+            <a href="participantes.php" class="btn-mobile voltar"><i class="fa-solid fa-chevron-left"></i></a>
+        </div>
+    </div>
     <!-- Cabeçalho com foto, nome, CPF e data de nascimento -->
     <div class="participant-header">
         <img src="<?= htmlspecialchars($pessoa['foto']) ?>" alt="Foto do Participante" class="medium-image" onerror="this.src='assets/images/no-image.png';">
@@ -111,6 +116,29 @@ $rituais = $stmt_rituais->fetchAll();
             <input type="hidden" name="id" value="<?= $id ?>">
             <button type="submit" class="filter-btn">Filtrar</button>
             <a href="participante-visualizar.php?id=<?= $id ?>" class="filter-btn clear-btn">Limpar Filtro</a>
+        </div>
+    </form>
+    <!-- Filtro para Mobile -->
+    <form method="GET" class="filters-mobile">
+        <div class="search-container">
+            <!-- Campo de pesquisa -->
+            <input
+                type="text"
+                name="filtro_nome"
+                id="filtro_nome_mobile"
+                placeholder="Nome do ritual"
+                value="<?= htmlspecialchars($_GET['filtro_nome'] ?? '') ?>"
+                autocomplete="off">
+            <!-- Botão Pesquisar -->
+            <button type="submit" class="search-btn">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+            <!-- Botão Limpar (inicialmente oculto) -->
+            <button type="button" class="clear-btn" onclick="limparPesquisaMobile()" style="display: none;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <!-- Campo oculto para enviar o ID do participante -->
+            <input type="hidden" name="id" value="<?= $id ?>">
         </div>
     </form>
     <!-- Tabela de Rituais -->
@@ -186,11 +214,83 @@ $rituais = $stmt_rituais->fetchAll();
             <?php endforeach; ?>
         </tbody>
     </table>
+
+    <div class="table-responsive-cards">
+        <?php foreach ($rituais as $ritual): ?>
+            <div class="card">
+                <!-- Primeira linha: Foto e Nome -->
+                <div class="card-header">
+                    <img
+                        src="<?= htmlspecialchars($ritual['foto']) ?>"
+                        alt="Foto do Ritual"
+                        class="small-preview"
+                        onclick="openImageModal('<?= htmlspecialchars($ritual['foto']) ?>')"
+                        onerror="this.src='assets/images/no-image.png'; this.onclick=null; this.classList.remove('clickable');">
+                    <span class="nome-completo"><?= htmlspecialchars($ritual['nome']) ?></span>
+                </div>
+
+                <!-- Segunda linha: Data de Nascimento -->
+                <div class="card-row">
+                    <strong>Data do ritual:</strong>
+                    <span>
+                        <?php
+                        // Formata a data para DD/MM/AAAA
+                        $data_ritual = new DateTime($ritual['data_ritual']);
+                        echo $data_ritual->format('d/m/Y');
+                        ?>
+                    </span>
+                </div>
+
+                <!-- Quarta linha: Rituais Participados -->
+                <div class="card-row-obs">
+                    <strong>Observação do participante:</strong>
+                    <div class="text-container">
+                        <span class="truncated-text">
+                            <?= htmlspecialchars($ritual['observacao'] ?? '') ?></span>
+                        </span>
+                        <button class="ver-mais-btn" style="display: none;">Ver mais</button>
+                    </div>
+                </div>
+
+                <div class="card-row">
+                    <strong>Presente?</strong>
+                    <button
+                        class="presence-btn <?= $ritual['presente'] === 'Sim' ? 'active' : '' ?>"
+                        data-ritual-id="<?= $ritual['id'] ?>"
+                        data-current-status="<?= $ritual['presente'] ?>"
+                        onclick="togglePresenca(this)">
+                        <?= htmlspecialchars($ritual['presente']) ?>
+                    </button>
+                </div>
+
+                <!-- Ícones de Ação (Botões) -->
+                <div class="card-actions">
+                    <a href="participante-visualizar.php?id=<?= $pessoa['id'] ?>" class="action-icon-mobile" title="Gerenciar rituais">
+                        <i class="fa-solid fa-list-check"></i>
+                    </a>
+                    <a href="participante-editar.php?id=<?= $pessoa['id'] ?>" class="action-icon-mobile" title="Editar dados do participante">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                    <a href="participante-excluir.php?id=<?= $pessoa['id'] ?>" class="action-icon-mobile danger" title="Excluir participante" onclick="return confirm('Tem certeza que deseja remover este participante permanentemente e desvincular de todos os rituais?')">
+                        <i class="fa-solid fa-trash"></i>
+                    </a>
+                </div>
+            </div>
+        <?php endforeach; ?>
+    </div>
+
     <!-- Paginação -->
     <div class="pagination">
         <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
             <a href="?pagina=<?= $i ?>&id=<?= $id ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&order_by=<?= $order_by ?>&order_dir=<?= $order_dir ?>" class="<?= $pagina == $i ? 'active' : '' ?>"><?= $i ?></a>
         <?php endfor; ?>
+    </div>
+</div>
+
+<div class="page-bottom">
+    <div class="actions">
+        <a href="participantes.php" class="btn voltar">Voltar</a>
+        <button class="btn adicionar" onclick="document.getElementById('modal-adicionar').style.display='flex'">Adicionar ritual</button>
     </div>
 </div>
 
@@ -786,6 +886,70 @@ $rituais = $stmt_rituais->fetchAll();
                 }
             });
         });
+    });
+    document.addEventListener("DOMContentLoaded", function() {
+        const textContainers = document.querySelectorAll(".text-container");
+
+        textContainers.forEach((container) => {
+            const truncatedText = container.querySelector(".truncated-text");
+            const verMaisBtn = container.querySelector(".ver-mais-btn");
+
+            // Verifica se o texto excede as 3 linhas
+            if (truncatedText.scrollHeight > truncatedText.clientHeight) {
+                verMaisBtn.style.display = "inline-block"; // Mostra o botão "Ver mais"
+            }
+
+            // Adiciona o evento de clique ao botão "Ver mais"
+            verMaisBtn.addEventListener("click", function() {
+                if (truncatedText.classList.contains("expanded")) {
+                    // Se já estiver expandido, volta ao estado original
+                    truncatedText.classList.remove("expanded");
+                    truncatedText.style.display = "-webkit-box";
+                    verMaisBtn.textContent = "Ver mais";
+                    verMaisBtn.classList.remove("expanded-btn");
+                } else {
+                    // Expande o texto
+                    truncatedText.classList.add("expanded");
+                    truncatedText.style.display = "block";
+                    verMaisBtn.textContent = "Ver menos";
+                    verMaisBtn.classList.add("expanded-btn");
+                }
+            });
+        });
+    });
+
+    // Função para limpar a pesquisa no filtro mobile
+    function limparPesquisaMobile() {
+        const filtroInput = document.getElementById('filtro_nome_mobile');
+        const clearBtn = document.querySelector('.filters-mobile .clear-btn');
+
+        // Limpa o campo de pesquisa
+        filtroInput.value = '';
+
+        // Oculta o botão "Limpar"
+        clearBtn.style.display = 'none';
+
+        // Redireciona para a página sem parâmetros de filtro
+        location.href = `participante-visualizar.php?id=<?= $id ?>`;
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        const filtroInput = document.getElementById('filtro_nome_mobile');
+        const clearBtn = document.querySelector('.filters-mobile .clear-btn');
+
+        // Mostra ou oculta o botão "Limpar" com base no valor do input
+        filtroInput.addEventListener('input', function() {
+            if (filtroInput.value.trim() !== '') {
+                clearBtn.style.display = 'inline-block'; // Mostra o botão "X"
+            } else {
+                clearBtn.style.display = 'none'; // Oculta o botão "X"
+            }
+        });
+
+        // Verifica se há um valor pré-existente no campo de pesquisa ao carregar a página
+        if (filtroInput.value.trim() !== '') {
+            clearBtn.style.display = 'inline-block'; // Mantém o botão "X" visível se houver um valor
+        }
     });
 </script>
 <?php require_once 'includes/footer.php'; ?>

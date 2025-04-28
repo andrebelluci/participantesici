@@ -15,6 +15,7 @@ $offset = ($pagina - 1) * $itens_por_pagina;
 // Filtros
 $filtro_nome = isset($_GET['filtro_nome']) ? $_GET['filtro_nome'] : '';
 $filtro_cpf = isset($_GET['filtro_cpf']) ? $_GET['filtro_cpf'] : '';
+$filtro = isset($_GET['filtro']) ? $_GET['filtro'] : ''; // Novo filtro para mobile
 
 // Ordenação
 $order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'nome_completo'; // Coluna padrão: nome_completo
@@ -29,6 +30,12 @@ if (!empty($filtro_nome)) {
 if (!empty($filtro_cpf)) {
     $where .= " AND cpf LIKE ?";
     $params[] = "%$filtro_cpf%";
+}
+if (!empty($filtro)) {
+    // Para o filtro mobile, busca tanto por nome quanto por CPF
+    $where .= " AND (nome_completo LIKE ? OR cpf LIKE ?)";
+    $params[] = "%$filtro%";
+    $params[] = "%$filtro%";
 }
 
 // Consulta para contar o total de registros
@@ -83,6 +90,16 @@ function formatarTelefone($telefone)
 ?>
 
 <div class="page-title">
+    <div class="mobile-actions">
+        <div class="left-actions">
+            <?php
+            // Verifica se há um parâmetro 'redirect' na URL
+            $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : 'home.php';
+            ?>
+            <a href="<?= $redirect ?>" class="btn-mobile voltar"><i class="fa-solid fa-chevron-left"></i></a>
+
+        </div>
+    </div>
     <h1>👥 Participantes</h1>
     <br>
     <div class="actions">
@@ -114,8 +131,30 @@ function formatarTelefone($telefone)
             <a href="participantes.php" class="filter-btn clear-btn">Limpar filtro</a>
         </div>
     </form>
+    <!-- Filtro para Mobile -->
+    <form method="GET" class="filters-mobile">
+        <div class="search-container">
+            <!-- Input único para pesquisa por Nome ou CPF -->
+            <input
+                type="text"
+                name="filtro"
+                id="filtro"
+                placeholder="Pesquisar por nome ou CPF..."
+                value="<?= htmlspecialchars($filtro ?? '') ?>"
+                oninput="aplicarMascaraCPF(this)"
+                autocomplete="off">
+            <!-- Botão Pesquisar -->
+            <button type="submit" class="search-btn">
+                <i class="fa-solid fa-magnifying-glass"></i>
+            </button>
+            <!-- Botão Limpar (inicialmente oculto) -->
+            <button type="button" class="clear-btn" onclick="limparPesquisa()" style="display: none;">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+    </form>
 
-    <!-- Lista de Participantes -->
+    <!-- Lista de Participantes (Desktop) -->
     <table class="styled-table">
         <thead>
             <tr>
@@ -181,78 +220,209 @@ function formatarTelefone($telefone)
             <?php endforeach; ?>
         </tbody>
     </table>
-    <!-- Modal de Ampliação de Imagem -->
-    <div id="modal-image" class="modal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <span class="close" onclick="closeImageModal()">&times;</span>
-                <img id="modal-image-content" class="modal-image" alt="Imagem Ampliada">
+
+    <div class="table-responsive-cards-wrapper">
+        <div class="table-responsive-cards">
+            <?php foreach ($pessoas as $pessoa): ?>
+                <div class="card">
+                    <!-- Primeira linha: Foto e Nome -->
+                    <div class="card-header">
+                        <img
+                            src="<?= htmlspecialchars($pessoa['foto']) ?>"
+                            alt="Foto"
+                            class="small-preview"
+                            onclick="openImageModal('<?= htmlspecialchars($pessoa['foto']) ?>')"
+                            onerror="this.src='assets/images/no-image.png'; this.onclick=null; this.classList.remove('clickable');">
+                        <span class="nome-completo"><?= htmlspecialchars($pessoa['nome_completo']) ?></span>
+                    </div>
+
+                    <!-- Segunda linha: Data de Nascimento -->
+                    <div class="card-row">
+                        <strong>Data de Nascimento:</strong>
+                        <span>
+                            <?php
+                            // Formata a data para DD/MM/AAAA
+                            $nascimento = new DateTime($pessoa['nascimento']);
+                            echo $nascimento->format('d/m/Y');
+                            ?>
+                        </span>
+                    </div>
+
+                    <!-- Terceira linha: CPF -->
+                    <div class="card-row">
+                        <strong>CPF:</strong>
+                        <span><?= formatarCPF(htmlspecialchars($pessoa['cpf'])) ?></span>
+                    </div>
+
+                    <!-- Quarta linha: Rituais Participados -->
+                    <div class="card-row">
+                        <strong>Rituais Participados:</strong>
+                        <span><?= htmlspecialchars($pessoa['rituais_participados']) ?></span>
+                    </div>
+
+                    <!-- Ícones de Ação (Botões) -->
+                    <div class="card-actions">
+                        <a href="participante-visualizar.php?id=<?= $pessoa['id'] ?>" class="action-icon-mobile" title="Gerenciar rituais">
+                            <i class="fa-solid fa-list-check"></i>
+                        </a>
+                        <a href="participante-editar.php?id=<?= $pessoa['id'] ?>" class="action-icon-mobile" title="Editar dados do participante">
+                            <i class="fa-solid fa-pen-to-square"></i>
+                        </a>
+                        <a href="participante-excluir.php?id=<?= $pessoa['id'] ?>" class="action-icon-mobile danger" title="Excluir participante" onclick="return confirm('Tem certeza que deseja remover este participante permanentemente e desvincular de todos os rituais?')">
+                            <i class="fa-solid fa-trash"></i>
+                        </a>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
+
+        <!-- Modal de Ampliação de Imagem -->
+        <div id="modal-image" class="modal">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <span class="close" onclick="closeImageModal()">&times;</span>
+                    <img id="modal-image-content" class="modal-image" alt="Imagem Ampliada">
+                </div>
+            </div>
+        </div>
+
+        <!-- Paginação -->
+        <div class="pagination">
+            <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
+                <a href="?pagina=<?= $i ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>" class="<?= $pagina == $i ? 'active' : '' ?>"><?= $i ?></a>
+            <?php endfor; ?>
+        </div>
+    </div>
+
+    <div class="page-bottom">
+        <div class="actions">
+            <div class="left-actions">
+                <?php
+                // Verifica se há um parâmetro 'redirect' na URL
+                $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : 'home.php';
+                ?>
+                <a href="<?= $redirect ?>" class="btn voltar">Voltar</a>
+            </div>
+            <div class="right-actions">
+                <a href="participante-novo.php" class="btn novo-participante">Novo participante</a>
             </div>
         </div>
     </div>
 
-    <!-- Paginação -->
-    <div class="pagination">
-        <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
-            <a href="?pagina=<?= $i ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>" class="<?= $pagina == $i ? 'active' : '' ?>"><?= $i ?></a>
-        <?php endfor; ?>
-    </div>
-</div>
+    <script>
+        // Função para abrir a modal de imagem
+        function openImageModal(imageSrc) {
+            const modal = document.getElementById('modal-image');
+            const modalImage = document.getElementById('modal-image-content');
+            modalImage.src = imageSrc; // Define a imagem ampliada
+            modal.style.display = 'flex'; // Exibe a modal
+        }
 
-<script>
-    // Função para abrir a modal de imagem
-    function openImageModal(imageSrc) {
-        const modal = document.getElementById('modal-image');
-        const modalImage = document.getElementById('modal-image-content');
-        modalImage.src = imageSrc; // Define a imagem ampliada
-        modal.style.display = 'flex'; // Exibe a modal
-    }
+        // Função para fechar a modal de imagem
+        function closeImageModal() {
+            const modal = document.getElementById('modal-image');
+            modal.style.display = 'none'; // Oculta a modal
+        }
 
-    // Função para fechar a modal de imagem
-    function closeImageModal() {
-        const modal = document.getElementById('modal-image');
-        modal.style.display = 'none'; // Oculta a modal
-    }
+        document.addEventListener("DOMContentLoaded", function() {
+            const modals = document.querySelectorAll(".modal");
 
-    document.addEventListener("DOMContentLoaded", function() {
-        const modals = document.querySelectorAll(".modal");
-
-        modals.forEach(modal => {
-            modal.addEventListener("click", function(event) {
-                // Verifica se o clique foi fora do .modal-content
-                if (event.target === modal) {
-                    modal.style.display = "none";
-                }
+            modals.forEach(modal => {
+                modal.addEventListener("click", function(event) {
+                    // Verifica se o clique foi fora do .modal-content
+                    if (event.target === modal) {
+                        modal.style.display = "none";
+                    }
+                });
             });
         });
-    });
 
-    // Função para aplicar máscara no CPF
-    function mascaraCPF(input) {
-        let valor = input.value.replace(/\D/g, ''); // Remove tudo que não é número
-        if (valor.length > 11) valor = valor.slice(0, 11); // Limita a 11 dígitos
-        valor = valor.replace(/(\d{3})(\d)/, '$1.$2'); // Adiciona o primeiro ponto
-        valor = valor.replace(/(\d{3})(\d)/, '$1.$2'); // Adiciona o segundo ponto
-        valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2'); // Adiciona o traço
-        input.value = valor;
-    }
-
-    document.addEventListener('DOMContentLoaded', function() {
-        const cpfInput = document.getElementById('filtro_cpf');
-        if (cpfInput && cpfInput.value) {
-            // Reaplica a máscara ao valor preenchido
-            cpfInput.value = cpfInput.value.replace(/\D/g, ''); // Remove máscara temporariamente
-            mascaraCPF(cpfInput); // Reaplica a máscara
+        // Função para aplicar máscara no CPF
+        function mascaraCPF(input) {
+            let valor = input.value.replace(/\D/g, ''); // Remove tudo que não é número
+            if (valor.length > 11) valor = valor.slice(0, 11); // Limita a 11 dígitos
+            valor = valor.replace(/(\d{3})(\d)/, '$1.$2'); // Adiciona o primeiro ponto
+            valor = valor.replace(/(\d{3})(\d)/, '$1.$2'); // Adiciona o segundo ponto
+            valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2'); // Adiciona o traço
+            input.value = valor;
         }
-    });
 
-    // Função para remover máscara antes de enviar o formulário
-    document.querySelector('form.filters').addEventListener('submit', function(event) {
-        const cpfInput = document.getElementById('filtro_cpf');
-        if (cpfInput) {
-            cpfInput.value = cpfInput.value.replace(/\D/g, ''); // Remove tudo que não é número
+        document.addEventListener('DOMContentLoaded', function() {
+            const cpfInput = document.getElementById('filtro_cpf');
+            if (cpfInput && cpfInput.value) {
+                // Reaplica a máscara ao valor preenchido
+                cpfInput.value = cpfInput.value.replace(/\D/g, ''); // Remove máscara temporariamente
+                mascaraCPF(cpfInput); // Reaplica a máscara
+            }
+        });
+
+        // Função para remover máscara antes de enviar o formulário
+        document.querySelector('form.filters-mobile').addEventListener('submit', function(event) {
+            const filtroInput = document.getElementById('filtro');
+            if (filtroInput) {
+                // Verifica se o valor parece ser um CPF (contém apenas números após a remoção de máscara)
+                const valorSemMascara = filtroInput.value.replace(/\D/g, '');
+                if (/^\d+$/.test(valorSemMascara)) {
+                    filtroInput.value = valorSemMascara; // Remove a máscara
+                }
+            }
+        });
+
+        // Máscara para CPF
+        function aplicarMascaraCPF(input) {
+            let valor = input.value;
+
+            // Verifica se o valor contém apenas números
+            if (/^\d+$/.test(valor.replace(/\D/g, ''))) {
+                // Aplica a máscara de CPF
+                valor = valor.replace(/\D/g, ''); // Remove tudo que não é número
+                if (valor.length > 11) valor = valor.slice(0, 11); // Limita a 11 dígitos
+                valor = valor.replace(/(\d{3})(\d)/, '$1.$2'); // Adiciona o primeiro ponto
+                valor = valor.replace(/(\d{3})(\d)/, '$1.$2'); // Adiciona o segundo ponto
+                valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2'); // Adiciona o traço
+                input.value = valor;
+            } else {
+                // Não aplica a máscara se o valor contiver letras
+                input.value = valor;
+            }
         }
-    });
-</script>
 
-<?php require_once 'includes/footer.php'; ?>
+        // Função para remover máscara antes de enviar o formulário
+        document.querySelector('form.filters').addEventListener('submit', function(event) {
+            const cpfInput = document.getElementById('filtro_cpf');
+            if (cpfInput) {
+                cpfInput.value = cpfInput.value.replace(/\D/g, ''); // Remove tudo que não é número
+            }
+        });
+
+        document.addEventListener("DOMContentLoaded", function() {
+            const filtroInput = document.getElementById('filtro');
+            const clearBtn = document.querySelector('.filters-mobile .clear-btn');
+
+            // Mostra ou oculta o botão "Limpar" com base no valor do input
+            filtroInput.addEventListener('input', function() {
+                if (filtroInput.value.trim() !== '') {
+                    clearBtn.style.display = 'inline-block'; // Mostra o botão "X"
+                } else {
+                    clearBtn.style.display = 'none'; // Oculta o botão "X"
+                }
+            });
+
+            // Função para limpar a pesquisa
+            window.limparPesquisa = function() {
+                filtroInput.value = ''; // Limpa o campo de pesquisa
+                clearBtn.style.display = 'none'; // Oculta o botão "X"
+
+                // Recarrega a página para mostrar todos os itens novamente
+                location.href = location.pathname; // Redireciona para a mesma página sem parâmetros de pesquisa
+            };
+
+            // Verifica se há um valor pré-existente no campo de pesquisa ao carregar a página
+            if (filtroInput.value.trim() !== '') {
+                clearBtn.style.display = 'inline-block'; // Mantém o botão "X" visível se houver um valor
+            }
+        });
+    </script>
+
+    <?php require_once 'includes/footer.php'; ?>

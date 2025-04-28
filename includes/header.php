@@ -36,6 +36,8 @@ $_SESSION['last_activity'] = time();
     <title>Participantes - ICI</title>
     <link rel="icon" type="image/x-icon" href="assets/images/favicon.ico">
     <link rel="stylesheet" href="assets/css/styles.css">
+    <link rel="stylesheet" href="assets/css/styles-480.css">
+    <link rel="stylesheet" href="assets/css/styles-1366.css">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
@@ -49,7 +51,12 @@ $_SESSION['last_activity'] = time();
                 <img id="logo-image" src="assets/images/logo.png" alt="Logo Instituto Céu Interior">
             </a>
         </div>
-        <nav>
+        <!-- Botão do Menu Hamburguer -->
+        <button id="menu-toggle" class="hamburger-menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+        <!-- Menu de Navegação -->
+        <nav id="main-nav">
             <a href="home.php" class="<?= is_active('home.php') ?>">Home</a>
             <a href="participantes.php" class="<?= is_active('participantes.php') ?>">Participantes</a>
             <a href="rituais.php" class="<?= is_active('rituais.php') ?>">Rituais</a>
