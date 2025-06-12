@@ -1,0 +1,1348 @@
+/* Reset básico */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Estilo global */
+body {
+    font-family: Arial, sans-serif;
+    background-color: hsl(0, 0%, 88%);
+    line-height: 1.6;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    margin: 0;
+}
+
+.video-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+#bg-video {
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+}
+
+/* Container Principal */
+.login-container {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    color: white;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+/* Logo */
+.logo-container {
+    margin-bottom: 20px;
+    padding: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+.logo {
+    width: 150px;
+    height: auto;
+    display: block;
+}
+
+/* Título */
+.login-container h2 {
+    font-size: 1.5rem;
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+/* Formulário */
+.login-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    width: 100%;
+    max-width: 300px;
+}
+
+input[type="text"],
+input[type="password"] {
+    padding: 10px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 5px;
+    background: rgba(255, 255, 255, 0.7);
+    color: #333;
+    transition: background 0.3s ease;
+}
+
+input[type="text"]:focus,
+input[type="password"]:focus {
+    background: rgba(255, 255, 255, 0.9);
+    outline: none;
+}
+
+.login-button {
+    padding: 10px;
+    font-size: 1rem;
+    color: white;
+    background: #007BFF;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+button:hover {
+    background: #0056b3;
+}
+
+/* Header */
+header {
+    background-color: black;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+header .logo img {
+    margin-left: 80px;
+    height: 80px;
+    cursor: pointer;
+}
+
+header nav {
+    display: flex;
+    align-items: center;
+    margin-right: 80px;
+}
+
+header nav a {
+    color: white;
+    text-decoration: none;
+    margin-left: 30px;
+    font-size: 16px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+header nav a:hover {
+    background-color: #333;
+}
+
+/* Menu Hamburguer */
+.hamburger-menu {
+    display: none;
+    /* Oculto por padrão em telas grandes */
+    font-size: 24px;
+    color: white;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+/* Menu de Navegação */
+#main-nav {
+    display: flex;
+    gap: 20px;
+}
+
+/* Estilo para o item do menu ativo */
+header nav a.active {
+    background-color: yellow;
+    border: 2px solid #00bfff;
+    color: black;
+    font-weight: bold;
+}
+
+header nav .dropdown {
+    margin-left: 30px;
+    position: relative;
+    display: inline-block;
+}
+
+header nav .dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: black;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+    z-index: 1;
+}
+
+header nav .dropdown-content a {
+    color: rgb(255, 255, 255);
+    padding: 10px;
+    text-decoration: none;
+    display: block;
+}
+
+header nav .dropdown:hover .dropdown-content {
+    display: block;
+}
+
+/* Estilo para o span "Perfil" */
+header nav .dropdown span {
+    color: white;
+    font-size: 16px;
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+/* Destaque para o span "Perfil" quando ativo */
+header nav .dropdown span.active {
+    background-color: yellow;
+    border: 2px solid #00bfff;
+    color: black;
+    font-weight: bold;
+}
+
+/* Hover para o span "Perfil" */
+header nav .dropdown span:hover {
+    background-color: #333;
+}
+
+/* Estilo padrão do header */
+#main-header {
+    background-color: black;
+    color: white;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+/* Estilo do header quando reduzido */
+#main-header.scrolled {
+    padding: 10px 20px;
+    height: 60px;
+    background-color: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(5px);
+}
+
+#main-header.scrolled .logo img {
+    height: 50px;
+}
+
+#main-header.scrolled nav a,
+#main-header.scrolled .dropdown span {
+    font-size: 14px;
+}
+
+.page-title,
+.page-bottom {
+    flex: 1;
+    padding: 20px;
+    margin-top: 120px;
+    margin-left: 80px;
+    margin-right: 80px;
+    font-family: Arial, sans-serif;
+}
+
+/* Container principal */
+.container {
+    flex: 1;
+    padding: 20px;
+    margin-top: 20px;
+    margin-left: 80px;
+    margin-right: 80px;
+    margin-bottom: 20px;
+    background-color: rgb(255, 255, 255);
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 2);
+    font-family: Arial, sans-serif;
+}
+
+/* Cards */
+.cards-home {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 20px;
+}
+
+.card-home {
+    background-color: #00bfff;
+    color: black;
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 200px;
+    height: 100px;
+    text-align: center;
+    line-height: 60px;
+    font-size: 20px;
+    font-weight: bold;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    border: 2px solid transparent;
+    font-family: Arial, sans-serif;
+}
+
+.card-home:hover {
+    transform: scale(1.05);
+    border: 2px solid yellow;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+}
+
+
+
+@media (max-width: 768px) {
+    .cards-home {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* Footer */
+footer.desktop {
+    background-color: #fbff00;
+    color: rgb(10, 9, 63);
+    text-align: center;
+    padding: 5px;
+    margin-top: auto;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+}
+
+footer.desktop p {
+    font-size: 14px;
+}
+
+/* Botão de busca CEP */
+#buscar-cep-btn {
+    margin-left: 10px;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: Arial, sans-serif;
+}
+
+#buscar-cep-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Mensagens de sucesso/erro */
+.success {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border: 1px solid #c3e6cb;
+    font-family: Arial, sans-serif;
+}
+
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 4px;
+    border: 1px solid #f5c6cb;
+    font-family: Arial, sans-serif;
+}
+
+.alert {
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 4px;
+}
+
+/* Imagens pequenas */
+.small-image {
+    width: 50px;
+    height: auto;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 10px;
+}
+
+/* Estilo do modal */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    justify-content: center;
+    align-items: center;
+}
+
+/* Contêiner do modal */
+.modal-dialog {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    max-width: 800px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Conteúdo do modal */
+.modal-content {
+    position: relative;
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+    text-align: left;
+    overflow: hidden;
+}
+
+#modal-observacao .modal-content {
+    width: 600px;
+}
+
+#modal-detalhes-inscricao .modal-content {
+    width: 500px;
+}
+
+#modal-adicionar .modal-content {
+    width: auto;
+}
+
+#modal-cadastro .modal-content {
+    width: 500px;
+}
+
+/* Estilo para a lista dentro da modal */
+.modal-body ul.styled-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+/* Estilo para os títulos (h3) */
+.modal-body h3 {
+    font-size: 1.2em;
+    font-weight: bold;
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+/* Estilo para os itens da lista (li) */
+.modal-body ul.styled-list li {
+    margin-left: 20px;
+    line-height: 1.6;
+    font-size: 1em;
+}
+
+/* Estilo para os itens em negrito dentro dos <li> */
+.modal-body ul.styled-list li strong {
+    color: #858585;
+    font-weight: bold;
+}
+
+/* Botão de fechar */
+.close {
+    position: absolute;
+    top: 1px;
+    right: 1px;
+    width: 30px;
+    height: 30px;
+    background-color: rgb(150, 150, 150);
+    color: black;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    z-index: 1001;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.close:hover {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+/* Imagem dentro da modal */
+.modal-image {
+    max-width: 100%;
+    max-height: 400px;
+    object-fit: contain;
+    border: 2px solid #ddd;
+    border-radius: 8px;
+}
+
+.left-actions,
+.right-actions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+/* Botão Voltar */
+.btn.voltar {
+    background-color: #5cb85c;
+    border: 2px solid #4cae4c;
+}
+
+.btn.voltar:hover {
+    background-color: #449d44;
+}
+
+/* Botão Novo Ritual */
+.btn.novo-ritual,
+.novo-participante,
+.btn.salvar {
+    background-color: #00bfff;
+    border: 2px solid #00a2e6;
+}
+
+.btn.novo-ritual:hover,
+.novo-participante:hover,
+.btn.salvar:hover {
+    background-color: #0093cc;
+}
+
+/* Estilo geral do botão */
+.btn.ver-cadastro {
+    background-color: #fbff00;
+    color: #000;
+    border: 2px solid #00bfff;
+    padding: 5px 10px;
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-left: 15px;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover do botão */
+.btn.ver-cadastro:hover {
+    background-color: #333;
+    color: white;
+}
+
+.details button {
+    display: inline-flex;
+    align-items: flex-start;
+}
+
+/* Estilo geral da tabela */
+.styled-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.styled-table thead {
+    background-color: #00bfff;
+    color: black;
+}
+
+.styled-table th,
+.styled-table td {
+    padding: 5px 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.styled-table tbody tr:nth-child(even) {
+    background-color: #e9e9e9;
+}
+
+.styled-table tbody tr:hover {
+    background-color: #fffedd;
+}
+
+/* Estilo dos cabeçalhos clicáveis */
+.styled-table th a {
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.styled-table th a:hover {
+    color: #007bff;
+    text-decoration: underline;
+    text-decoration: none;
+}
+
+/* Ícones de ordenação */
+.styled-table th a .order-icon {
+    font-size: 12px;
+    color: #555;
+}
+
+/* Larguras personalizadas para as colunas */
+.col-foto {
+    width: 4%;
+}
+
+.col-nome {
+    width: 30%;
+}
+
+.col-nome a {
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.col-nome a:hover {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.col-data {
+    width: 8%;
+}
+
+.col-padrinho {
+    width: 8%;
+}
+
+.col-inscritos {
+    width: 6%;
+}
+
+.col-acoes {
+    width: 7%;
+}
+
+/* Larguras personalizadas para as colunas da tabela de pessoas */
+.col-foto-pessoa {
+    width: 5%;
+}
+
+.col-nome-pessoa {
+    width: 20%;
+}
+
+.col-nascimento {
+    width: 10%;
+}
+
+.col-cpf {
+    width: 10%;
+}
+
+.col-celular {
+    width: 10%;
+}
+
+.col-rituais-participados {
+    width: 10%;
+}
+
+.col-acoes-pessoa {
+    width: 10%;
+}
+
+/* Estilo para a imagem quadrada */
+.square-image {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border: 0px solid #ddd;
+    border-radius: 4px;
+}
+
+.square-image.clickable {
+    cursor: pointer;
+}
+
+/* Estilo para os ícones de ação */
+.action-icon {
+    font-size: 18px;
+    margin-right: 10px;
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s ease;
+    position: relative;
+    cursor: pointer;
+    border: none;
+    background: none;
+    padding: 0;
+}
+
+.action-icon:hover {
+    color: #0056b3;
+}
+
+.action-icon:hover::after {
+    content: attr(title);
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgb(77, 76, 76);
+    color: white;
+    padding: 5px;
+    border-radius: 4px;
+    font-size: 13px;
+    white-space: nowrap;
+    z-index: 1;
+}
+
+.action-icon.danger {
+    color: red;
+}
+
+.action-icon.danger:hover {
+    color: darkred;
+}
+
+/* Estilo para a paginação */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.pagination a {
+    padding: 8px 12px;
+    background-color: #00bfff;
+    color: black;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+.pagination a.active {
+    background-color: yellow;
+    border: 2px solid #00bfff;
+    font-weight: bold;
+}
+
+.pagination a:hover {
+    background-color: #333;
+    color: white;
+}
+
+/* Filtros */
+.filters {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    align-items: flex-end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.filter-group label {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.filter-group input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.filters button {
+    padding: 8px 16px;
+    background-color: #00bfff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.filters button:hover {
+    background-color: #0093cc;
+}
+
+.filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.filter-btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.filter-btn:hover {
+    opacity: 0.9;
+}
+
+/* Botão Filtrar */
+.filter-btn:first-child {
+    background-color: #00bfff;
+    color: white;
+}
+
+/* Botão Limpar Filtro */
+.clear-btn {
+    background-color: #ff4d4d;
+    color: white;
+    text-decoration: none;
+}
+
+.clear-btn:hover {
+    background-color: #cc0000;
+    /* Vermelho mais escuro */
+}
+
+/* Estilo para a seção superior (nome do ritual, botões e detalhes) */
+.ritual-header,
+.participant-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.ritual-header img,
+.participant-header img {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 2px solid #ddd;
+}
+
+.ritual-header .details,
+.participant-header .details {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.ritual-header .details h1,
+.participant-header .details h1 {
+    font-size: 24px;
+    margin: 0;
+}
+
+.ritual-header .details p,
+.participant-header .details p {
+    margin: 0;
+    font-size: 14px;
+    color: #555;
+}
+
+/* Botões no topo */
+.actions {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 20px;
+    justify-content: space-between;
+}
+
+.actions .btn {
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: bold;
+    text-decoration: none;
+    color: white;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.actions .btn.voltar {
+    background-color: #5cb85c;
+    border: 2px solid #4cae4c;
+}
+
+.actions .btn.voltar:hover {
+    background-color: #449d44;
+}
+
+.actions .btn.adicionar {
+    background-color: #00bfff;
+    border: 2px solid #00a2e6;
+}
+
+.actions .btn.adicionar:hover {
+    background-color: #0093cc;
+}
+
+/* Modal Adicionar Participante */
+.modal-content form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.modal-content form input,
+.modal-content form select,
+.modal-content form textarea {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Alinhamento dos botões na mesma linha */
+.button-container {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-start;
+    margin-top: 10px;
+
+}
+
+/* Estilo geral para os botões */
+.modal-content form button {
+    padding: 8px 16px;
+    background-color: #00bfff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+/* Botão "Pesquisar" */
+#pesquisar-btn {
+    background-color: #00bfff;
+    color: white;
+    flex-grow: 1;
+}
+
+#pesquisar-btn:hover {
+    background-color: #0093cc;
+}
+
+/* Botão "Limpar Pesquisa" */
+#limpar-pesquisa-btn {
+    background-color: #ff4d4d;
+    color: white;
+}
+
+#limpar-pesquisa-btn:hover {
+    background-color: #cc0000;
+}
+
+/* Tabela de participantes */
+.participantes-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.participantes-table thead {
+    background-color: #00bfff;
+    color: black;
+}
+
+.participantes-table th,
+.participantes-table td {
+    padding: 10px;
+    text-align: left;
+    border: 1px solid #ddd;
+}
+
+.participantes-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.participantes-table tbody tr:hover {
+    background-color: #f1f1f1;
+}
+
+/* Larguras personalizadas para as colunas da tabela de participantes */
+.col-foto-participante {
+    width: 5%;
+}
+
+.col-nome-participante {
+    width: 15%;
+}
+
+.col-nome-participante a,
+.col-nome-pessoa a {
+    color: black;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.col-nome-participante a:hover,
+.col-nome-pessoa a:hover {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.col-observacao {
+    width: 30%;
+}
+
+.col-presente {
+    width: 10%;
+}
+
+.col-acoes-participante {
+    width: 7%;
+}
+
+.col-foto-ritual {
+    width: 3%;
+}
+
+.col-nome-ritual {
+    width: 10%;
+}
+
+.col-data-ritual {
+    width: 5%;
+}
+
+.col-observacao-ritual {
+    width: 30%;
+}
+
+.col-acoes-ritual {
+    width: 5%;
+}
+
+/* Filtro por nome */
+.filtro-nome {
+    margin-bottom: 20px;
+}
+
+.filtro-nome input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Estilo para o botão de presença */
+.presence-btn {
+    padding: 5px 10px;
+    font-size: 14px;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.presence-btn.active {
+    background-color: #28a745;
+    color: white;
+}
+
+.presence-btn:not(.active) {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Estilo para a área de resultados */
+.scrollable-list {
+    max-height: 300px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+/* Estilo para os itens da lista */
+#lista-participantes,
+#lista-rituais {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#lista-participantes li,
+#lista-rituais li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+#lista-participantes li:last-child,
+#lista-rituais li:last-child {
+    border-bottom: none;
+}
+
+#lista-participantes img,
+#lista-rituais img {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 10%;
+}
+
+#lista-participantes .add-btn,
+#lista-rituais .add-btn {
+    margin-left: auto;
+    padding: 5px 10px;
+    background-color: #00bfff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+#lista-participantes .add-btn:hover,
+#lista-rituais .add-btn:hover {
+    background-color: #0093cc;
+}
+
+.add-new-btn {
+    padding: 8px 16px;
+    background-color: #28a745;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.add-new-btn:hover {
+    background-color: #218838;
+}
+
+/* Estilo geral para o formulário */
+.styled-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* Layout de linha (horizontal) */
+.form-line {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+/* Títulos das seções */
+.form-section h3 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Layout de duas colunas */
+.form-columns {
+    display: flex;
+    gap: 60px;
+}
+
+.form-column {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+/* Títulos das colunas */
+.form-column h3 {
+    font-size: 18px;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Layout horizontal para os campos */
+.horizontal-fields {
+    display: flex;
+    gap: 50px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+/* Agrupamento de cada campo */
+.field-group {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    flex: 1;
+}
+
+/* Estilo dos labels */
+.styled-form label {
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Estilo dos inputs e selects */
+.styled-form input,
+.styled-form select,
+.styled-form textarea {
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    margin-bottom: 15px;
+}
+
+/* Botão Buscar CEP */
+.cep-group {
+    display: flex;
+    align-items: flex;
+    gap: 10px;
+}
+
+#buscar-cep-btn.buscar-cep {
+    height: 35px;
+    margin-top: 28px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#buscar-cep-btn.buscar-cep:hover {
+    background-color: #0093cc;
+}
+
+/* Estilo para o botão de adicionar imagem */
+.btn.adicionar-imagem {
+    background-color: #00bfff;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s ease;
+}
+
+.btn.adicionar-imagem:hover {
+    background-color: #0093cc;
+}
+
+/* Estilo para o botão de excluir imagem */
+.btn.excluir-imagem {
+    background-color: #ff4d4d;
+    color: white;
+    padding: 5px 10px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+    transition: background-color 0.3s ease;
+}
+
+.btn.excluir-imagem:hover {
+    background-color: #cc0000;
+}
+
+/* Estilo para o preview da imagem */
+.small-preview {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
+/* Contêiner para o preview da imagem e o botão */
+.foto-preview-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+/* Contêiner para a imagem e o botão "Excluir Imagem" */
+.image-and-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.table-responsive-cards {
+    display: none;
+}
+
+.page-bottom,
+.page-title .mobile-actions {
+    display: none;
+}
+
+.filters-mobile {
+    display: none;
+}
+
+footer.mobile {
+    display: none;
+}
+

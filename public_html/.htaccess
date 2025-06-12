@@ -1,0 +1,85 @@
+RewriteEngine On
+RewriteBase /participantesici/public_html/
+
+# ----- Redirecionamentos principais -----
+# Página inicial → login
+RewriteRule ^$ /participantesici/app/auth/templates/login.php [L]
+# URL amigável para login
+RewriteRule ^login/?$ /participantesici/app/auth/templates/login.php [L]
+RewriteRule ^entrar/?$ /participantesici/app/auth/actions/login.php [L]
+# URL amigável para logout
+RewriteRule ^logout/?$ /participantesici/app/auth/actions/logout.php [L]
+
+# URL amigável para home
+RewriteRule ^home/?$ /participantesici/app/home/templates/home.php [L]
+
+# URL amigável para alterar_senha
+RewriteRule ^alterar_senha/?$ /participantesici/app/perfil/templates/alterar_senha.php [L]
+
+# URL amigável para rituais
+RewriteRule ^rituais/?$ /participantesici/app/rituais/actions/listar.php [L]
+RewriteRule ^ritual/([0-9]+)/?$ /participantesici/app/rituais/actions/visualizar.php?id=$1 [L]
+RewriteRule ^ritual/novo/?$ /participantesici/app/rituais/actions/novo.php [L]
+RewriteRule ^ritual/([0-9]+)/editar/?$ /participantesici/app/rituais/actions/editar.php?id=$1 [L]
+RewriteRule ^ritual/([0-9]+)/excluir/?$ /participantesici/app/rituais/actions/excluir.php?id=$1 [L]
+RewriteRule ^api/ritual/adicionar-participante/?$ /participantesici/app/rituais/api/adicionar_participante.php [L]
+RewriteRule ^api/ritual/buscar-participante/?$ /participantesici/app/rituais/api/buscar_participante.php [L]
+
+# URL amigável para participantes
+RewriteRule ^participantes/?$ /participantesici/app/participantes/actions/listar.php [L]
+RewriteRule ^participante/([0-9]+)/?$ /participantesici/app/participantes/actions/visualizar.php?id=$1 [L]
+RewriteRule ^participante/novo/?$ /participantesici/app/participantes/actions/novo.php [L]
+RewriteRule ^participante/([0-9]+)/editar/?$ /participantesici/app/participantes/actions/editar.php?id=$1 [L]
+RewriteRule ^participante/([0-9]+)/excluir/?$ /participantesici/app/participantes/actions/excluir.php?id=$1 [L]
+RewriteRule ^api/participante/verifica-cpf/?$ /participantesici/app/participantes/api/verifica_cpf.php [L]
+RewriteRule ^api/participante/adicionar-ritual/?$ /participantesici/app/participantes/api/adicionar_ritual.php [L]
+RewriteRule ^api/participante/buscar-ritual/?$ /participantesici/app/participantes/api/buscar_ritual.php [L]
+
+# URL amigável para incricoes
+RewriteRule ^api/inscricoes/atualizar-presenca/?$ /participantesici/app/inscricoes/api/atualizar_presenca.php [L]
+RewriteRule ^api/inscricoes/buscar-id/?$ /participantesici/app/inscricoes/api/buscar_id.php [L]
+RewriteRule ^api/inscricoes/detalhes-inscricao/?$ /participantesici/app/inscricoes/api/detalhes_inscricao.php [L]
+RewriteRule ^api/inscricoes/excluir-participacao/?$ /participantesici/app/inscricoes/api/excluir_participacao.php [L]
+RewriteRule ^api/inscricoes/salvar-inscricao/?$ /participantesici/app/inscricoes/api/salvar_inscricao.php [L]
+RewriteRule ^api/inscricoes/salvar-observacao/?$ /participantesici/app/inscricoes/api/salvar_observacao.php [L]
+
+# ----- Limpeza de URLs -----
+# Remove barra final (exceto para diretórios físicos)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)/$ /participantesici/public_html/$1 [L,R=301]
+
+# ----- Segurança -----
+# Bloqueia acesso direto a arquivos .php na pasta templates
+RewriteCond %{THE_REQUEST} /app/(home|auth)/templates/([^\s?]+)\.php [NC]
+RewriteRule ^ - [R=404,L]
+
+# Bloqueia acesso a qualquer arquivo .php (exceto via regras de rewrite)
+RewriteCond %{THE_REQUEST} \.php[\s?] [NC]
+RewriteRule ^ - [F,L]
+
+# Bloqueia acesso direto à pasta app
+RewriteRule ^app(/|$) - [F,L]
+
+# ----- URLS amigáveis para arquivos em public_html -----
+# Esconde .php para arquivos dentro de public_html
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^([^/]+)$ $1.php [L]
+
+# --- Variáveis de ambiente do banco de dados ---
+SetEnv DB_HOST localhost
+SetEnv DB_NAME participantesici_sistema
+SetEnv DB_USER participantesici_sistema
+SetEnv DB_PASS HAztRO;b6~.P
+
+# --- Segurança: Bloqueia acesso ao .htaccess ---
+<Files ".htaccess">
+    Order allow,deny
+    Deny from all
+</Files>
+
+# --- Segurança: Bloqueia acesso ao arquivo de conexão ---
+<Files "database.php">
+    Order allow,deny
+    Deny from all
+</Files>
