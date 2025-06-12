@@ -26,4 +26,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 // Se não for POST, redireciona para o formulário
 header("Location: /participantesici/public_html/login");
 exit;
-?>

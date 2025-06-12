@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $foto = null;
   if (!empty($_FILES['foto']['name'])) {
     $foto_nome = uniqid() . '_' . basename($_FILES['foto']['name']);
-    $foto_destino = __DIR__ . '/../../../storage/uploads/rituais' . $foto_nome;
+    $foto_destino = __DIR__ . '/../../../storage/uploads/rituais/' . $foto_nome;
     move_uploaded_file($_FILES['foto']['tmp_name'], $foto_destino);
     $foto = '/participantesici/storage/uploads/rituais' . $foto_nome;
   }

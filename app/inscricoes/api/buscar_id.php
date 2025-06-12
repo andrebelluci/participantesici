@@ -28,4 +28,3 @@ try {
 } catch (Exception $e) {
     echo json_encode(['error' => 'Erro ao buscar ID da inscrição: ' . $e->getMessage()]);
 }
-?>

@@ -123,3 +123,4 @@ require_once __DIR__ . '/../../includes/header.php';
 <script src="/participantesici/public_html/assets/js/rituais.js"></script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
+$senha_atual = hash('sha256', $_POST['senha_atual']);

@@ -37,4 +37,3 @@ if (isset($_GET['id']) && is_numeric($_GET['id'])) {
     header("Location: /participantesici/public_html/rituais");
     exit;
 }
-?>
