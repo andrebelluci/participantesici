@@ -100,9 +100,9 @@ document.addEventListener('DOMContentLoaded', function () {
   const cepInput = document.getElementById('cep');
   const celularInput = document.getElementById('celular');
 
-  if (cpfInput && cpfInput.value) mascaraCPF(cpfInput);
-  if (cepInput && cepInput.value) mascaraCEP(cepInput);
-  if (celularInput && celularInput.value) mascaraCelular(celularInput);
+  if (cpfInput?.value) mascaraCPF(cpfInput);
+  if (cepInput?.value) mascaraCEP(cepInput);
+  if (celularInput?.value) mascaraCelular(celularInput);
 });
 
 // Função para remover máscaras antes de enviar o formulário

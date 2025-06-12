@@ -37,7 +37,7 @@ function mascaraCPF(input) {
 
 document.addEventListener('DOMContentLoaded', function () {
   const cpfInput = document.getElementById('filtro_cpf');
-  if (cpfInput && cpfInput.value) {
+  if (cpfInput?.value) {
     // Reaplica a máscara ao valor preenchido
     cpfInput.value = cpfInput.value.replace(/\D/g, ''); // Remove máscara temporariamente
     mascaraCPF(cpfInput); // Reaplica a máscara

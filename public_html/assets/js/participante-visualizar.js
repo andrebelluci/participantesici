@@ -73,7 +73,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Captura os dados do formulário
     const formData = new FormData(form);
-    const inscricaoId = formData.get('id');
 
     // Envia os dados via AJAX
     fetch('/participantesici/public_html/api/inscricoes/salvar-inscricao', {
@@ -147,7 +146,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
     // Captura os dados do formulário
     const formData = new FormData(form);
-    const inscricaoId = formData.get('inscricao_id');
     const observacao = formData.get('observacao');
 
     // Verifica se a observação está vazia
