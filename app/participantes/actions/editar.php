@@ -51,7 +51,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if (move_uploaded_file($_FILES['foto']['tmp_name'], $foto_destino)) {
-      $foto = '/participantesici/storage/uploads/participantes/' . $foto_nome;
+      $foto = __DIR__ . '/../../../storage/uploads/participantes/' . $foto_nome;
 
       // Opcional: remover a foto antiga se existir
       if ($pessoa['foto'] && file_exists(__DIR__ . '/../../..' . $pessoa['foto'])) {

@@ -23,7 +23,7 @@ try {
 
   $pdo->commit();
 
-  $_SESSION['success'] = 'Ritual e participantes associados foram excluídos permanentemente.';
+  $_SESSION['success'] = 'Ritual excluído com sucesso!.';
 } catch (PDOException $e) {
   $pdo->rollBack();
   $_SESSION['error'] = 'Erro ao excluir ritual: ' . $e->getMessage();

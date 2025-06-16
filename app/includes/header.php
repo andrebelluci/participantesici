@@ -13,7 +13,7 @@ function is_active($pagina_url)
     $current_relative = str_replace($base_path, '', $current_url);
 
     // Compara com a URL passada (ex: 'rituais')
-    return trim($current_relative, '/') === trim($pagina_url, '/') ? 'active' : '';
+    return trim($current_relative, '/') === trim($pagina_url, '/') ? 'text-yellow-400' : '';
 }
 
 // Define o tempo limite
@@ -40,44 +40,60 @@ $_SESSION['last_activity'] = time();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Participantes - ICI</title>
     <link rel="icon" type="image/x-icon" href="/participantesici/public_html/assets/images/favicon.ico">
-    <link rel="stylesheet" href="/participantesici/public_html/assets/css/styles.css">
-    <link rel="stylesheet" href="/participantesici/public_html/assets/css/styles-480.css">
-    <link rel="stylesheet" href="/participantesici/public_html/assets/css/styles-1366.css">
-    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
-        integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA=="
         crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
 </head>
 
-<body>
-    <script src="/participantesici/public_html/assets/js/global-scripts.js"></script>
-    <header id="main-header">
-        <div class="logo">
-            <!-- Link para a página inicial -->
+<body class="bg-black min-h-screen flex flex-col">
+    <header class="fixed top-0 left-0 right-0 z-50 bg-black text-white shadow-lg">
+        <div class="flex items-center justify-between px-4 py-1 max-w-6xl mx-auto">
             <a href="/participantesici/public_html/home">
-                <img id="logo-image" src="/participantesici/public_html/assets/images/logo.png"
-                    alt="Logo Instituto Céu Interior">
+                <img src="/participantesici/public_html/assets/images/logo.png" alt="Logo Instituto Céu Interior"
+                    class="h-10">
             </a>
-        </div>
-        <!-- Botão do Menu Hamburguer -->
-        <button id="menu-toggle" class="hamburger-menu">
-            <i class="fa-solid fa-bars"></i>
-        </button>
-        <!-- Menu de Navegação -->
-        <nav id="main-nav">
-            <a href="/participantesici/public_html/home" class="<?= basename($_SERVER['PHP_SELF']) === 'home.php' ? 'active' : '' ?>">Home</a>
-            <a href="/participantesici/public_html/participantes" class="<?= is_active('participantes') ?>">Participantes</a>
-            <a href="/participantesici/public_html/rituais" class="<?= is_active('rituais') ?>">Rituais</a>
-            <div class="dropdown">
-                <!-- Aplicar classe .active ao span "Perfil" -->
-                <span class="<?= basename($_SERVER['PHP_SELF']) === 'alterar_senha.php' ? 'active' : '' ?>">Perfil</span>
-                <div class="dropdown-content">
-                    <a href="/participantesici/public_html/alterar_senha">Alterar Senha</a>
-                </div>
+
+            <!-- Botão Hamburguer -->
+            <div class="sm:hidden relative">
+                <button id="menu-toggle" class="text-white">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                </button>
+
+                <!-- Menu Mobile -->
+                <nav id="mobile-nav"
+                    class="hidden absolute right-0 mt-2 w-48 bg-black text-white shadow-md rounded-md z-50 flex flex-col"
+                    aria-label="Menu de navegação mobile">
+                    <a href="/participantesici/public_html/home"
+                        class="px-4 py-2 hover:bg-gray-800 <?= basename($_SERVER['PHP_SELF']) === 'home.php' ? 'text-yellow-400' : '' ?>">Home</a>
+                    <a href="/participantesici/public_html/participantes"
+                        class="px-4 py-2 hover:bg-gray-800 <?= is_active('participantes') ?>">Participantes</a>
+                    <a href="/participantesici/public_html/rituais"
+                        class="px-4 py-2 hover:bg-gray-800 <?= is_active('rituais') ?>">Rituais</a>
+                    <a href="/participantesici/public_html/alterar_senha"
+                        class="px-4 py-2 hover:bg-gray-800 <?= basename($_SERVER['PHP_SELF']) === 'alterar_senha.php' ? 'text-yellow-400' : '' ?>">Alterar
+                        Senha</a>
+                    <a href="/participantesici/public_html/logout" class="px-4 py-2 hover:bg-gray-800">Sair</a>
+                </nav>
             </div>
-            <a href="/participantesici/public_html/logout">Sair</a>
-        </nav>
+
+
+            <nav id="main-nav" class="hidden sm:flex space-x-8 items-center">
+                <a href="/participantesici/public_html/home"
+                    class="hover:text-[#00bfff] <?= basename($_SERVER['PHP_SELF']) === 'home.php' ? 'text-yellow-400' : '' ?>">Home</a>
+                <a href="/participantesici/public_html/participantes"
+                    class="hover:text-[#00bfff] <?= is_active('participantes') ?>">Participantes</a>
+                <a href="/participantesici/public_html/rituais"
+                    class="hover:text-[#00bfff] <?= is_active('rituais') ?>">Rituais</a>
+                <a href="/participantesici/public_html/alterar_senha"
+                    class="hover:text-[#00bfff] <?= basename($_SERVER['PHP_SELF']) === 'alterar_senha.php' ? 'text-yellow-400' : '' ?>">
+                    Alterar Senha
+                </a>
+                <a href="/participantesici/public_html/logout" class="hover:text-[#00bfff]">Sair</a>
+            </nav>
+        </div>
     </header>
 
-    <main>
-        
+    <main class="flex-grow bg-gray-300 pt-[50px]">

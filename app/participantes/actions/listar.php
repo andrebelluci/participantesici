@@ -7,14 +7,18 @@ $pagina = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
 $itens_por_pagina = 10;
 $offset = ($pagina - 1) * $itens_por_pagina;
 
-// Filtros
-$filtro_nome = isset($_GET['filtro_nome']) ? $_GET['filtro_nome'] : '';
-$filtro_cpf = isset($_GET['filtro_cpf']) ? $_GET['filtro_cpf'] : '';
-
 // Ordenação
 $order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'nome_completo'; // Coluna padrão: nome_completo
 $order_dir = isset($_GET['order_dir']) ? $_GET['order_dir'] : 'ASC'; // Direção padrão: ASC
 
+// Filtros
+$filtro_nome = isset($_GET['filtro_nome']) ? $_GET['filtro_nome'] : '';
+$filtro_cpf = isset($_GET['filtro_cpf']) ? $_GET['filtro_cpf'] : '';
+
+// Remove a máscara do CPF (mantém só números)
+$filtro_cpf = preg_replace('/\D/', '', $filtro_cpf);
+
+// Monta cláusulas de filtro
 $where = "";
 $params = [];
 if (!empty($filtro_nome)) {
@@ -22,8 +26,8 @@ if (!empty($filtro_nome)) {
   $params[] = "%$filtro_nome%";
 }
 if (!empty($filtro_cpf)) {
-  $where .= " AND cpf LIKE ?";
-  $params[] = "%$filtro_cpf%";
+  $where .= " AND cpf = ?"; // <- comparação exata
+  $params[] = $filtro_cpf;
 }
 
 // Consulta para contar o total de registros

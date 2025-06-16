@@ -16,13 +16,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     header("Location: /participantesici/public_html/home");
     exit;
   } else {
-    // Passa o erro para a página de login via sessão
     $_SESSION['login_error'] = 'Usuário ou senha inválidos!';
-    header("Location: /participantesici/public_html/login");
+    // Evita cache com parâmetro fake de tempo
+    header("Location: /participantesici/public_html/login?t=" . time());
     exit;
   }
 }
 
-// Se não for POST, redireciona para o formulário
 header("Location: /participantesici/public_html/login");
 exit;

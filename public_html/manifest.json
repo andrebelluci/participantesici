@@ -1,0 +1,35 @@
+{
+  "name": "Participantes ICI",
+  "short_name": "ICI",
+  "start_url": "/participantesici/public_html/login",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#1D4ED8",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/participantesici/public_html/assets/images/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/participantesici/public_html/assets/images/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/participantesici/public_html/assets/images/pwa-login-wide.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "/participantesici/public_html/assets/images/pwa-login-mobile.png",
+      "sizes": "375x667",
+      "type": "image/png",
+      "form_factor": "narrow"
+    }
+  ]
+}

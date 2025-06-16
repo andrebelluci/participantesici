@@ -37,7 +37,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if (move_uploaded_file($_FILES['foto']['tmp_name'], $foto_destino)) {
-      $foto = '/participantesici/storage/uploads/rituais/' . $foto_nome;
+      $foto = __DIR__ . '/../../../storage/uploads/rituais/' . $foto_nome;
 
       // Opcional: remover a foto antiga se existir
       if ($ritual['foto'] && file_exists(__DIR__ . '/../../..' . $ritual['foto'])) {

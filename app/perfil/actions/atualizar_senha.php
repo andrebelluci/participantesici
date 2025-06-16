@@ -1,10 +1,18 @@
 <?php
-session_start();
 require_once __DIR__ . '/../../functions/check_auth.php';
 require_once __DIR__ . '/../../config/database.php';
 
 $mensagem = '';
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+  if (empty($_POST['senha_atual']) || empty($_POST['nova_senha']) || empty($_POST['confirmar_senha'])) {
+    $_SESSION['mensagem'] = [
+      'tipo' => 'error',
+      'texto' => 'Todos os campos são obrigatórios.'
+    ];
+    header('Location: /participantesici/public_html/alterar_senha');
+    exit;
+  }
+
   $senha_atual = hash('sha256', $_POST['senha_atual']);
   $nova_senha = $_POST['nova_senha'];
   $confirmar_senha = $_POST['confirmar_senha'];
@@ -26,10 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $_SESSION['mensagem'] = ['tipo' => 'error', 'texto' => 'Senha atual incorreta.'];
   }
 
-  header("Location: /participantesici/public_html/alterar_senha");
+  header("Location: /participantesici/public_html/alterar_senha?t=" . time());
   exit;
 }
-
-header("Location: /participantesici/public_html/alterar_senha");
-exit;
 ?>

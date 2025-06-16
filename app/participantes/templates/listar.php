@@ -3,138 +3,161 @@ require_once __DIR__ . '/../../functions/check_auth.php';
 require_once __DIR__ . '/../../includes/header.php';
 ?>
 
-<div class="page-title">
-    <div class="mobile-actions">
-        <div class="left-actions">
-       <?php
-      // Verifica se há um parâmetro 'redirect' na URL
-      $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : 'home';
-      ?>
-      <a href="<?= $redirect ?>" class="btn-mobile voltar"><i class="fa-solid fa-chevron-left"></i></a>
+<div class="max-w-screen-xl mx-auto px-4 py-6">
+  <!-- Cabeçalho -->
+  <div class="flex items-center justify-between mb-6">
+    <?php
+    // Verifica se há um parâmetro 'redirect' na URL
+    $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : 'home';
+    ?>
+    <a href="<?= $redirect ?>" class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
+      <i class="fas fa-arrow-left mr-2"></i> Voltar
+    </a>
+    <a href="/participantesici/public_html/participante/novo"
+      class="bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
+      Novo Participante
+    </a>
+  </div>
 
-    </div>
+  <h1 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">👥 Participantes</h1>
+
+  <div class="md:hidden flex items-center justify-between">
+    <!-- Botão de abrir filtros no mobile -->
+    <button type="button" onclick="document.getElementById('filtros').classList.toggle('hidden')" class="
+      bg-gray-200 text-gray-700 px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-gray-300">
+      <i class="fas fa-search"></i> Filtrar
+    </button>
+    <!-- Botão limpar visível no mobile -->
+    <a href="/participantesici/public_html/participantes"
+      class="<?= empty($filtro_nome) && empty($filtro_cpf) ? 'hidden' : '' ?> bg-red-600 text-white px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-red-300 transition">
+      <i class="fas fa-broom mr-1"></i> Limpar Filtro
+    </a>
   </div>
-  <h1>👥 Participantes</h1>
-  <br>
-  <div class="actions">
-    <div class="left-actions">
-      <?php
-      // Verifica se há um parâmetro 'redirect' na URL
-      $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : 'home';
-      ?>
-      <a href="<?= $redirect ?>" class="btn voltar">Voltar</a>
-    </div>
-    <div class="right-actions">
-      <a href="/participantesici/public_html/participante/novo" class="btn novo-participante">Novo participante</a>
-    </div>
-  </div>
-</div>
-<div class="container">
+
   <!-- Filtros -->
-  <form method="GET" class="filters">
-    <div class="filter-group">
-      <label for="filtro_nome">Nome:</label>
+  <form id="filtros"
+    class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-3 rounded-lg shadow border border-gray-200 mb-6 <?= empty($filtro_nome) && empty($filtro_cpf) ? 'hidden md:grid' : '' ?>"
+    method="GET">
+    <div>
+      <label for="filtro_nome" class="block text-sm font-medium text-gray-700 mb-1">Nome:</label>
       <input type="text" name="filtro_nome" id="filtro_nome" placeholder="Filtrar por nome"
-        value="<?= htmlspecialchars($filtro_nome) ?>">
+        value="<?= htmlspecialchars($filtro_nome) ?>"
+        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00bfff]">
     </div>
-    <div class="filter-group">
-      <label for="filtro_cpf">CPF:</label>
+    <div>
+      <label for="filtro_cpf" class="block text-sm font-medium text-gray-700 mb-1">CPF:</label>
       <input type="text" name="filtro_cpf" id="filtro_cpf" placeholder="___.___.___-__"
-        value="<?= htmlspecialchars($filtro_cpf) ?>" oninput="mascaraCPF(this)">
+        value="<?= htmlspecialchars($filtro_cpf) ?>" oninput="mascaraCPF(this)"
+        class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00bfff]">
     </div>
-    <div class="filter-actions">
-      <button type="submit" class="filter-btn">Filtrar</button>
-      <a href="/participantesici/public_html/participantes" class="filter-btn clear-btn">Limpar filtro</a>
+    <div class="flex items-end gap-2">
+      <button type="submit"
+        class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
+        <i class="fas fa-search mr-1"></i> Buscar
+      </button>
+      <a href="/participantesici/public_html/participantes"
+        class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition font-semibold shadow">
+        <i class="fas fa-broom mr-1"></i> Limpar
+      </a>
     </div>
   </form>
 
-  <table class="styled-table">
-    <thead>
-      <tr>
-        <th class="col-foto-pessoa">Foto</th>
-        <th class="col-nome-pessoa">
-          <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&order_by=nome_completo&order_dir=<?= $order_by === 'nome_completo' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>"
-            class="sortable-header">
-            Nome Completo
-            <?php if ($order_by === 'nome_completo'): ?>
-              <span class="order-icon"><?= $order_dir === 'ASC' ? '▼' : '▲' ?></span>
-            <?php endif; ?>
-          </a>
-        </th>
-        <th class="col-nascimento">Nascimento</th>
-        <th class="col-cpf">CPF</th>
-        <th class="col-celular">Celular</th>
-        <th class="col-rituais-participados">
-          <a href="?pagina=<?= $pagina ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&order_by=rituais_participados&order_dir=<?= $order_by === 'rituais_participados' && $order_dir === 'ASC' ? 'DESC' : 'ASC' ?>"
-            class="sortable-header">
-            Rituais Participados
-            <?php if ($order_by === 'rituais_participados'): ?>
-              <span class="order-icon"><?= $order_dir === 'ASC' ? '▲' : '▼' ?></span>
-            <?php endif; ?>
-          </a>
-        </th>
-        <th class="col-acoes-pessoa">Ações</th>
-      </tr>
-    </thead>
-    <tbody>
-      <?php foreach ($pessoas as $pessoa): ?>
-        <tr>
-          <td class="col-foto-pessoa">
-            <img src="<?= htmlspecialchars($pessoa['foto']) ?>" alt="Foto" class="square-image clickable"
-              onclick="openImageModal('<?= htmlspecialchars($pessoa['foto']) ?>')"
-              onerror="this.src='/participantesici/public_html/assets/images/no-image.png'; this.onclick=null; this.classList.remove('clickable');">
-          </td>
-          <td class="col-nome-pessoa">
-            <a href="/participantesici/public_html/participante/<?= $pessoa['id'] ?>"
-              title="Gerenciar rituais"><?= htmlspecialchars($pessoa['nome_completo']) ?></a>
-          </td>
-          <td class="col-nascimento">
-            <?php
-            // Formata a data para DD/MM/AAAA
-            $nascimento = new DateTime($pessoa['nascimento']);
-            echo $nascimento->format('d/m/Y');
-            ?>
-          </td>
-          <td class="col-cpf"><?= formatarCPF(htmlspecialchars($pessoa['cpf'])) ?></td>
-          <td class="col-celular"><?= formatarTelefone(htmlspecialchars($pessoa['celular'])) ?></td>
-          <td class="col-rituais-participados"><?= htmlspecialchars($pessoa['rituais_participados']) ?></td>
-          <td class="col-acoes-pessoa">
-            <a href="/participantesici/public_html/participante/<?= $pessoa['id'] ?>" class="action-icon" title="Gerenciar rituais">
-              <i class="fa-solid fa-list-check"></i>
-            </a>
-            <a href="/participantesici/public_html/participante/<?= $pessoa['id'] ?>/editar" class="action-icon"
-              title="Editar dados do participante">
-              <i class="fa-solid fa-pen-to-square"></i>
-            </a>
-            <a href="/participantesici/public_html/participante/<?= $pessoa['id'] ?>/excluir" class="action-icon danger" title="Excluir participante"
-              onclick="return confirm('Tem certeza que deseja remover este participante permanentemente e desvincular de todos os rituais?')">
-              <i class="fa-solid fa-trash"></i>
-            </a>
-          </td>
-        </tr>
-      <?php endforeach; ?>
-    </tbody>
-  </table>
+  <!-- Lista de Cards -->
+  <div class="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+    <?php foreach ($pessoas as $pessoa): ?>
+      <div class="bg-white p-4 rounded-lg shadow border border-gray-200 flex flex-col gap-3">
+        <div class="flex items-center gap-4">
+          <img src="<?= htmlspecialchars($pessoa['foto']) ?>" alt="Foto"
+            class="w-16 h-16 rounded-lg object-cover border border-gray-300 cursor-pointer"
+            onclick="openImageModal(this.src)"
+            onerror="this.src='/participantesici/public_html/assets/images/no-image.png'; this.onclick=null; this.classList.remove('cursor-pointer');">
+          <div class="text-sm text-gray-600 space-y-1">
+            <h2 class="text-lg font-bold text-gray-800"><?= htmlspecialchars($pessoa['nome_completo']) ?></h2>
+            <p><span class="font-semibold">Nascimento:</span>
+              <?= (new DateTime($pessoa['nascimento']))->format('d/m/Y') ?></p>
+            <p><span class="font-semibold">CPF:</span> <?= formatarCPF($pessoa['cpf']) ?></p>
+            <p><span class="font-semibold">Celular:</span> <?= formatarTelefone($pessoa['celular']) ?></p>
+            <p><span class="font-semibold">Rituais:</span> <?= htmlspecialchars($pessoa['rituais_participados']) ?></p>
+          </div>
+        </div>
 
-  <!-- Modal de Ampliação de Imagem -->
-  <div id="modal-image" class="modal">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <span class="close" onclick="closeImageModal()">&times;</span>
-        <img id="modal-image-content" class="modal-image" alt="Imagem Ampliada">
+        <!-- Ações: Desktop (topo) | Mobile (base do card) -->
+        <div class="flex justify-center gap-6 md:justify-end md:gap-2 mt-2 text-sm">
+          <a href="/participantesici/public_html/participante/<?= $pessoa['id'] ?>"
+            class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
+            title="Gerenciar Rituais">
+            <div class="flex flex-col items-center sm:flex-row sm:gap-1">
+              <i class="fa-solid fa-list-check text-lg"></i>
+              <span class="block sm:hidden text-xs mt-1">Rituais</span>
+            </div>
+          </a>
+          <a href="/participantesici/public_html/participante/<?= $pessoa['id'] ?>/editar"
+            class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
+            title="Editar Participante">
+            <div class="flex flex-col items-center sm:flex-row sm:gap-1">
+              <i class="fa-solid fa-pen-to-square"></i>
+              <span class="block sm:hidden text-xs mt-1">Editar</span>
+            </div>
+          </a>
+          <button
+            onclick="abrirConfirmacaoExcluir('/participantesici/public_html/participante/<?= $pessoa['id'] ?>/excluir')"
+            class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded flex items-center gap-1"
+            title="Excluir Participante">
+            <div class="flex flex-col items-center sm:flex-row sm:gap-1">
+              <i class="fa-solid fa-trash"></i>
+              <span class="block sm:hidden text-xs mt-1">Excluir</span>
+            </div>
+          </button>
+        </div>
       </div>
-    </div>
+    <?php endforeach; ?>
+    <?php if (empty($pessoas)): ?>
+      <p class="text-center text-gray-500 col-span-full mt-4">
+        Nenhum participante encontrado.
+      </p>
+    <?php endif; ?>
   </div>
 
   <!-- Paginação -->
-  <div class="pagination">
+  <div class="flex justify-center mt-6 flex-wrap gap-2">
     <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
-      <a href="?pagina=<?= $i ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&data_inicio=<?= htmlspecialchars($data_inicio) ?>&data_fim=<?= htmlspecialchars($data_fim) ?>"
-        class="<?= $pagina == $i ? 'active' : '' ?>"><?= $i ?></a>
+      <a href="?pagina=<?= $i ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&filtro_cpf=<?= htmlspecialchars($filtro_cpf) ?>"
+        class="px-4 py-2 rounded border transition
+          <?= $pagina == $i ? 'bg-[#00bfff] text-black font-semibold shadow' : 'bg-white text-gray-600 hover:bg-gray-100' ?>">
+        <?= $i ?>
+      </a>
     <?php endfor; ?>
   </div>
 </div>
 
+<!-- Modal de Ampliação de Imagem -->
+<div id="modal-image" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg overflow-hidden shadow-lg relative max-w-sm w-full mx-4">
+    <button onclick="closeImageModal()" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg">
+      <i class="fas fa-window-close"></i>
+    </button>
+    <img id="modal-image-content" class="w-full h-auto object-contain max-h-[80vh]" alt="Imagem Ampliada">
+  </div>
+</div>
+
+<!-- Modal de Confirmação Genérico -->
+<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
+    <h2 class="text-xl font-bold mb-4 text-red-600" id="confirmModalTitle">ATENÇÃO!</h2>
+    <p class="text-gray-700 mb-6" id="confirmModalText">Tem certeza que deseja continuar?</p>
+    <div class="flex justify-end gap-3">
+    <button id="confirmModalBtn"
+        class="px-4 py-2 bg-[#00bfff] text-black rounded hover:bg-yellow-400 transition font-semibold">
+        Confirmar
+      </button>
+      <button onclick="closeConfirmModal()" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-900 transition font-semibold">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
 <script src="/participantesici/public_html/assets/js/participantes.js"></script>
+<script src="/participantesici/public_html/assets/js/modal.js"></script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
