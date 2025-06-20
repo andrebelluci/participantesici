@@ -1,17 +1,3 @@
-// Função para abrir a modal de imagem
-function openImageModal(imageSrc) {
-  const modal = document.getElementById('modal-image');
-  const modalImage = document.getElementById('modal-image-content');
-  modalImage.src = imageSrc;
-  modal.style.display = 'flex';
-}
-
-// Função para fechar a modal de imagem
-function closeImageModal() {
-  const modal = document.getElementById('modal-image');
-  modal.style.display = 'none';
-}
-
 // Preview da imagem
 const fileInput = document.getElementById('foto-input');
 const adicionarImagemBtn = document.getElementById('adicionar-imagem-btn');

@@ -1,2 +1,6 @@
 .senha
+.expo
 storage/uploads/*
+node_modules
+package.json
+package-lock.json

@@ -47,3 +47,13 @@ document.getElementById('confirmModalBtn').addEventListener('click', () => {
     confirmCallback();
   }
 });
+
+// Fechar modal com ESC
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const imageModal = document.getElementById('modal-image');
+    if (imageModal && !imageModal.classList.contains('hidden')) {
+      closeImageModal();
+    }
+  }
+});

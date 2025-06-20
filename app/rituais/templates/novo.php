@@ -3,73 +3,126 @@ require_once __DIR__ . '/../../functions/check_auth.php';
 require_once __DIR__ . '/../../includes/header.php';
 ?>
 
-<div class="page-title">
-    <h1>🪵 Novo Ritual</h1>
-    <br>
-    <div class="actions">
-        <div class="left-actions">
-            <a href="/participantesici/public_html/rituais" class="btn voltar">Voltar</a>
-        </div>
-        <div class="right-actions">
-            <button type="submit" form="formulario-ritual" class="btn salvar">Criar ritual</button>
-        </div>
+<div class="max-w-screen-lg mx-auto px-4 py-8">
+    <!-- Ações -->
+    <div class="flex items-center justify-between mb-6">
+        <a href="/participantesici/public_html/rituais"
+            class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
+            <i class="fas fa-arrow-left mr-2"></i> Voltar
+        </a>
+
+        <button type="submit" form="formulario-ritual"
+            class="bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
+            Criar ritual
+        </button>
     </div>
-</div>
-<div class="container">
-    <form method="POST" action="/participantesici/public_html/rituais/novo" enctype="multipart/form-data" class="styled-form" id="formulario-ritual">
-        <div class="form-columns">
-            <!-- Coluna 1: Dados do Ritual -->
-            <div class="form-column">
-                <h3>🍃Dados do Ritual</h3>
-                <label for="foto">Foto do Ritual:</label>
-                <div class="foto-preview-container">
-                    <input type="file" name="foto" id="foto-input" accept="image/*" style="display: none;">
-                    <button type="button" id="adicionar-imagem-btn" class="btn adicionar-imagem">Adicionar
-                        Imagem</button>
-                    <div id="preview-container" style="display: none;">
-                        <div class="image-and-button">
-                            <img id="preview-image" src="#" alt="Preview" class="small-preview">
-                            <button type="button" id="excluir-imagem-btn" class="btn excluir-imagem">Excluir
-                                Imagem</button>
-                        </div>
+
+    <!-- Título -->
+    <h1 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">🪵 Novo Ritual</h1>
+
+    <form method="POST" action="/participantesici/public_html/ritual/novo" enctype="multipart/form-data"
+        id="formulario-ritual" class="bg-white p-6 rounded-lg shadow space-y-6 border border-gray-200" novalidate>
+
+        <!-- Dados do Ritual -->
+        <div>
+            <h2 class="text-lg font-semibold text-gray-700 mb-4">🍃 Dados do Ritual</h2>
+
+            <!-- Upload de imagem -->
+            <div class="mb-6 w-full md:w-1/6">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Foto do Ritual:</label>
+
+                <input type="file" name="foto" id="foto-input" accept="image/*" class="hidden">
+
+                <!-- Área de Upload -->
+                <div id="upload-area"
+                    class="border-2 border-dashed border-gray-300 rounded-lg p-4 md:p-4 text-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer">
+                    <div class="flex flex-col items-center">
+                        <svg class="w-8 h-8 md:w-12 md:h-12 text-gray-400 mb-2 md:mb-3" fill="none"
+                            stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        <p class="text-xs md:text-sm font-medium text-gray-700 mb-1">Adicionar Foto</p>
+                        <p class="text-xs text-gray-500 hidden md:block">Clique para escolher</p>
                     </div>
                 </div>
-                <br>
-                <div class="horizontal-fields">
-                    <div class="field-group">
-                        <label for="nome">Nome do Ritual:</label>
-                        <input type="text" name="nome" id="nome" required>
+
+                <!-- Preview da Imagem -->
+                <div id="preview-container" class="hidden mt-4">
+                    <!-- Container quadrado fixo -->
+                    <div class="relative bg-white rounded-lg border border-gray-200 overflow-hidden">
+                        <div class="aspect-square w-full"> <!-- Força aspecto 1:1 -->
+                            <img id="preview-image" src="#" alt="Preview"
+                                class="w-full h-full object-cover cursor-pointer"
+                                onclick="openImageModal(this.src)">
+                        </div>
                     </div>
 
-                    <div class="field-group">
-                        <label for="data_ritual">Data do Ritual:</label>
-                        <input type="date" name="data_ritual" id="data_ritual" required>
+                    <div class="flex flex-col md:flex-row gap-2 mt-3">
+                        <button type="button" id="substituir-imagem-btn"
+                            class="bg-blue-600 text-white py-2 px-2 md:px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-xs md:text-sm">
+                            Substituir
+                        </button>
+                        <button type="button" id="excluir-imagem-btn"
+                            class="bg-red-600 text-white py-2 px-2 md:px-4 rounded-lg hover:bg-red-700 transition-colors font-medium text-xs md:text-sm">
+                            Remover
+                        </button>
                     </div>
+                </div>
+            </div>
 
-                    <div class="field-group">
-                        <label for="padrinho_madrinha">Padrinho ou Madrinha:</label>
-                        <select name="padrinho_madrinha" id="padrinho_madrinha" required>
-                            <option value="Dirceu">Dirceu</option>
-                            <option value="Gabriela">Gabriela</option>
-                            <option value="Dirceu e Gabriela">Dirceu e Gabriela</option>
-                        </select>
-                    </div>
+            <!-- Campos do Ritual -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="nome" class="block text-sm font-medium text-gray-700 mb-1">Nome do Ritual:</label>
+                    <input type="text" name="nome" id="nome" required
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
+                </div>
+
+                <div>
+                    <label for="data_ritual" class="block text-sm font-medium text-gray-700 mb-1">Data do
+                        Ritual:</label>
+                    <input type="date" name="data_ritual" id="data_ritual" required
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
+                </div>
+
+                <div>
+                    <label for="padrinho_madrinha" class="block text-sm font-medium text-gray-700 mb-1">Padrinho ou
+                        Madrinha:</label>
+                    <select name="padrinho_madrinha" id="padrinho_madrinha" required
+                        class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Selecione...</option>
+                        <option value="Dirceu">Dirceu</option>
+                        <option value="Gabriela">Gabriela</option>
+                        <option value="Dirceu e Gabriela">Dirceu e Gabriela</option>
+                    </select>
+                    <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
                 </div>
             </div>
         </div>
     </form>
-
-    <!-- Modal de Ampliação de Imagem -->
-    <div id="modal-image" class="modal">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <span class="close" onclick="closeImageModal()">&times;</span>
-                <img id="modal-image-content" class="modal-image" alt="Imagem Ampliada">
-            </div>
-        </div>
-    </div>
 </div>
 
+<!-- Botão Voltar ao Topo -->
+<button id="scroll-to-top"
+    class="fixed bottom-12 right-4 bg-[#00bfff] hover:bg-yellow-400 text-black p-3 rounded-full shadow-lg transform transition-all duration-300 ease-in-out opacity-0 invisible translate-y-4 z-50">
+    <i class="fas fa-chevron-up text-lg"></i>
+</button>
+
+<!-- Modal de Ampliação de Imagem -->
+<div id="modal-image" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg overflow-hidden shadow-lg relative max-w-sm w-full mx-4">
+    <button onclick="closeImageModal()" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg">
+      <i class="fas fa-window-close"></i>
+    </button>
+    <img id="modal-image-content" class="w-full h-auto object-contain max-h-[80vh]" alt="Imagem Ampliada">
+  </div>
+</div>
+
+<script src="/participantesici/public_html/assets/js/ritual.js"></script>
 <script src="/participantesici/public_html/assets/js/ritual-novo.js"></script>
+<script src="/participantesici/public_html/assets/js/modal.js"></script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

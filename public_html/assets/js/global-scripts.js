@@ -1,13 +1,41 @@
+function toggleSenha() {
+    const inputSenha = document.getElementById('senha'); // <- id do input de senha
+    const icon = document.getElementById('iconOlho');
+    const btn = document.getElementById('toggleSenhaBtn');
+
+    if (!inputSenha || !icon || !btn) return;
+
+    const mostrando = inputSenha.type === 'text';
+    inputSenha.type = mostrando ? 'password' : 'text';
+
+    icon.classList.toggle('fa-eye', mostrando);
+    icon.classList.toggle('fa-eye-slash', !mostrando);
+    btn.title = mostrando ? 'Mostrar senha' : 'Esconder senha';
+}
+
 document.addEventListener('DOMContentLoaded', function () {
+    // Ativa menu mobile se houver
     const toggleButton = document.getElementById('menu-toggle');
     const mobileNav = document.getElementById('mobile-nav');
+    if (toggleButton && mobileNav) {
+        toggleButton.addEventListener('click', function () {
+            mobileNav.classList.toggle('hidden');
+        });
+    }
 
-    toggleButton.addEventListener('click', function () {
-        mobileNav.classList.toggle('hidden');
+    // Inicializa validação para todos os formulários com campos obrigatórios
+    document.querySelectorAll('form').forEach((form) => {
+        if (form.querySelector('[required]')) {
+            configurarValidacao(form);
+        }
     });
+
+    initScrollToTop();
 });
 
-// Alternar visibilidade de todos os campos de senha
+/**
+ * Alterna visibilidade de todos os campos de senha
+ */
 function toggleTodasSenhas(btn, icone) {
     const inputsSenha = document.querySelectorAll('.senha-input');
     const exibir = Array.from(inputsSenha).some(input => input.type === 'password');
@@ -26,75 +54,85 @@ function toggleTodasSenhas(btn, icone) {
     }
 }
 
-// Validação simples de campos obrigatórios (visual)
-function validarCamposObrigatorios(formSelector = 'form') {
-    const formulario = document.querySelector(formSelector);
-
-    if (!formulario) return;
-
-    formulario.addEventListener('submit', function (e) {
+/**
+ * Configura validação visual de campos obrigatórios
+ */
+function configurarValidacao(form) {
+    form.addEventListener('submit', function (e) {
         let valido = true;
 
-        formulario.querySelectorAll('input[required]').forEach(input => {
-            const erro = input.parentElement.querySelector('p');
+        form.querySelectorAll('[required]').forEach((input) => {
+            const mensagemErro = encontrarMensagemErro(input);
             if (!input.value.trim()) {
                 input.classList.add('border-red-500');
-                if (erro) erro.classList.remove('hidden');
+                input.focus();
+                mensagemErro?.classList.remove('hidden');
                 valido = false;
             } else {
                 input.classList.remove('border-red-500');
-                if (erro) erro.classList.add('hidden');
+                mensagemErro?.classList.add('hidden');
             }
         });
 
         if (!valido) e.preventDefault();
     });
 
-    // validação em blur
-    formulario.querySelectorAll('input[required]').forEach(input => {
+    form.querySelectorAll('[required]').forEach((input) => {
         input.addEventListener('blur', () => {
-            const erro = input.parentElement.querySelector('p');
+            const mensagemErro = encontrarMensagemErro(input);
             if (!input.value.trim()) {
                 input.classList.add('border-red-500');
-                if (erro) erro.classList.remove('hidden');
+                i
+                mensagemErro?.classList.remove('hidden');
             } else {
                 input.classList.remove('border-red-500');
-                if (erro) erro.classList.add('hidden');
+                mensagemErro?.classList.add('hidden');
             }
         });
     });
 }
 
-// Executa automaticamente se tiver senha-input ou campos obrigatórios
-document.addEventListener('DOMContentLoaded', () => {
-    if (document.querySelector('.senha-input')) {
-        validarCamposObrigatorios();
+/**
+ * Encontra <p> de erro associado ao input
+ * Procura por id="erro-NOME" ou <p> imediatamente após o input
+ */
+function encontrarMensagemErro(input) {
+    const erroPorId = document.getElementById(`erro-${input.name}`);
+    if (erroPorId) return erroPorId;
+
+    const proximo = input.nextElementSibling;
+    if (proximo?.tagName === 'P' && proximo.classList.contains('text-red-500')) {
+        return proximo;
     }
-});
 
-document.addEventListener("DOMContentLoaded", () => {
-    const form = document.getElementById("formulario-senha");
+    return null;
+}
 
-    if (form) {
-        form.addEventListener("submit", (e) => {
-            let isValid = true;
+// ============= SCROLL TO TOP =============
+function initScrollToTop() {
+    const scrollToTopBtn = document.getElementById('scroll-to-top');
+    if (!scrollToTopBtn) return;
 
-            form.querySelectorAll("input[required]").forEach((input) => {
-                const erroMsg = document.getElementById(`erro-${input.name}`);
-                if (!input.value.trim()) {
-                    input.classList.add("border-red-500");
-                    erroMsg?.classList.remove("hidden");
-                    isValid = false;
-                } else {
-                    input.classList.remove("border-red-500");
-                    erroMsg?.classList.add("hidden");
-                }
-            });
+    const scrollThreshold = 300;
 
-            if (!isValid) {
-                e.preventDefault(); // impede o envio do formulário
-            }
+    function toggleScrollButton() {
+        if (window.pageYOffset > scrollThreshold) {
+            scrollToTopBtn.classList.remove('opacity-0', 'invisible', 'translate-y-4');
+            scrollToTopBtn.classList.add('opacity-100', 'visible', 'translate-y-0');
+        } else {
+            scrollToTopBtn.classList.remove('opacity-100', 'visible', 'translate-y-0');
+            scrollToTopBtn.classList.add('opacity-0', 'invisible', 'translate-y-4');
+        }
+    }
+
+    function scrollToTop() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
         });
     }
-});
 
+    window.addEventListener('scroll', toggleScrollButton);
+    scrollToTopBtn.addEventListener('click', scrollToTop);
+    toggleScrollButton();
+  }

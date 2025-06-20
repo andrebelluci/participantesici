@@ -16,6 +16,7 @@ unset($_SESSION['login_error']);
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="manifest" href="/participantesici/public_html/manifest.json" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <script src="/participantesici/public_html/assets/js/global-scripts.js?t=<?= time() ?>"></script>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
 

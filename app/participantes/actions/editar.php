@@ -7,8 +7,7 @@ $id = $_GET['id'] ?? null;
 if (!$id) {
   die("ID da pessoa não especificado.");
 }
-$redirect = $_GET['redirect'] ?? '/participantesici/public_html/participantes'; // Página padrão se não houver redirect
-
+$redirect = $_GET['redirect'] ?? '/participantesici/public_html/participantes';
 
 // Consulta os dados da pessoa no banco de dados
 $stmt = $pdo->prepare("SELECT * FROM participantes WHERE id = ?");
@@ -17,6 +16,30 @@ $pessoa = $stmt->fetch();
 
 if (!$pessoa) {
   die("Pessoa não encontrada.");
+}
+
+// ✅ FUNÇÃO PARA GERAR NOME DE ARQUIVO INTELIGENTE
+function gerarNomeArquivoParticipante($cpf, $extensao)
+{
+  $cpfLimpo = preg_replace('/\D/', '', $cpf); // Remove tudo que não é número
+  $numeroAleatorio = uniqid();
+  return $numeroAleatorio . '_' . $cpfLimpo . '.' . $extensao;
+}
+
+// ✅ FUNÇÃO PARA EXCLUIR FOTO ANTIGA
+function excluirFotoAntigaParticipante($cpf)
+{
+  $cpfLimpo = preg_replace('/\D/', '', $cpf);
+  $diretorio = __DIR__ . '/../../../storage/uploads/participantes/';
+
+  if (is_dir($diretorio)) {
+    $arquivos = glob($diretorio . '*_' . $cpfLimpo . '.*');
+    foreach ($arquivos as $arquivo) {
+      if (file_exists($arquivo)) {
+        unlink($arquivo);
+      }
+    }
+  }
 }
 
 // Processamento do formulário de edição
@@ -40,46 +63,101 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $bairro = $_POST['bairro'];
   $sobre_participante = $_POST['sobre_participante'];
 
-  // Processar upload de nova foto
-  if (!empty($_FILES['foto']['name'])) {
-    $foto_nome = uniqid() . '_' . basename($_FILES['foto']['name']);
+  // ✅ GERENCIAMENTO DE IMAGENS MELHORADO
+  $foto = $pessoa['foto']; // Mantém a foto atual por padrão
+
+  // Verifica se há imagem cropada (prioridade)
+  if (!empty($_POST['foto_cropada'])) {
+    // Exclui fotos antigas baseadas no CPF
+    excluirFotoAntigaParticipante($cpf);
+
+    // Processa imagem cropada (base64)
+    $imageData = $_POST['foto_cropada'];
+    if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $matches)) {
+      $imageType = $matches[1];
+      $imageData = substr($imageData, strpos($imageData, ',') + 1);
+      $imageData = base64_decode($imageData);
+
+      $foto_nome = gerarNomeArquivoParticipante($cpf, $imageType);
+      $foto_destino = __DIR__ . '/../../../storage/uploads/participantes/' . $foto_nome;
+
+      if (!is_dir(dirname($foto_destino))) {
+        mkdir(dirname($foto_destino), 0755, true);
+      }
+
+      if (file_put_contents($foto_destino, $imageData)) {
+        $foto = '/participantesici/storage/uploads/participantes/' . $foto_nome;
+      }
+    }
+  }
+  // Verifica se há upload de nova foto
+  elseif (!empty($_FILES['foto']['name'])) {
+    // Exclui fotos antigas baseadas no CPF
+    excluirFotoAntigaParticipante($cpf);
+
+    $extensao = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
+    $foto_nome = gerarNomeArquivoParticipante($cpf, $extensao);
     $foto_destino = __DIR__ . '/../../../storage/uploads/participantes/' . $foto_nome;
 
-    // Criar diretório se não existir
     if (!is_dir(dirname($foto_destino))) {
       mkdir(dirname($foto_destino), 0755, true);
     }
 
     if (move_uploaded_file($_FILES['foto']['tmp_name'], $foto_destino)) {
-      $foto = __DIR__ . '/../../../storage/uploads/participantes/' . $foto_nome;
-
-      // Opcional: remover a foto antiga se existir
-      if ($pessoa['foto'] && file_exists(__DIR__ . '/../../..' . $pessoa['foto'])) {
-        unlink(__DIR__ . '/../../..' . $pessoa['foto']);
-      }
+      $foto = '/participantesici/storage/uploads/participantes/' . $foto_nome;
     }
+  }
+  // ✅ VERIFICAR SE FOI SOLICITADA REMOÇÃO DE FOTO
+  elseif (isset($_POST['remover_foto'])) {
+    excluirFotoAntigaParticipante($cpf);
+    $foto = null;
   }
 
   // Verifica se o e-mail é válido
   if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^[a-zA-Z0-9._%+-]{3,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $email)) {
-    die("Erro: Por favor, digite um e-mail válido.");
+    $_SESSION['error'] = 'Erro: Por favor, digite um e-mail válido.';
+    header("Location: /participantesici/public_html/participante/editar?id=$id");
+    exit;
   }
 
   // Verifica se o CPF já existe no banco de dados (ignorando o próprio participante)
   $stmt_check_cpf = $pdo->prepare("SELECT id FROM participantes WHERE cpf = ? AND id != ?");
-  $stmt_check_cpf->execute([$cpf, $id]); // Passa o CPF e o ID do participante atual
+  $stmt_check_cpf->execute([$cpf, $id]);
   if ($stmt_check_cpf->rowCount() > 0) {
-    die("<script>alert('Erro: Este CPF já está cadastrado.'); window.location.href = 'participante-editar?id=$id';</script>");
+    $_SESSION['error'] = 'Erro: Este CPF já está cadastrado.';
+    header("Location: /participantesici/public_html/participante/editar?id=$id");
+    exit;
+  }
+
+  // ✅ SE O CPF MUDOU, PRECISAMOS RENOMEAR A FOTO
+  if ($cpf !== $pessoa['cpf'] && $foto) {
+    // Encontra foto atual
+    $cpfAntigo = preg_replace('/\D/', '', $pessoa['cpf']);
+    $cpfNovo = preg_replace('/\D/', '', $cpf);
+    $diretorio = __DIR__ . '/../../../storage/uploads/participantes/';
+
+    $arquivosAntigos = glob($diretorio . '*_' . $cpfAntigo . '.*');
+    if (!empty($arquivosAntigos)) {
+      $arquivoAntigo = $arquivosAntigos[0];
+      $extensao = pathinfo($arquivoAntigo, PATHINFO_EXTENSION);
+      $novoNome = gerarNomeArquivoParticipante($cpf, $extensao);
+      $novoArquivo = $diretorio . $novoNome;
+
+      if (rename($arquivoAntigo, $novoArquivo)) {
+        $foto = '/participantesici/storage/uploads/participantes/' . $novoNome;
+      }
+    }
   }
 
   // Atualiza os dados no banco de dados
   $stmt_update = $pdo->prepare("
-        UPDATE participantes SET
-            foto = ?, nome_completo = ?, nascimento = ?, sexo = ?, cpf = ?, rg = ?, passaporte = ?,
-            celular = ?, email = ?, como_soube = ?, cep = ?, endereco_rua = ?, endereco_numero = ?,
-            endereco_complemento = ?, cidade = ?, estado = ?, bairro = ?, sobre_participante = ?
-        WHERE id = ?
-    ");
+    UPDATE participantes SET
+        foto = ?, nome_completo = ?, nascimento = ?, sexo = ?, cpf = ?, rg = ?, passaporte = ?,
+        celular = ?, email = ?, como_soube = ?, cep = ?, endereco_rua = ?, endereco_numero = ?,
+        endereco_complemento = ?, cidade = ?, estado = ?, bairro = ?, sobre_participante = ?
+    WHERE id = ?
+  ");
+
   $stmt_update->execute([
     $foto,
     $nome_completo,
@@ -102,8 +180,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $id
   ]);
 
-  echo "<script>alert('Pessoa atualizada com sucesso!');</script>";
-  echo "<script>window.location.href = '$redirect?id=$id';</script>";
+  $_SESSION['success'] = 'Pessoa atualizada com sucesso!';
+  header("Location: $redirect?id=$id");
+  exit;
 }
 
 // Se não for POST, mostrar formulário
