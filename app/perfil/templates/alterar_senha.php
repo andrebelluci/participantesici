@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../includes/header.php';
     <div class="flex items-center justify-between mb-6">
         <a href="/participantesici/public_html/home"
             class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
-            <i class="fas fa-arrow-left mr-2"></i> Voltar
+            <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
         </a>
 
         <button type="submit" form="formulario-senha"

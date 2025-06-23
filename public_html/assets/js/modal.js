@@ -24,6 +24,16 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 });
 
+// Fechar modal com ESC
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const imageModal = document.getElementById('modal-image');
+    if (imageModal && !imageModal.classList.contains('hidden')) {
+      closeImageModal();
+    }
+  }
+});
+
 // Modal de confirmação
 let confirmCallback = null;
 
@@ -45,15 +55,5 @@ function closeConfirmModal() {
 document.getElementById('confirmModalBtn').addEventListener('click', () => {
   if (typeof confirmCallback === 'function') {
     confirmCallback();
-  }
-});
-
-// Fechar modal com ESC
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') {
-    const imageModal = document.getElementById('modal-image');
-    if (imageModal && !imageModal.classList.contains('hidden')) {
-      closeImageModal();
-    }
   }
 });

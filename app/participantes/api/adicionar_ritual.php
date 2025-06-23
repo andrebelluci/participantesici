@@ -14,17 +14,6 @@ if (!$ritual_id || !$participante_id || !is_numeric($ritual_id) || !is_numeric($
 }
 
 try {
-  // Verifica se o ritual já está vinculado ao participante
-  $stmt = $pdo->prepare("
-        SELECT id FROM inscricoes
-        WHERE ritual_id = ? AND participante_id = ?
-    ");
-  $stmt->execute([$ritual_id, $participante_id]);
-  if ($stmt->fetch()) {
-    echo json_encode(['success' => false, 'error' => 'Ritual já vinculado a este participante']);
-    exit;
-  }
-
   // Insere o ritual para o participante
   $stmt = $pdo->prepare("
         INSERT INTO inscricoes (ritual_id, participante_id)

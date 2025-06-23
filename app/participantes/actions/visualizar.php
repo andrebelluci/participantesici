@@ -8,6 +8,21 @@ $stmt = $pdo->prepare("SELECT * FROM participantes WHERE id = ?");
 $stmt->execute([$id]);
 $pessoa = $stmt->fetch();
 
+// ✅ FUNÇÃO PARA CONTAR TOTAL DE RITUAIS DO PARTICIPANTE
+function contarRituaisParticipados($pdo, $participante_id)
+{
+  $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM inscricoes WHERE participante_id = ? AND presente = 'Sim'");
+  $stmt->execute([$participante_id]);
+  return $stmt->fetch()['total'];
+}
+
+function contarRituaisNaoParticipados($pdo, $participante_id)
+{
+  $stmt = $pdo->prepare("SELECT COUNT(*) as total FROM inscricoes WHERE participante_id = ? AND presente = 'Não'");
+  $stmt->execute([$participante_id]);
+  return $stmt->fetch()['total'];
+}
+
 function formatarCPF($cpf)
 {
   // Remove caracteres não numéricos
@@ -19,9 +34,52 @@ function formatarCPF($cpf)
     substr($cpf, 9, 2);
 }
 
+function formatarCEP($cep)
+{
+  if (empty($cep))
+    return '';
+
+  $cep = preg_replace('/\D/', '', $cep);
+
+  if (strlen($cep) !== 8)
+    return $cep;
+
+  return substr($cep, 0, 5) . '-' . substr($cep, 5);
+}
+
+/**
+ * Formatar celular com máscara (__) _____-____
+ */
+function formatarCelular($celular)
+{
+  if (empty($celular))
+    return '';
+
+  $celular = preg_replace('/\D/', '', $celular);
+
+  // 11 dígitos (padrão com 9)
+  if (strlen($celular) === 11) {
+    return '(' . substr($celular, 0, 2) . ') ' .
+      substr($celular, 2, 5) . '-' .
+      substr($celular, 7);
+  }
+  // 10 dígitos (padrão antigo)
+  elseif (strlen($celular) === 10) {
+    return '(' . substr($celular, 0, 2) . ') ' .
+      substr($celular, 2, 4) . '-' .
+      substr($celular, 6);
+  }
+
+  return $celular;
+}
+
 if (!$pessoa) {
   die("Participante não encontrado.");
 }
+
+// ✅ ADICIONAR CONTAGEM TOTAL DE RITUAIS
+$total_rituais_participados = contarRituaisParticipados($pdo, $id);
+$total_rituais_nao_participados = contarRituaisParticipados($pdo, $id);
 
 // Paginação
 $pagina = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
@@ -35,7 +93,7 @@ $filtro_nome = isset($_GET['filtro_nome']) ? trim($_GET['filtro_nome']) : '';
 $order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'data_ritual'; // Coluna padrão: data_ritual
 $order_dir = isset($_GET['order_dir']) ? $_GET['order_dir'] : 'DESC'; // Direção padrão: DESC (mais novo primeiro)
 
-// Consulta para contar o total de registros
+// Consulta para contar o total de registros (COM FILTRO)
 $sql_count = "
     SELECT COUNT(*) AS total
     FROM inscricoes i

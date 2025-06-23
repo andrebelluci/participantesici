@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../includes/header.php';
     <div class="flex items-center justify-between mb-6">
         <a href="/participantesici/public_html/participantes"
             class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
-            <i class="fas fa-arrow-left mr-2"></i> Voltar
+            <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
         </a>
 
         <button type="submit" form="formulario-participante"
@@ -221,14 +221,14 @@ require_once __DIR__ . '/../../includes/header.php';
 <!-- Botão Voltar ao Topo -->
 <button id="scroll-to-top"
     class="fixed bottom-12 right-4 bg-[#00bfff] hover:bg-yellow-400 text-black p-3 rounded-full shadow-lg transform transition-all duration-300 ease-in-out opacity-0 invisible translate-y-4 z-50">
-    <i class="fas fa-chevron-up text-lg"></i>
+    <i class="fa-solid fa-chevron-up text-lg"></i>
 </button>
 
 <!-- Modal de Ampliação de Imagem -->
 <div id="modal-image" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-lg overflow-hidden shadow-lg relative max-w-sm w-full mx-4">
     <button onclick="closeImageModal()" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg">
-      <i class="fas fa-window-close"></i>
+      <i class="fa-solid fa-window-close"></i>
     </button>
     <img id="modal-image-content" class="w-full h-auto object-contain max-h-[80vh]" alt="Imagem Ampliada">
   </div>

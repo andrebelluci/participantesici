@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/../../functions/check_auth.php';
+require_once __DIR__ . '/../../functions/check_auth_api.php';
 require_once __DIR__ . '/../../config/database.php';
 
 // Verifica se o ID do participante foi fornecido

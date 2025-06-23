@@ -82,7 +82,7 @@ unset($_SESSION['login_error']);
           <button type="button" onclick="toggleSenha()"
             class="absolute right-3 top-1/2 -translate-y-1/2 text-black hover:text-blue-300" title="Mostrar senha"
             id="toggleSenhaBtn">
-            <i class="fas fa-eye" id="iconOlho"></i>
+            <i class="fa-solid fa-eye" id="iconOlho"></i>
           </button>
         </div>
         <p class="text-sm text-red-500 mt-1 hidden" id="erro-senha">Campo obrigatório.</p>

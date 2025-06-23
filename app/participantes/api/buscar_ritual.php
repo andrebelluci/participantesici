@@ -10,11 +10,12 @@ if (!$pesquisa) {
 }
 
 try {
-  // Pesquisar por nome
+  // Pesquisar por nome - INCLUINDO data_ritual
   $stmt = $pdo->prepare("
-        SELECT id, nome, foto
+        SELECT id, nome, foto, data_ritual
         FROM rituais
         WHERE nome LIKE ?
+        ORDER BY data_ritual DESC
         LIMIT 20
     ");
   $stmt->execute(["%$pesquisa%"]);
@@ -22,7 +23,7 @@ try {
   $ritual = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
   if (empty($ritual)) {
-    echo json_encode([]); // Retorna uma lista vazia se nenhum participante for encontrado
+    echo json_encode([]); // Retorna uma lista vazia se nenhum ritual for encontrado
     exit;
   }
 
@@ -30,3 +31,4 @@ try {
 } catch (Exception $e) {
   echo json_encode(['error' => 'Erro ao buscar ritual: ' . $e->getMessage()]);
 }
+?>

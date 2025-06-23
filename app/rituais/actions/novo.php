@@ -2,6 +2,18 @@
 require_once __DIR__ . '/../../functions/check_auth.php';
 require_once __DIR__ . '/../../config/database.php';
 
+$redirect = $_GET['redirect'] ?? '/participantesici/public_html/rituais';
+
+// ✅ EXTRAIR PARTICIPANTE_ID DO REDIRECT (para vinculação automática)
+$participante_id_from_redirect = null;
+if ($redirect && strpos($redirect, '/participante/') !== false) {
+  // Extrai ID do participante da URL: /participante/123
+  preg_match('/\/participante\/(\d+)/', $redirect, $matches);
+  if (isset($matches[1])) {
+    $participante_id_from_redirect = (int) $matches[1];
+  }
+}
+
 // ✅ FUNÇÃO PARA GERAR NOME DE ARQUIVO INTELIGENTE
 function gerarNomeArquivoRitual($nomeRitual, $extensao)
 {
@@ -206,6 +218,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $data_ritual = $_POST['data_ritual'];
   $padrinho_madrinha = $_POST['padrinho_madrinha'];
 
+  // ✅ CAPTURAR REDIRECT DO POST (campo hidden)
+  $redirect = $_POST['redirect'] ?? $_GET['redirect'] ?? '/participantesici/public_html/rituais';
+
+  // ✅ EXTRAIR PARTICIPANTE_ID DO REDIRECT NOVAMENTE (do POST)
+  $participante_id_from_redirect = null;
+  if ($redirect && strpos($redirect, '/participante/') !== false) {
+    preg_match('/\/participante\/(\d+)/', $redirect, $matches);
+    if (isset($matches[1])) {
+      $participante_id_from_redirect = (int) $matches[1];
+    }
+  }
+
   $foto = null; // Inicialmente sem foto
 
   // ✅ PROCESSAR UPLOAD DE FOTO
@@ -230,34 +254,78 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   // Validações básicas
   if (empty($nome)) {
     $_SESSION['error'] = 'Nome do ritual é obrigatório.';
-    header('Location: /participantesici/public_html/ritual/novo');
+    $redirectUrl = '/participantesici/public_html/ritual/novo';
+    if ($redirect) {
+      $redirectUrl .= '?redirect=' . urlencode($redirect);
+    }
+    header("Location: $redirectUrl");
     exit;
   }
 
   if (empty($data_ritual)) {
     $_SESSION['error'] = 'Data do ritual é obrigatória.';
-    header('Location: /participantesici/public_html/ritual/novo');
+    $redirectUrl = '/participantesici/public_html/ritual/novo';
+    if ($redirect) {
+      $redirectUrl .= '?redirect=' . urlencode($redirect);
+    }
+    header("Location: $redirectUrl");
     exit;
   }
 
   if (empty($padrinho_madrinha)) {
     $_SESSION['error'] = 'Padrinho ou Madrinha é obrigatório.';
-    header('Location: /participantesici/public_html/ritual/novo');
+    $redirectUrl = '/participantesici/public_html/ritual/novo';
+    if ($redirect) {
+      $redirectUrl .= '?redirect=' . urlencode($redirect);
+    }
+    header("Location: $redirectUrl");
     exit;
   }
 
-  // Inserir no banco de dados
-  $stmt = $pdo->prepare("
-    INSERT INTO rituais (nome, data_ritual, foto, padrinho_madrinha)
-    VALUES (?, ?, ?, ?)
-  ");
+  try {
+    // ✅ INSERIR RITUAL NO BANCO
+    $stmt = $pdo->prepare("
+      INSERT INTO rituais (nome, data_ritual, foto, padrinho_madrinha)
+      VALUES (?, ?, ?, ?)
+    ");
+    $stmt->execute([$nome, $data_ritual, $foto, $padrinho_madrinha]);
 
-  $stmt->execute([$nome, $data_ritual, $foto, $padrinho_madrinha]);
+    // ✅ OBTER ID DO RITUAL RECÉM-CRIADO
+    $ritual_id = $pdo->lastInsertId();
 
-  $_SESSION['success'] = 'Ritual criado com sucesso!';
-  header('Location: /participantesici/public_html/rituais');
-  exit;
+    // ✅ SE VEIO DE UM PARTICIPANTE, VINCULAR AUTOMATICAMENTE
+    if ($participante_id_from_redirect) {
+      try {
+        $stmt_inscricao = $pdo->prepare("
+                INSERT INTO inscricoes (ritual_id, participante_id)
+                VALUES (?, ?)
+            ");
+        $stmt_inscricao->execute([$ritual_id, $participante_id_from_redirect]);
+
+        $_SESSION['success'] = 'Ritual criado e vinculado ao participante com sucesso!';
+      } catch (Exception $e) {
+        // Se falhar a vinculação, avisa mas mantém o ritual criado
+        $_SESSION['success'] = 'Ritual criado com sucesso! Porém houve erro ao vincular ao participante.';
+        error_log('Erro ao vincular ritual ao participante: ' . $e->getMessage());
+      }
+    } else {
+      $_SESSION['success'] = 'Ritual criado com sucesso!';
+    }
+
+    header("Location: $redirect");
+    exit;
+
+  } catch (Exception $e) {
+    $_SESSION['error'] = 'Erro ao criar ritual: ' . $e->getMessage();
+    $redirectUrl = '/participantesici/public_html/ritual/novo';
+    if ($redirect) {
+      $redirectUrl .= '?redirect=' . urlencode($redirect);
+    }
+    header("Location: $redirectUrl");
+    exit;
+  }
 }
 
 // Se não for POST, mostrar formulário
 require __DIR__ . '/../templates/novo.php';
+?>

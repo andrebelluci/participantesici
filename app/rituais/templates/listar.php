@@ -11,7 +11,7 @@ require_once __DIR__ . '/../../includes/header.php';
     $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : 'home';
     ?>
     <a href="<?= $redirect ?>" class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
-      <i class="fas fa-arrow-left mr-2"></i> Voltar
+      <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
     </a>
     <a href="/participantesici/public_html/ritual/novo"
       class="bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
@@ -24,11 +24,11 @@ require_once __DIR__ . '/../../includes/header.php';
   <div class="md:hidden flex items-center justify-between">
     <button type="button" onclick="document.getElementById('filtros').classList.toggle('hidden')"
       class="bg-gray-200 text-gray-700 px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-gray-300">
-      <i class="fas fa-search"></i> Filtrar
+      <i class="fa-solid fa-search"></i> Filtrar
     </button>
     <a href="/participantesici/public_html/rituais"
       class="<?= empty($_GET['filtro_nome']) && empty($_GET['data_inicio']) && empty($_GET['data_fim']) ? 'hidden' : '' ?> bg-red-600 text-white px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-red-300">
-      <i class="fas fa-broom mr-1"></i> Limpar Filtro
+      <i class="fa-solid fa-broom mr-1"></i> Limpar Filtro
     </a>
   </div>
 
@@ -54,11 +54,11 @@ require_once __DIR__ . '/../../includes/header.php';
     <div class="flex items-end gap-2 ">
       <button type="submit"
         class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
-        <i class="fas fa-search mr-1"></i> Buscar
+        <i class="fa-solid fa-search mr-1"></i> Buscar
       </button>
       <a href="/participantesici/public_html/rituais"
         class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition font-semibold shadow">
-        <i class="fas fa-broom mr-1"></i> Limpar
+        <i class="fa-solid fa-broom mr-1"></i> Limpar
       </a>
     </div>
   </form>
@@ -87,7 +87,7 @@ require_once __DIR__ . '/../../includes/header.php';
             class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
             title="Gerenciar Participantes">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-              <i class="fa-solid fa-circle-user"></i>
+              <i class="fa-solid fa-circle-user text-lg"></i>
               <span class="block sm:hidden text-xs mt-1">Participantes</span>
             </div>
           </a>
@@ -95,7 +95,7 @@ require_once __DIR__ . '/../../includes/header.php';
             class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
             title="Editar Ritual">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-              <i class="fa-solid fa-pen-to-square"></i>
+              <i class="fa-solid fa-pen-to-square text-lg"></i>
               <span class="block sm:hidden text-xs mt-1">Editar</span>
             </div>
           </a>
@@ -103,7 +103,7 @@ require_once __DIR__ . '/../../includes/header.php';
             class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded flex items-center gap-1"
             title="Excluir Ritual">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-              <i class="fa-solid fa-trash"></i>
+              <i class="fa-solid fa-trash text-lg"></i>
               <span class="block sm:hidden text-xs mt-1">Excluir</span>
             </div>
           </button>
@@ -133,7 +133,7 @@ require_once __DIR__ . '/../../includes/header.php';
 <div id="modal-image" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-lg overflow-hidden shadow-lg relative max-w-sm w-full mx-4">
     <button onclick="closeImageModal()" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg">
-      <i class="fas fa-window-close"></i>
+      <i class="fa-solid fa-window-close"></i>
     </button>
     <img id="modal-image-content" class="w-full h-auto object-contain max-h-[80vh]" alt="Imagem Ampliada">
   </div>

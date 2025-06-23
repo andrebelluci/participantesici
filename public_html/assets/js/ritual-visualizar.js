@@ -187,20 +187,6 @@ function ordenarPor(coluna) {
   // Implementar lógica de ordenação aqui (pode ser via JavaScript ou PHP)
 }
 
-// Função para abrir a modal de imagem
-function openImageModal(imageSrc) {
-  const modal = document.getElementById('modal-image');
-  const modalImage = document.getElementById('modal-image-content');
-  modalImage.src = imageSrc; // Define a imagem ampliada
-  modal.style.display = 'flex'; // Exibe a modal
-}
-
-// Função para fechar a modal de imagem
-function closeImageModal() {
-  const modal = document.getElementById('modal-image');
-  modal.style.display = 'none'; // Oculta a modal
-}
-
 // Função para alternar a presença (Sim/Não)
 function togglePresenca(button) {
   const participanteId = button.getAttribute('data-participante-id'); // ID do participante

@@ -7,6 +7,7 @@ $id = $_GET['id'] ?? null;
 if (!$id) {
   die("ID da pessoa não especificado.");
 }
+
 $redirect = $_GET['redirect'] ?? '/participantesici/public_html/participantes';
 
 // Consulta os dados da pessoa no banco de dados
@@ -19,16 +20,14 @@ if (!$pessoa) {
 }
 
 // ✅ FUNÇÃO PARA GERAR NOME DE ARQUIVO INTELIGENTE
-function gerarNomeArquivoParticipante($cpf, $extensao)
-{
+function gerarNomeArquivoParticipante($cpf, $extensao) {
   $cpfLimpo = preg_replace('/\D/', '', $cpf); // Remove tudo que não é número
   $numeroAleatorio = uniqid();
   return $numeroAleatorio . '_' . $cpfLimpo . '.' . $extensao;
 }
 
 // ✅ FUNÇÃO PARA EXCLUIR FOTO ANTIGA
-function excluirFotoAntigaParticipante($cpf)
-{
+function excluirFotoAntigaParticipante($cpf) {
   $cpfLimpo = preg_replace('/\D/', '', $cpf);
   $diretorio = __DIR__ . '/../../../storage/uploads/participantes/';
 
@@ -116,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   // Verifica se o e-mail é válido
   if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^[a-zA-Z0-9._%+-]{3,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $email)) {
     $_SESSION['error'] = 'Erro: Por favor, digite um e-mail válido.';
-    header("Location: /participantesici/public_html/participante/editar?id=$id");
+    header("Location: /participantesici/public_html/participante/editar/$id");
     exit;
   }
 
@@ -125,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $stmt_check_cpf->execute([$cpf, $id]);
   if ($stmt_check_cpf->rowCount() > 0) {
     $_SESSION['error'] = 'Erro: Este CPF já está cadastrado.';
-    header("Location: /participantesici/public_html/participante/editar?id=$id");
+    header("Location: /participantesici/public_html/participante/editar/$id");
     exit;
   }
 
@@ -181,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   ]);
 
   $_SESSION['success'] = 'Pessoa atualizada com sucesso!';
-  header("Location: $redirect?id=$id");
+  header("Location: $redirect");
   exit;
 }
 
