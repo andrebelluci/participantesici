@@ -82,7 +82,6 @@ function configurarValidacao(form) {
             const mensagemErro = encontrarMensagemErro(input);
             if (!input.value.trim()) {
                 input.classList.add('border-red-500');
-                i
                 mensagemErro?.classList.remove('hidden');
             } else {
                 input.classList.remove('border-red-500');

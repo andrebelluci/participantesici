@@ -108,6 +108,13 @@ function abrirModalDetalhes(ritualId) {
     });
 
   document.getElementById('modal-detalhes-inscricao').style.display = 'flex';
+  // ✅ ADICIONE ESTA LINHA
+  configurarValidacao(document.getElementById('form-detalhes-inscricao'));
+  // ✅ Foco no primeiro campo do formulário
+  const primeiroCampo = document.querySelector('#form-detalhes-inscricao input, #form-detalhes-inscricao select, #form-detalhes-inscricao textarea');
+  if (primeiroCampo) {
+    primeiroCampo.focus();
+  }
 }
 
 // Função para abrir o modal de observação
@@ -186,6 +193,36 @@ function fecharModalCadastro() {
   document.getElementById('modal-cadastro').style.display = 'none';
 }
 
+function aplicarFocoModalAdicionar() {
+  // Observa quando a modal aparece e aplica foco
+  const modal = document.getElementById('modal-adicionar');
+
+  if (modal) {
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          const isVisible = modal.style.display === 'flex';
+
+          if (isVisible) {
+            setTimeout(() => {
+              const inputPesquisa = document.getElementById('nome_pesquisa');
+              if (inputPesquisa) {
+                inputPesquisa.focus();
+                console.log('✅ Foco aplicado automaticamente');
+              }
+            }, 100);
+          }
+        }
+      });
+    });
+
+    observer.observe(modal, { attributes: true, attributeFilter: ['style'] });
+  }
+}
+
+// Chama a função quando a página carrega
+document.addEventListener('DOMContentLoaded', aplicarFocoModalAdicionar);
+
 function fecharModalAdicionar() {
   document.getElementById('modal-adicionar').style.display = 'none';
   limparFiltroCompleto();
@@ -252,9 +289,63 @@ function initFormDetalhes() {
     formDetalhes.setAttribute('data-initialized', 'true');
 
     formDetalhes.addEventListener('submit', function (event) {
-      event.preventDefault();
+      event.preventDefault(); // Sempre previne o submit padrão
+
       console.log('Form detalhes submetido');
 
+      // ✅ Validação manual completa
+      let formularioValido = true;
+      const campos = {
+        primeira_vez_instituto: formDetalhes.querySelector('[name="primeira_vez_instituto"]'),
+        primeira_vez_ayahuasca: formDetalhes.querySelector('[name="primeira_vez_ayahuasca"]'),
+        doenca_psiquiatrica: formDetalhes.querySelector('[name="doenca_psiquiatrica"]'),
+        uso_medicao: formDetalhes.querySelector('[name="uso_medicao"]')
+      };
+
+      // Valida campos obrigatórios
+      Object.keys(campos).forEach(nome => {
+        const campo = campos[nome];
+        if (campo && !campo.value.trim()) {
+          campo.classList.add('border-red-500');
+          campo.focus();
+          formularioValido = false;
+        } else if (campo) {
+          campo.classList.remove('border-red-500');
+        }
+      });
+
+      // Validação condicional
+      const doencaSelect = campos.doenca_psiquiatrica;
+      const nomeDoencaInput = formDetalhes.querySelector('[name="nome_doenca"]');
+
+      if (doencaSelect && doencaSelect.value === 'Sim' &&
+        nomeDoencaInput && !nomeDoencaInput.value.trim()) {
+        nomeDoencaInput.classList.add('border-red-500');
+        nomeDoencaInput.focus();
+        formularioValido = false;
+      } else if (nomeDoencaInput) {
+        nomeDoencaInput.classList.remove('border-red-500');
+      }
+
+      const medicacaoSelect = campos.uso_medicao;
+      const nomeMedicacaoInput = formDetalhes.querySelector('[name="nome_medicao"]');
+
+      if (medicacaoSelect && medicacaoSelect.value === 'Sim' &&
+        nomeMedicacaoInput && !nomeMedicacaoInput.value.trim()) {
+        nomeMedicacaoInput.classList.add('border-red-500');
+        nomeMedicacaoInput.focus();
+        formularioValido = false;
+      } else if (nomeMedicacaoInput) {
+        nomeMedicacaoInput.classList.remove('border-red-500');
+      }
+
+      // ✅ Só envia se válido
+      if (!formularioValido) {
+        showToast("Por favor, preencha todos os campos obrigatórios.", 'error');
+        return;
+      }
+
+      // Prossegue com o AJAX
       const formData = new FormData(formDetalhes);
 
       fetch('/participantesici/public_html/api/inscricoes/salvar-inscricao', {
@@ -264,10 +355,9 @@ function initFormDetalhes() {
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            showToast("Detalhes salvos com sucesso!", 'success');
+            showToast("Detalhes da inscrição salvos com sucesso!", 'success');
             fecharModalDetalhes();
 
-            // Remove notificação se tiver ritual ID
             if (currentRitualId) {
               removerNotificacaoDetalhes(currentRitualId);
             }
@@ -276,12 +366,12 @@ function initFormDetalhes() {
               location.reload();
             }, 1000);
           } else {
-            showToast("Erro ao salvar detalhes: " + data.error, 'error');
+            showToast("Erro ao salvar detalhes da inscrição: " + data.error, 'error');
           }
         })
         .catch(error => {
           console.error('Erro ao enviar requisição:', error);
-          showToast("Erro ao salvar detalhes. Tente novamente.", 'error');
+          showToast("Erro ao salvar detalhes da inscrição. Tente novamente.", 'error');
         });
     });
   }
@@ -436,11 +526,81 @@ function atualizarContadores(novoStatus) {
 }
 
 // ============= PESQUISA DE RITUAIS =============
+// Event listener para Enter no campo de pesquisa
+document.addEventListener('DOMContentLoaded', function () {
+  const nomePesquisaInput = document.getElementById('nome_pesquisa');
+
+  if (nomePesquisaInput) {
+    nomePesquisaInput.addEventListener('keypress', function (event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        pesquisarRituaisComColapso();
+      }
+    });
+  }
+});
+
+// Função para remover acentos e normalizar texto
+function removerAcentos(texto) {
+  return texto.normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+// ============= FUNÇÃO DE PESQUISA COMPLETA COM MELHORIAS =============
+
+// Event listener para Enter no campo de pesquisa
+document.addEventListener('DOMContentLoaded', function () {
+  const nomePesquisaInput = document.getElementById('nome_pesquisa');
+  const formPesquisa = document.getElementById('pesquisa-ritual-form');
+
+  // Limpa flag se existir
+  window.pesquisaEmAndamento = false;
+
+  if (nomePesquisaInput) {
+    nomePesquisaInput.addEventListener('keydown', function (event) {
+      if (event.key === 'Enter' || event.keyCode === 13) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+
+        console.log('🔍 Enter detectado');
+
+        // Executa pesquisa diretamente
+        pesquisarRituaisComColapso();
+
+        return false;
+      }
+    });
+  }
+
+  // Desabilita o formulário completamente
+  if (formPesquisa) {
+    formPesquisa.addEventListener('submit', function (event) {
+      event.preventDefault();
+      return false;
+    });
+  }
+});
+
+
 function pesquisarRituaisComColapso() {
   const nomePesquisa = document.getElementById('nome_pesquisa').value.trim();
-  if (!nomePesquisa) {
-    showToast("Digite um nome para pesquisar.", 'error');
+
+  // Validação mínima de 3 caracteres
+  if (nomePesquisa.length < 3) {
+    showToast("Digite pelo menos 3 caracteres para pesquisar.", 'error');
+    document.getElementById('nome_pesquisa').focus();
     return;
+  }
+
+  // Loading state no botão
+  const pesquisarBtn = document.getElementById('pesquisar-btn');
+  const originalText = pesquisarBtn ? pesquisarBtn.textContent : 'Pesquisar';
+
+  if (pesquisarBtn) {
+    pesquisarBtn.textContent = 'Pesquisando...';
+    pesquisarBtn.disabled = true;
   }
 
   // Colapsa o filtro
@@ -461,6 +621,9 @@ function pesquisarRituaisComColapso() {
   const listaRituais = document.getElementById('lista-rituais');
   if (listaRituais) listaRituais.innerHTML = '';
 
+  // Texto de pesquisa normalizado (sem acentos)
+  const pesquisaNormalizada = removerAcentos(nomePesquisa);
+
   // Executa pesquisa
   Promise.all([
     fetch(`/participantesici/public_html/api/participante/buscar-ritual?nome=${encodeURIComponent(nomePesquisa)}`),
@@ -475,23 +638,48 @@ function pesquisarRituaisComColapso() {
 
       const rituaisVinculados = rituaisVinculadosData.rituais_ids || [];
 
-      if (rituaisData.length === 0) {
+      // Filtro adicional no frontend para ignorar acentos
+      const rituaisFiltrados = rituaisData.filter(ritual => {
+        const nomeNormalizado = removerAcentos(ritual.nome || '');
+        return nomeNormalizado.includes(pesquisaNormalizada);
+      });
+
+      if (rituaisFiltrados.length === 0) {
         if (listaRituais) {
           listaRituais.innerHTML = `
             <li class="p-4 text-center text-gray-500">
               <i class="fa-solid fa-search text-2xl mb-2 block"></i>
-              Nenhum ritual encontrado.
+              <p class="mt-2">Nenhum ritual encontrado para "<strong>${nomePesquisa}</strong>"</p>
+              <p class="text-xs mt-1">Pode ser que esse ritual ainda não exista, crie pelo botão abaixo.</p>
             </li>
           `;
         }
         return;
       }
 
-      // Cria lista de rituais
-      rituaisData.forEach(ritual => {
+      // Exibe contador de resultados
+      if (listaRituais) {
+        const contadorResultados = document.createElement('li');
+        contadorResultados.className = 'p-2 bg-blue-50 border-b border-blue-200 text-blue-700 text-sm font-medium';
+        contadorResultados.innerHTML = `
+          <i class="fa-solid fa-info-circle mr-1"></i>
+          ${rituaisFiltrados.length} ritual(is) encontrado(s) para "<strong>${nomePesquisa}</strong>"
+        `;
+        listaRituais.appendChild(contadorResultados);
+      }
+
+      // Cria lista de rituais filtrados
+      rituaisFiltrados.forEach(ritual => {
         const jaAdicionado = rituaisVinculados.includes(ritual.id);
         const li = document.createElement('li');
-        li.className = 'p-4 hover:bg-gray-50 transition-colors';
+        li.className = 'p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0';
+
+        // Destacar termo pesquisado no nome
+        const nomeDestacado = ritual.nome ?
+          ritual.nome.replace(
+            new RegExp(`(${nomePesquisa})`, 'gi'),
+            '<mark class="bg-yellow-200 px-1 rounded">$1</mark>'
+          ) : 'Nome não informado';
 
         li.innerHTML = `
           <div class="grid grid-cols-[auto_1fr] gap-4">
@@ -503,7 +691,7 @@ function pesquisarRituaisComColapso() {
             </div>
             <div class="space-y-2">
               <h3 class="!font-semibold !text-gray-900 !text-lg !leading-tight !m-0 !p-0">
-                ${ritual.nome || 'Nome não informado'}
+                ${nomeDestacado}
               </h3>
               <div class="flex items-center gap-1">
                 <span class="text-sm font-semibold">Data:</span>
@@ -530,10 +718,34 @@ function pesquisarRituaisComColapso() {
 
         if (listaRituais) listaRituais.appendChild(li);
       });
+
+      // Feedback de sucesso
+      showToast(`${rituaisFiltrados.length} ritual(is) encontrado(s)!`, 'success');
     })
     .catch(error => {
       console.error('Erro ao buscar rituais:', error);
-      showToast('Erro ao carregar rituais. Tente novamente.', 'error');
+      showToast('Erro ao carregar rituais. Verifique sua conexão e tente novamente.', 'error');
+
+      // Exibe mensagem de erro na lista
+      if (listaRituais) {
+        listaRituais.innerHTML = `
+          <li class="p-4 text-center text-red-500">
+            <i class="fa-solid fa-exclamation-triangle text-2xl mb-2 block"></i>
+            <p>Erro ao carregar rituais</p>
+            <button onclick="pesquisarRituaisComColapso()"
+                    class="mt-2 text-sm underline hover:no-underline">
+              Tentar novamente
+            </button>
+          </li>
+        `;
+      }
+    })
+    .finally(() => {
+      // Restaura o botão após pesquisa
+      if (pesquisarBtn) {
+        pesquisarBtn.textContent = originalText;
+        pesquisarBtn.disabled = false;
+      }
     });
 }
 
@@ -695,3 +907,104 @@ function setupConditionalFields() {
     toggleNomeMedicacao();
   }
 }
+
+// Confirmação excluir participante
+function abrirConfirmacaoExcluir(url) {
+  openConfirmModal('Tem certeza que deseja desvincular este ritual do participante? Observação e dados de inscrição serão apagados!', () => {
+    window.location.href = url;
+  });
+}
+
+// ============= VALIDAÇÃO PERSONALIZADA PARA MODAL DETALHES =============
+document.addEventListener('DOMContentLoaded', function() {
+  const formDetalhes = document.getElementById('form-detalhes-inscricao');
+
+  if (formDetalhes) {
+    // Aplica a validação personalizada do global-scripts.js
+    configurarValidacao(formDetalhes);
+
+    // ✅ VALIDAÇÃO ESPECÍFICA PARA CAMPOS CONDICIONAIS
+    const doencaSelect = document.getElementById('doenca_psiquiatrica');
+    const nomeDoencaInput = document.getElementById('nome_doenca');
+    const medicacaoSelect = document.getElementById('uso_medicao');
+    const nomeMedicacaoInput = document.getElementById('nome_medicao');
+
+    // Função para validar campos condicionais
+    function validarCamposCondicionais() {
+      let valido = true;
+
+      // Validação nome da doença
+      if (doencaSelect && nomeDoencaInput) {
+        const mensagemDoenca = nomeDoencaInput.nextElementSibling;
+
+        if (doencaSelect.value === 'Sim' && !nomeDoencaInput.value.trim()) {
+          nomeDoencaInput.classList.add('border-red-500');
+          if (mensagemDoenca && mensagemDoenca.classList.contains('text-red-500')) {
+            mensagemDoenca.classList.remove('hidden');
+          }
+          valido = false;
+        } else {
+          nomeDoencaInput.classList.remove('border-red-500');
+          if (mensagemDoenca && mensagemDoenca.classList.contains('text-red-500')) {
+            mensagemDoenca.classList.add('hidden');
+          }
+        }
+      }
+
+      // Validação nome da medicação
+      if (medicacaoSelect && nomeMedicacaoInput) {
+        const mensagemMedicacao = nomeMedicacaoInput.nextElementSibling;
+
+        if (medicacaoSelect.value === 'Sim' && !nomeMedicacaoInput.value.trim()) {
+          nomeMedicacaoInput.classList.add('border-red-500');
+          if (mensagemMedicacao && mensagemMedicacao.classList.contains('text-red-500')) {
+            mensagemMedicacao.classList.remove('hidden');
+          }
+          valido = false;
+        } else {
+          nomeMedicacaoInput.classList.remove('border-red-500');
+          if (mensagemMedicacao && mensagemMedicacao.classList.contains('text-red-500')) {
+            mensagemMedicacao.classList.add('hidden');
+          }
+        }
+      }
+
+      return valido;
+    }
+
+    // Intercepta o submit para incluir validação condicional
+    formDetalhes.addEventListener('submit', function(e) {
+      // Valida campos condicionais
+      const camposCondicionaisValidos = validarCamposCondicionais();
+
+      if (!camposCondicionaisValidos) {
+        e.preventDefault();
+        showToast('Por favor, preencha todos os campos obrigatórios.', 'error');
+      }
+    });
+
+    // Validação em tempo real nos campos condicionais
+    if (nomeDoencaInput) {
+      nomeDoencaInput.addEventListener('blur', validarCamposCondicionais);
+      nomeDoencaInput.addEventListener('input', validarCamposCondicionais);
+    }
+
+    if (nomeMedicacaoInput) {
+      nomeMedicacaoInput.addEventListener('blur', validarCamposCondicionais);
+      nomeMedicacaoInput.addEventListener('input', validarCamposCondicionais);
+    }
+
+    // Limpa validação quando campos condicionais mudam
+    if (doencaSelect) {
+      doencaSelect.addEventListener('change', function() {
+        validarCamposCondicionais();
+      });
+    }
+
+    if (medicacaoSelect) {
+      medicacaoSelect.addEventListener('change', function() {
+        validarCamposCondicionais();
+      });
+    }
+  }
+});

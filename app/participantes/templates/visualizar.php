@@ -54,7 +54,7 @@ if (!isset($pessoa)) {
     </div>
 
     <!-- Botões de ação -->
-    <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center justify-between mb-1">
       <a href="/participantesici/public_html/participantes"
         class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
         <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
@@ -157,7 +157,7 @@ if (!isset($pessoa)) {
             <!-- Tem observação: mostra preview de 2 linhas + tag -->
             <div class="space-y-2">
               <!-- Preview da observação (2 linhas) -->
-              <div class="text-sm text-gray-700 line-clamp-2 leading-relaxed">
+              <div class="text-sm text-gray-700 line-clamp-1 leading-relaxed">
                 <?= htmlspecialchars($ritual['observacao']) ?>
               </div>
 
@@ -193,7 +193,7 @@ if (!isset($pessoa)) {
             class="relative bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
             title="Observação do participante neste ritual">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-              <i class="fa-solid fa-file-lines text-lg"></i>
+              <i class="fa-solid fa-file-lines md:text-lg"></i>
               <span class="block sm:hidden text-xs mt-1">Observação</span>
             </div>
 
@@ -208,8 +208,8 @@ if (!isset($pessoa)) {
             class="relative bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
             title="Detalhes da inscrição no ritual">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-              <i class="fa-solid fa-pencil text-lg"></i>
-              <span class="block sm:hidden text-xs mt-1">Detalhes</span>
+              <i class="fa-solid fa-pencil md:text-lg"></i>
+              <span class="block sm:hidden text-xs mt-1">Inscrição</span>
             </div>
 
             <!-- ✅ BOLINHA VERMELHA se não tem detalhes preenchidos -->
@@ -223,13 +223,13 @@ if (!isset($pessoa)) {
             <?php endif; ?>
           </button>
 
-          <!-- ✅ BOTÃO DESVINCULAR (novo ícone) -->
+          <!-- ✅ BOTÃO DESVINCULAR -->
           <button
-            onclick="if(confirm('Tem certeza que deseja desvincular este ritual do participante?')) { window.location.href='participante-excluir-ritual.php?id=<?= $ritual['id'] ?>' }"
+            onclick="abrirConfirmacaoExcluir('/participantesici/public_html/api/inscricoes/excluir-participacao?participante_id=<?= $pessoa['id'] ?? $participante['id'] ?>&ritual_id=<?= $ritual['id'] ?>&redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>')"
             class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded flex items-center gap-1"
-            title="Desvincular participante do ritual">
+            title="Desvincular ritual do participante">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-              <i class="fa-solid fa-link-slash text-lg"></i>
+              <i class="fa-solid fa-link-slash md:text-lg"></i>
               <span class="block sm:hidden text-xs mt-1">Desvincular</span>
             </div>
           </button>
@@ -240,15 +240,35 @@ if (!isset($pessoa)) {
     <!-- Mensagem quando não há rituais -->
     <?php if (empty($rituais)): ?>
       <div class="col-span-full text-center py-8">
-        <div class="text-gray-400 mb-4">
-          <i class="fa-solid fa-calendar-times text-4xl"></i>
-        </div>
-        <p class="text-gray-500 text-lg mb-2">Nenhum ritual encontrado</p>
-        <p class="text-gray-400 text-sm">Este participante ainda não está inscrito em nenhum ritual.</p>
-        <button onclick="document.getElementById('modal-adicionar').style.display='flex'"
-          class="mt-4 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
-          <i class="fa-solid fa-plus mr-2"></i> Adicionar primeiro ritual
-        </button>
+        <?php if ($total_rituais_participante == 0): ?>
+          <!-- Participante sem rituais -->
+          <div class="text-gray-400 mb-4">
+            <i class="fa-solid fa-calendar-times text-4xl"></i>
+          </div>
+          <p class="text-gray-500 text-lg mb-2">Nenhum ritual encontrado</p>
+          <p class="text-gray-400 text-sm">Este participante ainda não está inscrito em nenhum ritual.</p>
+          <button onclick="document.getElementById('modal-adicionar').style.display='flex'"
+            class="mt-4 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
+            <i class="fa-solid fa-plus mr-2"></i> Adicionar primeiro ritual
+          </button>
+        <?php else: ?>
+          <!-- Filtro não retornou resultados -->
+          <div class="text-orange-400 mb-4">
+            <i class="fa-solid fa-search text-4xl"></i>
+          </div>
+          <p class="text-gray-500 text-lg mb-2">Nenhum ritual encontrado com esse nome.</p>
+          <p class="text-gray-400 text-sm">Pesquise novamente, ou adicione o ritual pelo botão abaixo.</p>
+          <div class="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
+            <a href="/participantesici/public_html/participante/<?= $id ?>"
+              class="inline-flex items-center gap-2 bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition font-semibold shadow">
+              <i class="fa-solid fa-list"></i> Ver todos os rituais
+            </a>
+            <button onclick="document.getElementById('modal-adicionar').style.display='flex'"
+              class="inline-flex items-center gap-2 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
+              <i class="fa-solid fa-plus"></i> Adicionar ritual
+            </button>
+          </div>
+        <?php endif; ?>
       </div>
     <?php endif; ?>
   </div>
@@ -268,7 +288,7 @@ if (!isset($pessoa)) {
 <!-- Botão Voltar ao Topo -->
 <button id="scroll-to-top"
   class="fixed bottom-12 right-4 bg-[#00bfff] hover:bg-yellow-400 text-black p-3 rounded-full shadow-lg transform transition-all duration-300 ease-in-out opacity-0 invisible translate-y-4 z-50">
-  <i class="fa-solid fa-chevron-up text-lg"></i>
+  <i class="fa-solid fa-chevron-up md:text-lg"></i>
 </button>
 
 <!-- Modal Adicionar Ritual - Com Filtro Colapsável -->
@@ -347,81 +367,88 @@ if (!isset($pessoa)) {
 
     <h2 class="text-xl font-bold mb-4 text-gray-800">Detalhes da inscrição</h2>
 
-    <form id="form-detalhes-inscricao" method="POST" class="space-y-4">
+    <form id="form-detalhes-inscricao" method="POST" class="space-y-4" novalidate>
       <input type="hidden" id="id" name="id" value="">
 
       <div>
         <label for="primeira_vez_instituto" class="block text-sm font-medium text-gray-700 mb-1">Primeira vez no
           Instituto?</label>
         <select name="primeira_vez_instituto" required
-          class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
           <option value="">Selecione...</option>
           <option value="Sim">Sim</option>
           <option value="Não">Não</option>
         </select>
+        <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
       </div>
 
       <div>
         <label for="primeira_vez_ayahuasca" class="block text-sm font-medium text-gray-700 mb-1">Primeira vez
           consagrando Ayahuasca?</label>
         <select name="primeira_vez_ayahuasca" required
-          class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
           <option value="">Selecione...</option>
           <option value="Sim">Sim</option>
           <option value="Não">Não</option>
         </select>
+        <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
       </div>
 
       <div>
         <label for="doenca_psiquiatrica" class="block text-sm font-medium text-gray-700 mb-1">Possui doença psiquiátrica
           diagnosticada?</label>
         <select name="doenca_psiquiatrica" id="doenca_psiquiatrica" required
-          class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
           <option value="">Selecione...</option>
           <option value="Sim">Sim</option>
           <option value="Não">Não</option>
         </select>
+        <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
       </div>
 
       <div>
         <label for="nome_doenca" class="block text-sm font-medium text-gray-700 mb-1">Se sim, escreva o nome da
           doença:</label>
         <input type="text" name="nome_doenca" id="nome_doenca" value="" disabled
-          class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100">
+          class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 text-sm">
+        <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório quando doença psiquiátrica for "Sim"</p>
       </div>
 
       <div>
         <label for="uso_medicao" class="block text-sm font-medium text-gray-700 mb-1">Faz uso de alguma
           medicação?</label>
         <select name="uso_medicao" id="uso_medicao" required
-          class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
           <option value="">Selecione...</option>
           <option value="Sim">Sim</option>
           <option value="Não">Não</option>
         </select>
+        <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
       </div>
 
       <div>
         <label for="nome_medicao" class="block text-sm font-medium text-gray-700 mb-1">Se sim, escreva o nome da
           medicação:</label>
         <input type="text" name="nome_medicao" id="nome_medicao" value="" disabled
-          class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100">
+          class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 text-sm">
+        <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório quando uso de medicação for "Sim"</p>
       </div>
 
       <div>
         <label for="mensagem" class="block text-sm font-medium text-gray-700 mb-1">Mensagem do participante:</label>
         <textarea name="mensagem" rows="3"
-          class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent"></textarea>
+          class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"></textarea>
       </div>
 
       <div>
         <label for="salvo_em" class="block text-sm font-medium text-gray-700 mb-1">Salvo em:</label>
         <input type="text" id="salvo_em" name="salvo_em" readonly value=""
-          class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100">
+          class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-sm">
       </div>
 
       <button type="submit"
         class="w-full bg-[#00bfff] text-black py-2 rounded hover:bg-yellow-400 transition font-semibold">
+        <i class="fa-solid fa-save mr-1"></i>
         Salvar
       </button>
     </form>
@@ -569,24 +596,6 @@ if (!isset($pessoa)) {
 </div>
 
 <script>
-  // Função para expandir/contrair observação
-  function toggleObservacao(button) {
-    const textoTruncado = button.parentNode.querySelector('.observacao-texto');
-    const textoCompleto = button.parentNode.querySelector('.observacao-completa');
-
-    if (textoCompleto.classList.contains('hidden')) {
-      // Expandir
-      textoTruncado.classList.add('hidden');
-      textoCompleto.classList.remove('hidden');
-      button.textContent = 'Ver menos';
-    } else {
-      // Contrair
-      textoTruncado.classList.remove('hidden');
-      textoCompleto.classList.add('hidden');
-      button.textContent = 'Ver mais';
-    }
-  }
-
   const pessoaId = <?= json_encode($id) ?>;
 </script>
 
@@ -601,7 +610,5 @@ if (!isset($pessoa)) {
 
 <script src="/participantesici/public_html/assets/js/participante-visualizar.js"></script>
 <script src="/participantesici/public_html/assets/js/modal.js"></script>
-
-
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

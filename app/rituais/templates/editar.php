@@ -17,6 +17,7 @@ if (!isset($ritual)) {
 
         <button type="submit" form="formulario-ritual"
             class="bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
+            <i class="fa-solid fa-save mr-1"></i>
             Salvar alterações
         </button>
     </div>

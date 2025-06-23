@@ -13,6 +13,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
         <button type="submit" form="formulario-participante"
             class="bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
+            <i class="fa-solid fa-plus"></i>
             Cadastrar
         </button>
     </div>
@@ -221,7 +222,7 @@ require_once __DIR__ . '/../../includes/header.php';
 <!-- Botão Voltar ao Topo -->
 <button id="scroll-to-top"
     class="fixed bottom-12 right-4 bg-[#00bfff] hover:bg-yellow-400 text-black p-3 rounded-full shadow-lg transform transition-all duration-300 ease-in-out opacity-0 invisible translate-y-4 z-50">
-    <i class="fa-solid fa-chevron-up text-lg"></i>
+    <i class="fa-solid fa-chevron-up md:text-lg"></i>
 </button>
 
 <!-- Modal de Ampliação de Imagem -->
@@ -262,9 +263,9 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 </div>
 
-<script src="/participantesici/public_html/assets/js/participante.js"></script>
 <script src="/participantesici/public_html/assets/js/participante-novo.js"></script>
-<script src="/participantesici/public_html/assets/js/busca-cep.js"></script>
+<script src="/participantesici/public_html/assets/js/participante.js"></script>
+    <script src="/participantesici/public_html/assets/js/busca-cep.js"></script>
 <script src="/participantesici/public_html/assets/js/modal.js"></script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

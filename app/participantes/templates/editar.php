@@ -17,6 +17,7 @@ if (!isset($pessoa)) {
 
         <button type="submit" form="formulario-participante"
             class="bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
+            <i class="fa-solid fa-save mr-1"></i>
             Salvar alterações
         </button>
     </div>
@@ -246,7 +247,7 @@ if (!isset($pessoa)) {
 <!-- Botão Voltar ao Topo -->
 <button id="scroll-to-top"
     class="fixed bottom-12 right-4 bg-[#00bfff] hover:bg-yellow-400 text-black p-3 rounded-full shadow-lg transform transition-all duration-300 ease-in-out opacity-0 invisible translate-y-4 z-50">
-    <i class="fa-solid fa-chevron-up text-lg"></i>
+    <i class="fa-solid fa-chevron-up md:text-lg"></i>
 </button>
 
 <!-- Modal de Ampliação de Imagem -->

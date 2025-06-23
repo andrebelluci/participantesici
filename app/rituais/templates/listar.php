@@ -15,6 +15,7 @@ require_once __DIR__ . '/../../includes/header.php';
     </a>
     <a href="/participantesici/public_html/ritual/novo"
       class="bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
+      <i class="fa-solid fa-plus"></i>
       Novo Ritual
     </a>
   </div>
@@ -85,15 +86,15 @@ require_once __DIR__ . '/../../includes/header.php';
         <div class="flex justify-center gap-6 md:justify-end md:gap-2 mt-2 text-sm">
           <a href="/participantesici/public_html/ritual/<?= $ritual['id'] ?>"
             class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
-            title="Gerenciar Participantes">
+            title="Gerenciar participantes">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-              <i class="fa-solid fa-circle-user text-lg"></i>
+              <i class="fa-solid fa-user-group text-lg"></i>
               <span class="block sm:hidden text-xs mt-1">Participantes</span>
             </div>
           </a>
           <a href="/participantesici/public_html/ritual/<?= $ritual['id'] ?>/editar"
             class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
-            title="Editar Ritual">
+            title="Editar ritual">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
               <i class="fa-solid fa-pen-to-square text-lg"></i>
               <span class="block sm:hidden text-xs mt-1">Editar</span>
@@ -101,7 +102,7 @@ require_once __DIR__ . '/../../includes/header.php';
           </a>
           <button onclick="abrirConfirmacaoExcluir('/participantesici/public_html/ritual/<?= $ritual['id'] ?>/excluir')"
             class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded flex items-center gap-1"
-            title="Excluir Ritual">
+            title="Excluir ritual">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
               <i class="fa-solid fa-trash text-lg"></i>
               <span class="block sm:hidden text-xs mt-1">Excluir</span>

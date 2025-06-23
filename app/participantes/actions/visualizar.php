@@ -112,7 +112,10 @@ $total_paginas = ceil($total_registros / $itens_por_pagina);
 
 // Consulta para listar os rituais com paginação e ordenação
 $sql_rituais = "
-    SELECT r.*, i.presente, i.observacao
+    SELECT r.*, i.presente, i.observacao,
+           i.primeira_vez_instituto, i.primeira_vez_ayahuasca,
+           i.doenca_psiquiatrica, i.nome_doenca,
+           i.uso_medicao, i.nome_medicao, i.mensagem
     FROM inscricoes i
     JOIN rituais r ON i.ritual_id = r.id
     WHERE i.participante_id = ?
@@ -126,6 +129,17 @@ $sql_rituais .= " ORDER BY $order_by $order_dir LIMIT $itens_por_pagina OFFSET $
 $stmt_rituais = $pdo->prepare($sql_rituais);
 $stmt_rituais->execute($params);
 $rituais = $stmt_rituais->fetchAll();
+
+// Consulta para contar o total REAL de rituais (sem filtro)
+$sql_total_rituais = "
+    SELECT COUNT(*) AS total
+    FROM inscricoes i
+    JOIN rituais r ON i.ritual_id = r.id
+    WHERE i.participante_id = ?
+";
+$stmt_total = $pdo->prepare($sql_total_rituais);
+$stmt_total->execute([$id]);
+$total_rituais_participante = $stmt_total->fetch()['total'];
 
 // Carregar template
 require __DIR__ . '/../templates/visualizar.php';

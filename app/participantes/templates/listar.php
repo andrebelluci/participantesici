@@ -15,6 +15,7 @@ require_once __DIR__ . '/../../includes/header.php';
     </a>
     <a href="/participantesici/public_html/participante/novo"
       class="bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
+      <i class="fa-solid fa-plus"></i>
       Novo Participante
     </a>
   </div>
@@ -85,26 +86,26 @@ require_once __DIR__ . '/../../includes/header.php';
         <div class="flex justify-center gap-6 md:justify-end md:gap-2 mt-2 text-sm">
           <a href="/participantesici/public_html/participante/<?= $pessoa['id'] ?>"
             class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
-            title="Gerenciar Rituais">
+            title="Gerenciar rituais">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-              <i class="fa-solid fa-list-check text-lg"></i>
+              <i class="fa-solid fa-list-check md:text-lg"></i>
               <span class="block sm:hidden text-xs mt-1">Rituais</span>
             </div>
           </a>
           <a href="/participantesici/public_html/participante/<?= $pessoa['id'] ?>/editar"
             class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
-            title="Editar Participante">
+            title="Editar participante">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-              <i class="fa-solid fa-pen-to-square text-lg"></i>
+              <i class="fa-solid fa-pen-to-square md:text-lg"></i>
               <span class="block sm:hidden text-xs mt-1">Editar</span>
             </div>
           </a>
           <button
             onclick="abrirConfirmacaoExcluir('/participantesici/public_html/participante/<?= $pessoa['id'] ?>/excluir')"
             class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded flex items-center gap-1"
-            title="Excluir Participante">
+            title="Excluir participante">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-              <i class="fa-solid fa-trash text-lg"></i>
+              <i class="fa-solid fa-trash md:text-lg"></i>
               <span class="block sm:hidden text-xs mt-1">Excluir</span>
             </div>
           </button>
@@ -133,7 +134,7 @@ require_once __DIR__ . '/../../includes/header.php';
 <!-- Botão Voltar ao Topo -->
 <button id="scroll-to-top"
     class="fixed bottom-12 right-4 bg-[#00bfff] hover:bg-yellow-400 text-black p-3 rounded-full shadow-lg transform transition-all duration-300 ease-in-out opacity-0 invisible translate-y-4 z-50">
-    <i class="fa-solid fa-chevron-up text-lg"></i>
+    <i class="fa-solid fa-chevron-up md:text-lg"></i>
 </button>
 
 <!-- Modal de Ampliação de Imagem -->

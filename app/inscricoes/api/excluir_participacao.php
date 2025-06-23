@@ -1,39 +1,115 @@
 <?php
+
 require_once __DIR__ . '/../../functions/check_auth_api.php';
 require_once __DIR__ . '/../../config/database.php';
 
-// Verifica se o ID do participante foi fornecido
-if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-    $participante_id = $_GET['id'];
+// Verifica se os parâmetros foram fornecidos
+$participante_id = $_GET['participante_id'] ?? null;
+$ritual_id = $_GET['ritual_id'] ?? null;
+$redirect = $_GET['redirect'] ?? null;
 
-    try {
-        // Encontra o ritual associado ao participante
-        $stmt = $pdo->prepare("SELECT ritual_id FROM inscricoes WHERE participante_id = ?");
-        $stmt->execute([$participante_id]);
-        $inscricao = $stmt->fetch();
+// Validação de parâmetros
+if (!$participante_id || !$ritual_id || !is_numeric($participante_id) || !is_numeric($ritual_id)) {
+    $_SESSION['error'] = "Parâmetros inválidos para desvinculação.";
 
-        if (!$inscricao) {
-            $_SESSION['error'] = "Participante não encontrado ou já foi removido.";
-            header("Location: /participantesici/public_html/rituais");
-            exit;
-        }
-
-        $ritual_id = $inscricao['ritual_id'];
-
-        // Remove o participante da tabela de inscrições
-        $stmt = $pdo->prepare("DELETE FROM inscricoes WHERE participante_id = ?");
-        $stmt->execute([$participante_id]);
-
-        $_SESSION['success'] = "Participante removido com sucesso!";
-    } catch (Exception $e) {
-        $_SESSION['error'] = "Erro ao remover participante: " . $e->getMessage();
+    // Redirect inteligente baseado no referrer
+    if ($redirect) {
+        header("Location: $redirect");
+    } else {
+        $referrer = $_SERVER['HTTP_REFERER'] ?? '/participantesici/public_html/';
+        header("Location: $referrer");
     }
-
-    // Redireciona de volta para a página do ritual
-    header("Location: /participantesici/public_html/ritual/$ritual_id");
-    exit;
-} else {
-    $_SESSION['error'] = "ID do participante inválido.";
-    header("Location: /participantesici/public_html/rituais");
     exit;
 }
+
+try {
+    // Verifica se a inscrição existe antes de tentar excluir
+    $stmt_check = $pdo->prepare("
+        SELECT id FROM inscricoes
+        WHERE participante_id = ? AND ritual_id = ?
+    ");
+    $stmt_check->execute([$participante_id, $ritual_id]);
+    $inscricao = $stmt_check->fetch();
+
+    // ✅ DETECTA DE ONDE VEIO A REQUISIÇÃO PARA PERSONALIZAR MENSAGENS
+    $referrer = $_SERVER['HTTP_REFERER'] ?? '';
+    $vemDeParticipante = strpos($referrer, '/participante/') !== false;
+    $vemDeRitual = strpos($referrer, '/ritual/') !== false;
+
+    if (!$inscricao) {
+        if ($vemDeParticipante) {
+            $_SESSION['error'] = "Ritual não encontrado ou já foi desvinculado deste participante.";
+        } elseif ($vemDeRitual) {
+            $_SESSION['error'] = "Participante não encontrado ou já foi desvinculado deste ritual.";
+        } else {
+            $_SESSION['error'] = "Inscrição não encontrada. Pode já ter sido desvinculada.";
+        }
+    } else {
+        // Remove a inscrição da tabela
+        $stmt_delete = $pdo->prepare("
+            DELETE FROM inscricoes
+            WHERE participante_id = ? AND ritual_id = ?
+        ");
+        $stmt_delete->execute([$participante_id, $ritual_id]);
+
+        if ($stmt_delete->rowCount() > 0) {
+            if ($vemDeParticipante) {
+                $_SESSION['success'] = "Ritual desvinculado do participante com sucesso!";
+            } elseif ($vemDeRitual) {
+                $_SESSION['success'] = "Participante desvinculado do ritual com sucesso!";
+            } else {
+                $_SESSION['success'] = "Desvinculação realizada com sucesso!";
+            }
+        } else {
+            if ($vemDeParticipante) {
+                $_SESSION['error'] = "Não foi possível desvincular o ritual do participante.";
+            } elseif ($vemDeRitual) {
+                $_SESSION['error'] = "Não foi possível desvincular o participante do ritual.";
+            } else {
+                $_SESSION['error'] = "Não foi possível realizar a desvinculação.";
+            }
+        }
+    }
+
+} catch (Exception $e) {
+    error_log("Erro ao desvincular: " . $e->getMessage());
+
+    if ($vemDeParticipante) {
+        $_SESSION['error'] = "Erro interno ao desvincular ritual do participante.";
+    } elseif ($vemDeRitual) {
+        $_SESSION['error'] = "Erro interno ao desvincular participante do ritual.";
+    } else {
+        $_SESSION['error'] = "Erro interno ao processar desvinculação.";
+    }
+}
+
+// ✅ REDIRECT INTELIGENTE
+if ($redirect) {
+    // Usa o redirect específico passado
+    header("Location: $redirect");
+} else {
+    // Detecta automaticamente de onde veio
+    $referrer = $_SERVER['HTTP_REFERER'] ?? '';
+
+    if (strpos($referrer, '/participante/') !== false) {
+        // Veio da página do participante - volta para lá
+        preg_match('/\/participante\/(\d+)/', $referrer, $matches);
+        if (isset($matches[1])) {
+            header("Location: /participantesici/public_html/participante/{$matches[1]}");
+        } else {
+            header("Location: /participantesici/public_html/participantes");
+        }
+    } elseif (strpos($referrer, '/ritual/') !== false) {
+        // Veio da página do ritual - volta para lá
+        preg_match('/\/ritual\/(\d+)/', $referrer, $matches);
+        if (isset($matches[1])) {
+            header("Location: /participantesici/public_html/ritual/{$matches[1]}");
+        } else {
+            header("Location: /participantesici/public_html/rituais");
+        }
+    } else {
+        // Fallback: volta para a página anterior
+        header("Location: $referrer");
+    }
+}
+exit;
