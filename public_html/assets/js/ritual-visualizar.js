@@ -1,5 +1,58 @@
+// ============= VARIÁVEIS GLOBAIS =============
+let currentParticipanteId = null; // Para rastrear o participante atual
+
+// ============= FUNÇÃO TOAST =============
+function showToast(message, type = 'error') {
+  const backgroundColor = type === 'success' ? '#16a34a' : '#dc2626';
+  Toastify({
+    text: message,
+    duration: type === 'success' ? 4000 : 5000,
+    close: true,
+    gravity: "top",
+    position: "right",
+    backgroundColor: backgroundColor,
+    stopOnFocus: true,
+  }).showToast();
+}
+
+// ============= MODAL MANAGER =============
+document.addEventListener("DOMContentLoaded", function () {
+  // Lista de IDs das modals que devem ter fechamento ao clicar fora
+  const modalIds = [
+    'modal-detalhes-inscricao',
+    'modal-observacao',
+    'modal-adicionar'
+  ];
+
+  // Aplica o evento de fechamento para cada modal
+  modalIds.forEach(modalId => {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+      modal.addEventListener("click", function (event) {
+        if (event.target === modal) {
+          modal.style.display = "none";
+        }
+      });
+    }
+  });
+
+  // Para modals com classe .modal (fallback)
+  const modals = document.querySelectorAll(".modal");
+  modals.forEach(modal => {
+    modal.addEventListener("click", function (event) {
+      if (event.target === modal) {
+        modal.style.display = "none";
+      }
+    });
+  });
+});
+
+// ============= FUNÇÕES DE MODAL =============
+
 // Função para abrir o modal de detalhes da inscrição
 function abrirModalDetalhes(participanteId) {
+  currentParticipanteId = participanteId;
+
   // Limpa todos os campos do formulário
   document.getElementById('id').value = '';
   document.querySelector('select[name="primeira_vez_instituto"]').value = '';
@@ -15,25 +68,22 @@ function abrirModalDetalhes(participanteId) {
     .then(response => response.json())
     .then(data => {
       if (data.error) {
-        alert(data.error);
+        showToast(data.error, 'error');
         return;
       }
-
       const inscricaoId = data.inscricao_id;
 
-      // Preenche o ID da inscrição no formulário
       document.getElementById('id').value = inscricaoId;
 
-      // Busca os detalhes da inscrição
       fetch(`/participantesici/public_html/api/inscricoes/detalhes-inscricao?id=${inscricaoId}`)
         .then(response => response.json())
         .then(detalhes => {
           if (detalhes.error) {
-            alert(detalhes.error);
+            showToast(detalhes.error, 'error');
             return;
           }
 
-          // Preenche os campos do formulário com os dados retornados
+          // Preenche os campos
           document.querySelector('select[name="primeira_vez_instituto"]').value = detalhes.primeira_vez_instituto || '';
           document.querySelector('select[name="primeira_vez_ayahuasca"]').value = detalhes.primeira_vez_ayahuasca || '';
           document.querySelector('select[name="doenca_psiquiatrica"]').value = detalhes.doenca_psiquiatrica || '';
@@ -42,174 +92,350 @@ function abrirModalDetalhes(participanteId) {
           document.querySelector('input[name="nome_medicao"]').value = detalhes.nome_medicao || '';
           document.querySelector('textarea[name="mensagem"]').value = detalhes.mensagem || '';
 
-          // Preenche a data de salvamento (se existir)
           const salvoEm = detalhes.salvo_em ?
-            new Date(detalhes.salvo_em).toLocaleDateString('pt-BR') // Formato "DD/MM/YYYY"
-            :
-            'Nunca salvo';
+            new Date(detalhes.salvo_em).toLocaleDateString('pt-BR') : 'Nunca salvo';
           document.getElementById('salvo_em').value = salvoEm;
         })
-        .catch(error => console.error('Erro ao carregar detalhes:', error));
+        .catch(error => {
+          console.error('Erro ao carregar detalhes:', error);
+          showToast('Erro ao carregar detalhes da inscrição', 'error');
+        });
     })
-    .catch(error => console.error('Erro ao buscar ID da inscrição:', error));
+    .catch(error => {
+      console.error('Erro ao buscar ID da inscrição:', error);
+      showToast('Erro ao buscar dados da inscrição', 'error');
+    });
 
-  // Exibe a modal
   document.getElementById('modal-detalhes-inscricao').style.display = 'flex';
-}
-document.addEventListener("DOMContentLoaded", function () {
-  const form = document.getElementById('form-detalhes-inscricao');
 
-  form.addEventListener('submit', function (event) {
-    event.preventDefault(); // Impede o envio tradicional do formulário
-
-    // Captura os dados do formulário
-    const formData = new FormData(form);
-
-    // Envia os dados via AJAX
-    fetch('/participantesici/public_html/api/inscricoes/buscar-id', {
-      method: 'POST',
-      body: formData
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          alert("Detalhes salvos com sucesso!");
-          // Fecha o modal
-          document.getElementById('modal-detalhes-inscricao').style.display = 'none';
-          // Atualiza a tabela (opcional)
-          location.reload();
-        } else {
-          alert("Erro ao salvar detalhes: " + data.error);
-        }
-      })
-      .catch(error => {
-        console.error('Erro ao enviar requisição:', error);
-        alert("Erro ao salvar detalhes. Por favor, tente novamente.");
-      });
-  });
-});
-
-// Função para fechar o modal de detalhes da inscrição
-function fecharModalDetalhes() {
-  document.getElementById('modal-detalhes-inscricao').style.display = 'none';
+  // Foco no primeiro campo do formulário
+  const primeiroCampo = document.querySelector('#form-detalhes-inscricao input, #form-detalhes-inscricao select, #form-detalhes-inscricao textarea');
+  if (primeiroCampo) {
+    primeiroCampo.focus();
+  }
 }
 
 // Função para abrir o modal de observação
 function abrirModalObservacao(participanteId) {
-  // Busca o ID da inscrição via AJAX
+  currentParticipanteId = participanteId;
+
   fetch(`/participantesici/public_html/api/inscricoes/buscar-id?participante_id=${participanteId}&ritual_id=${ritualId}`)
     .then(response => response.json())
     .then(data => {
       if (data.error) {
-        alert(data.error);
+        showToast(data.error, 'error');
         return;
       }
-
       const inscricaoId = data.inscricao_id;
 
-      // Preenche o ID da inscrição no formulário
       document.getElementById('inscricao_id_observacao').value = inscricaoId;
 
-      // Busca os detalhes da inscrição
       fetch(`/participantesici/public_html/api/inscricoes/detalhes-inscricao?id=${inscricaoId}`)
         .then(response => response.json())
         .then(detalhes => {
           if (detalhes.error) {
-            alert(detalhes.error);
+            showToast(detalhes.error, 'error');
             return;
           }
 
-          // Preenche o campo de observação com o valor salvo no banco
-          document.querySelector('textarea[name="observacao"]').value = detalhes.observacao || '';
+          // Ajustar título e botão da modal
+          const modalTitle = document.querySelector('#modal-observacao h2');
+          const observacaoTextarea = document.querySelector('#modal-observacao textarea[name="observacao"]');
+          const submitBtn = document.querySelector('#modal-observacao button[type="submit"]');
 
-          // Preenche a data de salvamento (se existir)
+          if (detalhes.observacao && detalhes.observacao.trim()) {
+            modalTitle.textContent = 'Observação do participante';
+            observacaoTextarea.placeholder = 'Edite a observação...';
+            submitBtn.innerHTML = '<i class="fa-solid fa-save mr-1"></i> Atualizar observação';
+          } else {
+            modalTitle.textContent = 'Adicionar observação';
+            observacaoTextarea.placeholder = 'Digite sua observação sobre este participante...';
+            submitBtn.innerHTML = '<i class="fa-solid fa-plus mr-1"></i> Salvar observação';
+          }
+
+          observacaoTextarea.value = detalhes.observacao || '';
+
           const obsSalvoEm = detalhes.obs_salvo_em ?
-            new Date(detalhes.obs_salvo_em).toLocaleDateString('pt-BR') // Formato "DD/MM/YYYY"
-            :
-            'Nunca salvo';
+            new Date(detalhes.obs_salvo_em).toLocaleDateString('pt-BR') : 'Nunca salvo';
           document.getElementById('obs_salvo_em').value = obsSalvoEm;
         })
-        .catch(error => console.error('Erro ao carregar detalhes:', error));
+        .catch(error => {
+          console.error('Erro ao carregar detalhes:', error);
+          showToast('Erro ao carregar observação', 'error');
+        });
 
-      // Exibe a modal
       document.getElementById('modal-observacao').style.display = 'flex';
     })
-    .catch(error => console.error('Erro ao buscar ID da inscrição:', error));
+    .catch(error => {
+      console.error('Erro ao buscar ID da inscrição:', error);
+      showToast('Erro ao buscar dados da inscrição', 'error');
+    });
 }
-document.addEventListener("DOMContentLoaded", function () {
-  const form = document.getElementById('form-observacao');
 
-  form.addEventListener('submit', function (event) {
-    event.preventDefault(); // Impede o envio tradicional do formulário
+// Funções para fechar modals
+function fecharModalDetalhes() {
+  document.getElementById('modal-detalhes-inscricao').style.display = 'none';
+  currentParticipanteId = null;
+}
 
-    // Captura os dados do formulário
-    const formData = new FormData(form);
-    const observacao = formData.get('observacao');
-
-    // Verifica se a observação está vazia
-    if (!observacao.trim()) {
-      alert("A observação não pode estar vazia.");
-      return;
-    }
-
-    // Envia os dados via AJAX
-    fetch('/participantesici/public_html/api/inscricoes/salvar-observacao', {
-      method: 'POST',
-      body: formData
-    })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          alert("Observação salva com sucesso!");
-          // Fecha o modal
-          document.getElementById('modal-observacao').style.display = 'none';
-          // Atualiza a tabela (opcional)
-          location.reload();
-        } else {
-          alert("Erro ao salvar observação: " + data.error);
-        }
-      })
-      .catch(error => {
-        console.error('Erro ao enviar requisição:', error);
-        alert("Erro ao salvar observação. Por favor, tente novamente.");
-      });
-  });
-});
-
-// Função para fechar o modal de observação
 function fecharModalObservacao() {
   document.getElementById('modal-observacao').style.display = 'none';
+  currentParticipanteId = null;
 }
 
-// Função para ordenar a tabela (simulação)
-function ordenarPor(coluna) {
-  alert(`Ordenar por ${coluna}`);
-  // Implementar lógica de ordenação aqui (pode ser via JavaScript ou PHP)
+function aplicarFocoModalAdicionar() {
+  // Observa quando a modal aparece e aplica foco
+  const modal = document.getElementById('modal-adicionar');
+
+  if (modal) {
+    const observer = new MutationObserver(function (mutations) {
+      mutations.forEach(function (mutation) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+          const isVisible = modal.style.display === 'flex';
+
+          if (isVisible) {
+            setTimeout(() => {
+              const inputPesquisa = document.getElementById('nome_pesquisa');
+              if (inputPesquisa) {
+                inputPesquisa.focus();
+                console.log('✅ Foco aplicado automaticamente');
+              }
+            }, 100);
+          }
+        }
+      });
+    });
+
+    observer.observe(modal, { attributes: true, attributeFilter: ['style'] });
+  }
 }
 
-// Função para alternar a presença (Sim/Não)
+// Chama a função quando a página carrega
+document.addEventListener('DOMContentLoaded', aplicarFocoModalAdicionar);
+
+function fecharModalAdicionar() {
+  document.getElementById('modal-adicionar').style.display = 'none';
+  limparPesquisa();
+}
+
+// ============= FUNÇÕES DE NOTIFICAÇÃO =============
+function removerNotificacaoObservacao(participanteId) {
+  console.log('Removendo notificação observação para participante:', participanteId);
+
+  // Busca todos os botões de observação do card específico
+  const cards = document.querySelectorAll('.bg-white.p-4.rounded-lg.shadow');
+
+  cards.forEach(card => {
+    const botaoObservacao = card.querySelector('button[onclick*="abrirModalObservacao"]');
+    if (botaoObservacao) {
+      const onclickAttr = botaoObservacao.getAttribute('onclick');
+      if (onclickAttr && onclickAttr.includes(`abrirModalObservacao(${participanteId})`)) {
+        const bolinha = botaoObservacao.querySelector('.bg-red-500');
+        if (bolinha) {
+          bolinha.remove();
+          console.log('Bolinha de observação removida para participante:', participanteId);
+        }
+      }
+    }
+  });
+}
+
+function removerNotificacaoDetalhes(participanteId) {
+  console.log('Removendo notificação detalhes para participante:', participanteId);
+
+  const cards = document.querySelectorAll('.bg-white.p-4.rounded-lg.shadow');
+
+  cards.forEach(card => {
+    const botaoDetalhes = card.querySelector('button[onclick*="abrirModalDetalhes"]');
+    if (botaoDetalhes) {
+      const onclickAttr = botaoDetalhes.getAttribute('onclick');
+      if (onclickAttr && onclickAttr.includes(`abrirModalDetalhes(${participanteId})`)) {
+        const bolinha = botaoDetalhes.querySelector('.bg-red-500');
+        if (bolinha) {
+          bolinha.remove();
+          console.log('Bolinha de detalhes removida para participante:', participanteId);
+        }
+      }
+    }
+  });
+}
+
+// ============= EVENT LISTENERS DE FORMULÁRIOS =============
+document.addEventListener("DOMContentLoaded", function () {
+  // Form de detalhes da inscrição
+  initFormDetalhes();
+
+  // Form de observação
+  initFormObservacao();
+
+  // Outras inicializações
+  setupConditionalFields();
+});
+
+// Função para inicializar form de detalhes
+function initFormDetalhes() {
+  const formDetalhes = document.getElementById('form-detalhes-inscricao');
+  if (formDetalhes && !formDetalhes.hasAttribute('data-initialized')) {
+    formDetalhes.setAttribute('data-initialized', 'true');
+
+    formDetalhes.addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      console.log('Form detalhes submetido');
+
+      // Validação manual completa
+      let formularioValido = true;
+      const campos = {
+        primeira_vez_instituto: formDetalhes.querySelector('[name="primeira_vez_instituto"]'),
+        primeira_vez_ayahuasca: formDetalhes.querySelector('[name="primeira_vez_ayahuasca"]'),
+        doenca_psiquiatrica: formDetalhes.querySelector('[name="doenca_psiquiatrica"]'),
+        uso_medicao: formDetalhes.querySelector('[name="uso_medicao"]')
+      };
+
+      // Valida campos obrigatórios
+      Object.keys(campos).forEach(nome => {
+        const campo = campos[nome];
+        if (campo && !campo.value.trim()) {
+          campo.classList.add('border-red-500');
+          campo.focus();
+          formularioValido = false;
+        } else if (campo) {
+          campo.classList.remove('border-red-500');
+        }
+      });
+
+      // Validação condicional
+      const doencaSelect = campos.doenca_psiquiatrica;
+      const nomeDoencaInput = formDetalhes.querySelector('[name="nome_doenca"]');
+
+      if (doencaSelect && doencaSelect.value === 'Sim' &&
+        nomeDoencaInput && !nomeDoencaInput.value.trim()) {
+        nomeDoencaInput.classList.add('border-red-500');
+        nomeDoencaInput.focus();
+        formularioValido = false;
+      } else if (nomeDoencaInput) {
+        nomeDoencaInput.classList.remove('border-red-500');
+      }
+
+      const medicacaoSelect = campos.uso_medicao;
+      const nomeMedicacaoInput = formDetalhes.querySelector('[name="nome_medicao"]');
+
+      if (medicacaoSelect && medicacaoSelect.value === 'Sim' &&
+        nomeMedicacaoInput && !nomeMedicacaoInput.value.trim()) {
+        nomeMedicacaoInput.classList.add('border-red-500');
+        nomeMedicacaoInput.focus();
+        formularioValido = false;
+      } else if (nomeMedicacaoInput) {
+        nomeMedicacaoInput.classList.remove('border-red-500');
+      }
+
+      // Só envia se válido
+      if (!formularioValido) {
+        showToast("Por favor, preencha todos os campos obrigatórios.", 'error');
+        return;
+      }
+
+      // Prossegue com o AJAX
+      const formData = new FormData(formDetalhes);
+
+      fetch('/participantesici/public_html/api/inscricoes/salvar-inscricao', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            showToast("Detalhes da inscrição salvos com sucesso!", 'success');
+            fecharModalDetalhes();
+
+            if (currentParticipanteId) {
+              removerNotificacaoDetalhes(currentParticipanteId);
+            }
+
+            setTimeout(() => {
+              location.reload();
+            }, 1000);
+          } else {
+            showToast("Erro ao salvar detalhes da inscrição: " + data.error, 'error');
+          }
+        })
+        .catch(error => {
+          console.error('Erro ao enviar requisição:', error);
+          showToast("Erro ao salvar detalhes da inscrição. Tente novamente.", 'error');
+        });
+    });
+  }
+}
+
+// Função para inicializar form de observação
+function initFormObservacao() {
+  const formObservacao = document.getElementById('form-observacao');
+  if (formObservacao && !formObservacao.hasAttribute('data-initialized')) {
+    formObservacao.setAttribute('data-initialized', 'true');
+
+    formObservacao.addEventListener('submit', function (event) {
+      event.preventDefault();
+      console.log('Form observação submetido');
+
+      const formData = new FormData(formObservacao);
+      const observacao = formData.get('observacao');
+
+      if (!observacao.trim()) {
+        showToast("A observação não pode estar vazia.", 'error');
+        return;
+      }
+
+      console.log('Enviando observação:', observacao, 'Participante ID:', currentParticipanteId);
+
+      fetch('/participantesici/public_html/api/inscricoes/salvar-observacao', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Resposta da API observação:', data);
+          if (data.success) {
+            showToast("Observação salva com sucesso!", 'success');
+            fecharModalObservacao();
+
+            // Remove notificação se tiver participante ID
+            if (currentParticipanteId) {
+              removerNotificacaoObservacao(currentParticipanteId);
+            }
+
+            setTimeout(() => {
+              location.reload();
+            }, 1000);
+          } else {
+            showToast("Erro ao salvar observação: " + data.error, 'error');
+          }
+        })
+        .catch(error => {
+          console.error('Erro ao enviar requisição:', error);
+          showToast("Erro ao salvar observação. Tente novamente.", 'error');
+        });
+    });
+  }
+}
+
+// ============= PRESENÇA =============
 function togglePresenca(button) {
-  const participanteId = button.getAttribute('data-participante-id'); // ID do participante
-  const currentStatus = button.getAttribute('data-current-status'); // Status atual (Sim/Não)
-  const newStatus = currentStatus === 'Sim' ? 'Não' : 'Sim'; // Alterna entre Sim/Não
+  const participanteId = button.getAttribute('data-participante-id');
+  const currentStatus = button.getAttribute('data-current-status');
+  const newStatus = currentStatus === 'Sim' ? 'Não' : 'Sim';
 
-  // Busca o ID da inscrição via AJAX
   fetch(`/participantesici/public_html/api/inscricoes/buscar-id?participante_id=${participanteId}&ritual_id=${ritualId}`)
     .then(response => response.json())
     .then(data => {
       if (data.error) {
-        alert(data.error);
+        showToast(data.error, 'error');
         return;
       }
-
       const inscricaoId = data.inscricao_id;
 
-      // Envia a requisição AJAX para atualizar o status no banco de dados
       fetch(`/participantesici/public_html/api/inscricoes/atualizar-presenca`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           inscricao_id: inscricaoId,
           novo_status: newStatus
@@ -218,215 +444,362 @@ function togglePresenca(button) {
         .then(response => response.json())
         .then(data => {
           if (data.success) {
-            // Atualiza o botão visualmente
-            button.textContent = newStatus;
-            button.classList.toggle('active'); // Alterna a classe CSS
-            button.setAttribute('data-current-status', newStatus); // Atualiza o atributo
+            // Atualizar botão com ícone + texto
+            if (newStatus === 'Sim') {
+              button.innerHTML = `
+                <i class="fa-solid fa-check"></i>
+                <span>Sim</span>
+              `;
+              button.classList.remove('bg-red-100', 'text-red-700', 'hover:bg-red-200');
+              button.classList.add('bg-green-100', 'text-green-700', 'hover:bg-green-200', 'active');
+            } else {
+              button.innerHTML = `
+                <i class="fa-solid fa-xmark"></i>
+                <span>Não</span>
+              `;
+              button.classList.remove('bg-green-100', 'text-green-700', 'hover:bg-green-200', 'active');
+              button.classList.add('bg-red-100', 'text-red-700', 'hover:bg-red-200');
+            }
+
+            button.setAttribute('data-current-status', newStatus);
+            atualizarContadorParticipantes();
+            showToast(`Presença atualizada para: ${newStatus}`, 'success');
           } else {
-            alert('Erro ao atualizar presença: ' + data.error);
+            showToast('Erro ao atualizar presença: ' + data.error, 'error');
           }
         })
-        .catch(error => console.error('Erro ao atualizar presença:', error));
+        .catch(error => {
+          console.error('Erro ao atualizar presença:', error);
+          showToast('Erro ao atualizar presença', 'error');
+        });
     })
-    .catch(error => console.error('Erro ao buscar ID da inscrição:', error));
+    .catch(error => {
+      console.error('Erro ao buscar ID da inscrição:', error);
+      showToast('Erro ao buscar dados da inscrição', 'error');
+    });
 }
 
-// Função para pesquisar participantes
-function pesquisarParticipantes() {
-  const nomePesquisa = document.getElementById('nome_pesquisa').value.trim();
-  if (!nomePesquisa) {
-    alert("Digite um nome ou CPF para pesquisar.");
-    return;
+function atualizarContadorParticipantes() {
+  try {
+    // Conta participantes presentes nos cards
+    const botoesPresenca = document.querySelectorAll('[data-current-status="Sim"]');
+    const totalParticipantes = botoesPresenca.length;
+
+    // Atualiza contador no cabeçalho
+    const contadorSpan = document.querySelector('span.bg-\\[\\#00bfff\\]');
+    if (contadorSpan && contadorSpan.parentElement.textContent.includes('Total de participantes')) {
+      contadorSpan.textContent = totalParticipantes;
+      console.log(`Contador atualizado: ${totalParticipantes} participantes`);
+    }
+  } catch (error) {
+    console.error('Erro ao atualizar contador:', error);
   }
-  // Mostra o botão "Limpar Pesquisa"
-  const limparPesquisaBtn = document.getElementById('limpar-pesquisa-btn');
-  limparPesquisaBtn.style.display = 'inline-block';
-  // Exibe os resultados (simulação)
-  const resultadosPesquisa = document.getElementById('resultados-pesquisa');
-  resultadosPesquisa.style.display = 'block';
-  // Limpa a lista de resultados
-  const listaParticipantes = document.getElementById('lista-participantes');
-  listaParticipantes.innerHTML = '';
-  // Exibe a área de resultados
-  document.getElementById('resultados-pesquisa').style.display = 'block';
-  // Envia a requisição AJAX para buscar os participantes
-  fetch(`/participantesici/public_html/api/ritual/buscar-participante?nome=${encodeURIComponent(nomePesquisa)}`)
-    .then(response => response.json())
-    .then(data => {
-      if (data.error) {
-        alert(data.error);
-        return;
-      }
-
-      if (data.length === 0) {
-        // Se nenhum participante for encontrado, exibe o botão "Adicionar Novo Participante"
-        listaParticipantes.innerHTML = `
-              <li>Nenhum participante encontrado.</li>
-              <li>
-                  <button class="add-new-btn" onclick="adicionarNovaPessoa()">Adicionar Novo Participante</button>
-              </li>
-          `;
-        return;
-      }
-
-      // Preenche a lista com os participantes encontrados
-      data.forEach(participante => {
-        const li = document.createElement('li');
-        li.innerHTML = `
-              <img src="${participante.foto || '/participantesici/public_html/assets/images/no-image.png'}" alt="Foto">
-              <span>${participante.nome_completo}</span>
-              <button class="add-btn" onclick="adicionarParticipante(${participante.id})">Adicionar</button>
-          `;
-        listaParticipantes.appendChild(li);
-      });
-      const li = document.createElement('ul');
-      li.innerHTML = `
-          <br>
-              <h3>Não encontrou o participante?</h3><br>
-              <button class="add-new-btn" onclick="adicionarNovaPessoa()">Adicionar Novo Participante</button>
-          `;
-      listaParticipantes.appendChild(li);
-    })
-    .catch(error => console.error('Erro ao buscar participantes:', error));
 }
 
-// Função para limpar a pesquisa
-function limparPesquisa() {
-  // Limpa o campo de pesquisa
-  const nomePesquisa = document.getElementById('nome_pesquisa');
-  nomePesquisa.value = '';
+// ============= PESQUISA DE PARTICIPANTES =============
+// Event listener para Enter no campo de pesquisa
+document.addEventListener('DOMContentLoaded', function () {
+  const nomePesquisaInput = document.getElementById('nome_pesquisa');
 
-  // Remove os resultados da lista
-  const listaParticipantes = document.getElementById('lista-participantes');
-  listaParticipantes.innerHTML = '';
-
-  // Oculta a área de resultados
-  const resultadosPesquisa = document.getElementById('resultados-pesquisa');
-  resultadosPesquisa.style.display = 'none';
-
-  // Oculta o botão "Limpar Pesquisa"
-  const limparPesquisaBtn = document.getElementById('limpar-pesquisa-btn');
-  limparPesquisaBtn.style.display = 'none';
-}
-
-// Função para capturar o evento de pressionar Enter no campo de pesquisa
-document.getElementById('pesquisa-participante-form').addEventListener('keypress', function (event) {
-  if (event.key === 'Enter') {
-    event.preventDefault(); // Impede o envio do formulário
-    pesquisarParticipantes(); // Chama a função de pesquisa
+  if (nomePesquisaInput) {
+    nomePesquisaInput.addEventListener('keypress', function (event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        pesquisarParticipantes();
+      }
+    });
   }
 });
 
-// Função para redirecionar para a página de cadastro de nova pessoa
-function adicionarNovaPessoa() {
-  const ritualId = document.querySelector('#modal-adicionar input[name="ritual_id"]').value;
-  window.location.href = `participante-novo?redirect=ritual-visualizar&id=${ritualId}`;
+function pesquisarParticipantes() {
+  const nomePesquisa = document.getElementById('nome_pesquisa').value.trim();
+
+  // Validação melhorada: CPF precisa ter exatamente 11 dígitos, nome pelo menos 3 caracteres
+  const apenasNumeros = nomePesquisa.replace(/\D/g, '');
+  const ehCPF = apenasNumeros.length === 11; // Exatamente 11 dígitos
+  const ehNome = nomePesquisa.length >= 3 && apenasNumeros.length !== 11;
+
+  if (!ehCPF && !ehNome) {
+    if (apenasNumeros.length > 0 && apenasNumeros.length !== 11) {
+      showToast("CPF deve ter exatamente 11 dígitos.", 'error');
+    } else {
+      showToast("Digite pelo menos 3 caracteres para pesquisar pelo nome.", 'error');
+    }
+    document.getElementById('nome_pesquisa').focus();
+    return;
+  }
+
+  console.log('🔍 Pesquisando:', nomePesquisa);
+  console.log('📱 É CPF?', ehCPF);
+  console.log('📝 É Nome?', ehNome);
+
+  // Loading state no botão
+  const pesquisarBtn = document.getElementById('pesquisar-btn');
+  const originalText = pesquisarBtn ? pesquisarBtn.textContent : 'Pesquisar';
+
+  if (pesquisarBtn) {
+    pesquisarBtn.textContent = 'Pesquisando...';
+    pesquisarBtn.disabled = true;
+  }
+
+  // Mostra resultados
+  const limparPesquisaBtn = document.getElementById('limpar-pesquisa-btn');
+  const resultadosPesquisa = document.getElementById('resultados-pesquisa');
+  if (limparPesquisaBtn) limparPesquisaBtn.style.display = 'inline-block';
+  if (resultadosPesquisa) resultadosPesquisa.style.display = 'block';
+
+  const listaParticipantes = document.getElementById('lista-participantes');
+  if (listaParticipantes) listaParticipantes.innerHTML = '';
+
+  const apiUrl = `/participantesici/public_html/api/ritual/buscar-participante?nome=${encodeURIComponent(nomePesquisa)}`;
+  console.log('🌐 URL da API:', apiUrl);
+  // Executa pesquisa
+  Promise.all([
+    fetch(`/participantesici/public_html/api/ritual/buscar-participante?nome=${encodeURIComponent(nomePesquisa)}`),
+    fetch(`/participantesici/public_html/api/inscricoes/rituais-vinculados?ritual_id=${ritualId}`)
+  ])
+    .then(responses => Promise.all(responses.map(r => r.json())))
+    .then(([participantesData, participantesVinculadosData]) => {
+      if (participantesData.error) {
+        showToast(participantesData.error, 'error');
+        return;
+      }
+
+      const participantesVinculados = participantesVinculadosData.participantes_ids || [];
+
+      if (participantesData.length === 0) {
+        if (listaParticipantes) {
+          const tipoTermoBusca = ehCPF ? 'CPF' : 'nome';
+          listaParticipantes.innerHTML = `
+            <li class="p-4 text-center text-gray-500">
+              <i class="fa-solid fa-search text-2xl mb-2 block"></i>
+              <p class="mt-2">Nenhum participante encontrado para o ${tipoTermoBusca} "<strong>${nomePesquisa}</strong>"</p>
+              <p class="text-xs mt-1">Pode ser que esse participante ainda não exista, crie pelo botão abaixo.</p>
+            </li>
+          `;
+        }
+        return;
+      }
+
+      // Exibe contador de resultados
+      if (listaParticipantes) {
+        const contadorResultados = document.createElement('li');
+        contadorResultados.className = 'p-2 bg-blue-50 border-b border-blue-200 text-blue-700 text-sm font-medium';
+        contadorResultados.innerHTML = `
+          <i class="fa-solid fa-info-circle mr-1"></i>
+          ${participantesData.length} participante(s) encontrado(s) para "<strong>${nomePesquisa}</strong>"
+        `;
+        listaParticipantes.appendChild(contadorResultados);
+      }
+
+      // Cria lista de participantes
+      participantesData.forEach(participante => {
+        const jaAdicionado = participantesVinculados.includes(participante.id);
+        const li = document.createElement('li');
+        li.className = 'p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0';
+
+        // Destacar termo pesquisado no nome
+        let nomeDestacado = participante.nome_completo || 'Nome não informado';
+
+        // Se busca foi por nome, destacar no nome
+        if (!ehCPF && participante.nome_completo) {
+          nomeDestacado = participante.nome_completo.replace(
+            new RegExp(`(${nomePesquisa.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+            '<mark class="bg-yellow-200 px-1 rounded">$1</mark>'
+          );
+        }
+
+        // Para CPF, mostrar indicador que foi encontrado por CPF
+        const infoAdicional = ehCPF ?
+          `<p class="text-xs text-green-600 mt-1"><i class="fa-solid fa-check mr-1"></i>Encontrado pelo CPF informado</p>` :
+          '';
+
+        li.innerHTML = `
+          <div class="grid grid-cols-[auto_1fr] gap-4">
+            <div class="flex-shrink-0">
+              <img src="${participante.foto || '/participantesici/public_html/assets/images/no-image.png'}"
+                   onerror="this.src='/participantesici/public_html/assets/images/no-image.png';"
+                   alt="Foto do participante"
+                   class="w-16 h-16 rounded-lg object-cover border border-gray-200">
+            </div>
+            <div class="space-y-2">
+              <h3 class="!font-semibold !text-gray-900 !text-lg !leading-tight !m-0 !p-0">
+                ${nomeDestacado}
+              </h3>
+              ${infoAdicional}
+              <div class="pt-1">
+                ${jaAdicionado ?
+            `<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    <i class="fa-solid fa-check"></i>
+                    Já adicionado
+                  </span>` :
+            `<button onclick="adicionarParticipante(${participante.id})"
+                           class="bg-[#00bfff] hover:bg-yellow-400 text-black px-4 py-2 rounded text-sm font-semibold transition-colors shadow-sm">
+                    <i class="fa-solid fa-plus mr-1"></i>
+                    Adicionar
+                  </button>`
+          }
+              </div>
+            </div>
+          </div>
+        `;
+
+        if (listaParticipantes) listaParticipantes.appendChild(li);
+      });
+
+      // Feedback de sucesso
+      showToast(`${participantesData.length} participante(s) encontrado(s)!`, 'success');
+    })
+    .catch(error => {
+      console.error('Erro ao buscar participantes:', error);
+      showToast('Erro ao carregar participantes. Verifique sua conexão e tente novamente.', 'error');
+
+      // Exibe mensagem de erro na lista
+      if (listaParticipantes) {
+        listaParticipantes.innerHTML = `
+          <li class="p-4 text-center text-red-500">
+            <i class="fa-solid fa-exclamation-triangle text-2xl mb-2 block"></i>
+            <p>Erro ao carregar participantes</p>
+            <button onclick="pesquisarParticipantes()"
+                    class="mt-2 text-sm underline hover:no-underline">
+              Tentar novamente
+            </button>
+          </li>
+        `;
+      }
+    })
+    .finally(() => {
+      // Restaura o botão após pesquisa
+      if (pesquisarBtn) {
+        pesquisarBtn.textContent = originalText;
+        pesquisarBtn.disabled = false;
+      }
+    });
 }
 
-// Função para adicionar um participante ao ritual
-function adicionarParticipante(participanteId) {
-  const ritualId = document.querySelector('#modal-adicionar input[name="ritual_id"]').value;
+function limparPesquisa() {
+  const elements = {
+    nomePesquisa: document.getElementById('nome_pesquisa'),
+    listaParticipantes: document.getElementById('lista-participantes'),
+    resultados: document.getElementById('resultados-pesquisa'),
+    limparPesquisa: document.getElementById('limpar-pesquisa-btn')
+  };
 
-  // Envia a requisição AJAX para adicionar o participante ao ritual
+  if (elements.nomePesquisa) elements.nomePesquisa.value = '';
+  if (elements.listaParticipantes) elements.listaParticipantes.innerHTML = '';
+  if (elements.resultados) elements.resultados.style.display = 'none';
+  if (elements.limparPesquisa) elements.limparPesquisa.style.display = 'none';
+}
+
+// ============= PARTICIPANTE ACTIONS =============
+function adicionarNovaPessoa() {
+  const ritualIdInput = document.querySelector('#modal-adicionar input[name="ritual_id"]');
+  if (ritualIdInput) {
+    const ritualIdValue = ritualIdInput.value;
+    window.location.href = `/participantesici/public_html/participante/novo?redirect=/participantesici/public_html/ritual/${ritualIdValue}`;
+  }
+}
+
+function adicionarParticipante(participanteId) {
+  const ritualIdInput = document.querySelector('#modal-adicionar input[name="ritual_id"]');
+  if (!ritualIdInput) {
+    showToast('Erro: ID do ritual não encontrado', 'error');
+    return;
+  }
+
+  const ritualIdValue = ritualIdInput.value;
+
   fetch('/participantesici/public_html/api/ritual/adicionar-participante', {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'
-    },
+    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       participante_id: participanteId,
-      ritual_id: ritualId
+      ritual_id: ritualIdValue
     })
   })
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        alert('Participante adicionado com sucesso!');
-        location.reload(); // Recarrega a página para atualizar a lista de participantes
+        showToast('Participante adicionado com sucesso!', 'success');
+        setTimeout(() => {
+          location.reload();
+        }, 1000);
       } else {
-        alert('Erro ao adicionar participante: ' + data.error);
+        showToast('Erro ao adicionar participante: ' + data.error, 'error');
       }
     })
-    .catch(error => console.error('Erro ao adicionar participante:', error));
+    .catch(error => {
+      console.error('Erro ao adicionar participante:', error);
+      showToast('Erro ao adicionar participante', 'error');
+    });
 }
 
-// Função para fechar o modal
-function fecharModalAdicionar() {
-  document.getElementById('modal-adicionar').style.display = 'none';
-  document.getElementById('resultados-pesquisa').style.display = 'none';
-  document.getElementById('lista-participantes').innerHTML = '';
-}
-
-// Máscara para CPF
-function aplicarMascaraCPF(input) {
-  let valor = input.value;
-
-  // Verifica se o valor contém apenas números
-  if (/^\d+$/.test(valor.replace(/\D/g, ''))) {
-    // Aplica a máscara de CPF
-    valor = valor.replace(/\D/g, ''); // Remove tudo que não é número
-    if (valor.length > 11) valor = valor.slice(0, 11); // Limita a 11 dígitos
-    valor = valor.replace(/(\d{3})(\d)/, '$1.$2'); // Adiciona o primeiro ponto
-    valor = valor.replace(/(\d{3})(\d)/, '$1.$2'); // Adiciona o segundo ponto
-    valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2'); // Adiciona o traço
-    input.value = valor;
-  } else {
-    // Não aplica a máscara se o valor contiver letras
-    input.value = valor;
-  }
-}
-
-document.addEventListener("DOMContentLoaded", function () {
-  // Função para habilitar/desabilitar o campo "Nome da doença"
+// ============= SETUP FUNCTIONS =============
+function setupConditionalFields() {
   function toggleNomeDoenca() {
     const doencaPsiquiatrica = document.getElementById("doenca_psiquiatrica");
     const nomeDoenca = document.getElementById("nome_doenca");
-
-    if (doencaPsiquiatrica.value === "Sim") {
-      nomeDoenca.disabled = false;
-      nomeDoenca.required = true; // Torna o campo obrigatório se "Sim" for selecionado
-    } else {
-      nomeDoenca.disabled = true;
-      nomeDoenca.required = false; // Remove a obrigatoriedade
-      nomeDoenca.value = ""; // Limpa o valor do campo
+    if (doencaPsiquiatrica && nomeDoenca) {
+      if (doencaPsiquiatrica.value === "Sim") {
+        nomeDoenca.disabled = false;
+        nomeDoenca.required = true;
+      } else {
+        nomeDoenca.disabled = true;
+        nomeDoenca.required = false;
+        nomeDoenca.value = "";
+      }
     }
   }
 
-  // Função para habilitar/desabilitar o campo "Nome da medicação"
   function toggleNomeMedicacao() {
     const usoMedicacao = document.getElementById("uso_medicao");
     const nomeMedicacao = document.getElementById("nome_medicao");
-
-    if (usoMedicacao.value === "Sim") {
-      nomeMedicacao.disabled = false;
-      nomeMedicacao.required = true; // Torna o campo obrigatório se "Sim" for selecionado
-    } else {
-      nomeMedicacao.disabled = true;
-      nomeMedicacao.required = false; // Remove a obrigatoriedade
-      nomeMedicacao.value = ""; // Limpa o valor do campo
+    if (usoMedicacao && nomeMedicacao) {
+      if (usoMedicacao.value === "Sim") {
+        nomeMedicacao.disabled = false;
+        nomeMedicacao.required = true;
+      } else {
+        nomeMedicacao.disabled = true;
+        nomeMedicacao.required = false;
+        nomeMedicacao.value = "";
+      }
     }
   }
 
-  // Monitorar mudanças no campo "Possui doença psiquiátrica diagnosticada?"
-  document.getElementById("doenca_psiquiatrica").addEventListener("change", toggleNomeDoenca);
+  const doencaSelect = document.getElementById("doenca_psiquiatrica");
+  const medicacaoSelect = document.getElementById("uso_medicao");
 
-  // Monitorar mudanças no campo "Faz uso de alguma medicação?"
-  document.getElementById("uso_medicao").addEventListener("change", toggleNomeMedicacao);
+  if (doencaSelect) {
+    doencaSelect.addEventListener("change", toggleNomeDoenca);
+    toggleNomeDoenca();
+  }
 
-  // Executar as funções ao carregar a página para garantir o estado inicial correto
-  toggleNomeDoenca();
-  toggleNomeMedicacao();
-});
+  if (medicacaoSelect) {
+    medicacaoSelect.addEventListener("change", toggleNomeMedicacao);
+    toggleNomeMedicacao();
+  }
+}
 
-document.addEventListener("DOMContentLoaded", function () {
-  const modals = document.querySelectorAll(".modal");
+// ============= UTILITÁRIOS =============
+function aplicarMascaraCPF(input) {
+  let valor = input.value;
 
-  modals.forEach(modal => {
-    modal.addEventListener("click", function (event) {
-      // Verifica se o clique foi fora do .modal-content
-      if (event.target === modal) {
-        modal.style.display = "none";
-      }
-    });
+  // ✅ Só aplica máscara se for APENAS números (CPF)
+  const apenasNumeros = valor.replace(/\D/g, '');
+
+  // Se tem só números e até 11 dígitos, aplica máscara de CPF
+  if (valor === apenasNumeros && apenasNumeros.length <= 11) {
+    valor = apenasNumeros.replace(/(\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
+    valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+    input.value = valor;
+  }
+  // Se tem letras, deixa como está (nome)
+}
+
+// Confirmação excluir participante
+function abrirConfirmacaoExcluir(url) {
+  openConfirmModal('Tem certeza que deseja desvincular este participante do ritual? Observação e dados de inscrição serão apagados!', () => {
+    window.location.href = url;
   });
-});
+}

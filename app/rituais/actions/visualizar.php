@@ -20,10 +20,14 @@ if (!$ritual) {
   exit;
 }
 
-// Buscar participantes com filtro
+// Buscar participantes com filtro e dados completos de inscrição
 $filtro_nome = isset($_GET['filtro_nome']) ? trim($_GET['filtro_nome']) : '';
 $sql_participantes = "
-    SELECT p.*, i.presente, i.observacao
+    SELECT p.*, i.presente, i.observacao,
+           i.primeira_vez_instituto, i.primeira_vez_ayahuasca,
+           i.doenca_psiquiatrica, i.nome_doenca,
+           i.uso_medicao, i.nome_medicao, i.mensagem,
+           i.salvo_em, i.obs_salvo_em
     FROM inscricoes i
     JOIN participantes p ON i.participante_id = p.id
     WHERE i.ritual_id = ?
@@ -34,6 +38,9 @@ if (!empty($filtro_nome)) {
   $sql_participantes .= " AND p.nome_completo LIKE ?";
   $params[] = "%$filtro_nome%";
 }
+
+// Ordenação por nome do participante
+$sql_participantes .= " ORDER BY p.nome_completo ASC";
 
 $stmt_participantes = $pdo->prepare($sql_participantes);
 $stmt_participantes->execute($params);
