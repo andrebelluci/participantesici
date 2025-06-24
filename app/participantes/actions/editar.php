@@ -185,4 +185,4 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // Se não for POST, mostrar formulário
-require __DIR__ . '/../templates/editar.php';
+require_once __DIR__ . '/../templates/editar.php';

@@ -41,6 +41,7 @@ RewriteRule ^api/inscricoes/buscar-id/?$ /participantesici/app/inscricoes/api/bu
 RewriteRule ^api/inscricoes/detalhes-inscricao/?$ /participantesici/app/inscricoes/api/detalhes_inscricao.php [L]
 RewriteRule ^api/inscricoes/excluir-participacao/?$ /participantesici/app/inscricoes/api/excluir_participacao.php [L]
 RewriteRule ^api/inscricoes/rituais-vinculados/?$ /participantesici/app/inscricoes/api/rituais_vinculados.php [L]
+RewriteRule ^api/inscricoes/participantes-vinculados/?$ /participantesici/app/inscricoes/api/participantes_vinculados.php [L]
 RewriteRule ^api/inscricoes/salvar-inscricao/?$ /participantesici/app/inscricoes/api/salvar_inscricao.php [L]
 RewriteRule ^api/inscricoes/salvar-observacao/?$ /participantesici/app/inscricoes/api/salvar_observacao.php [L]
 

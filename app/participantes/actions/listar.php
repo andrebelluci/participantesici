@@ -81,4 +81,4 @@ function formatarTelefone($telefone)
 }
 
 // Incluir template
-require __DIR__ . '/../templates/listar.php';
+require_once __DIR__ . '/../templates/listar.php';

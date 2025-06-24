@@ -1,5 +1,4 @@
 <?php
-// Arquivo: app/participantes/api/rituais_vinculados.php
 require_once __DIR__ . '/../../functions/check_auth.php';
 require_once __DIR__ . '/../../config/database.php';
 
@@ -40,4 +39,3 @@ try {
     echo json_encode(['error' => 'Erro interno do servidor']);
     error_log('Erro ao buscar rituais vinculados: ' . $e->getMessage());
 }
-?>

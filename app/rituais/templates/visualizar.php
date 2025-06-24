@@ -232,21 +232,35 @@ if (!isset($ritual)) {
         <!-- Mensagem quando não há participantes -->
         <?php if (empty($participantes)): ?>
             <div class="col-span-full text-center py-8">
-                <div class="text-gray-400 mb-4">
-                    <i class="fa-solid fa-user-group text-4xl"></i>
-                </div>
-                <p class="text-gray-500 text-lg mb-2">Nenhum participante encontrado</p>
-                <p class="text-gray-400 text-sm">
-                    <?php if (!empty($_GET['filtro_nome'])): ?>
-                        Nenhum participante encontrado com esse nome.
-                    <?php else: ?>
-                        Este ritual ainda não possui participantes inscritos.
-                    <?php endif; ?>
-                </p>
-                <button onclick="document.getElementById('modal-adicionar').style.display='flex'"
-                    class="mt-4 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
-                    <i class="fa-solid fa-plus mr-2"></i> Adicionar primeiro participante
-                </button>
+                <?php if (!isset($_GET['filtro_nome']) || empty($_GET['filtro_nome'])): ?>
+                    <!-- Ritual sem participantes -->
+                    <div class="text-gray-400 mb-4">
+                        <i class="fa-solid fa-user-group text-4xl"></i>
+                    </div>
+                    <p class="text-gray-500 text-lg mb-2">Nenhum participante encontrado</p>
+                    <p class="text-gray-400 text-sm">Este ritual ainda não possui participantes inscritos.</p>
+                    <button onclick="document.getElementById('modal-adicionar').style.display='flex'"
+                        class="mt-4 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
+                        <i class="fa-solid fa-plus mr-2"></i> Adicionar primeiro participante
+                    </button>
+                <?php else: ?>
+                    <!-- Filtro não retornou resultados -->
+                    <div class="text-orange-400 mb-4">
+                        <i class="fa-solid fa-search text-4xl"></i>
+                    </div>
+                    <p class="text-gray-500 text-lg mb-2">Nenhum participante encontrado com esse nome.</p>
+                    <p class="text-gray-400 text-sm">Pesquise novamente, ou adicione o participante pelo botão abaixo.</p>
+                    <div class="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
+                        <a href="/participantesici/public_html/ritual/<?= $id ?>"
+                            class="inline-flex items-center gap-2 bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition font-semibold shadow">
+                            <i class="fa-solid fa-list"></i> Ver todos os participantes
+                        </a>
+                        <button onclick="document.getElementById('modal-adicionar').style.display='flex'"
+                            class="inline-flex items-center gap-2 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
+                            <i class="fa-solid fa-plus"></i> Adicionar participante
+                        </button>
+                    </div>
+                <?php endif; ?>
             </div>
         <?php endif; ?>
     </div>
@@ -268,31 +282,46 @@ if (!isset($ritual)) {
 
         <h2 class="text-xl font-bold mb-4 text-gray-800">Adicionar participante</h2>
 
-        <form id="pesquisa-participante-form" onsubmit="return false;" class="space-y-4">
-            <input type="hidden" name="ritual_id" value="<?= $id ?>">
-
-            <div>
-                <label for="nome_pesquisa" class="block text-sm font-medium text-gray-700 mb-1">Pesquisar:</label>
-                <input type="text" id="nome_pesquisa" name="nome_pesquisa"
-                    placeholder="Digite o nome ou CPF (com ou sem pontos)"
-                    class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                <p class="text-xs text-gray-500 mt-1">
-                    <i class="fa-solid fa-info-circle mr-1"></i>
-                    Aceita nome (mín. 3 caracteres) ou CPF (exatos 11 dígitos)
-                </p>
-            </div>
-
-            <div class="flex gap-2">
-                <button type="button" id="pesquisar-btn" onclick="pesquisarParticipantes()"
-                    class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold">
-                    <i class="fa-solid fa-search mr-1"></i> Pesquisar
+        <!-- Área do filtro - inicialmente aberta -->
+        <div id="area-filtro-ritual" class="mb-4">
+            <!-- Botão toggle para mostrar/esconder filtro (inicialmente escondido) -->
+            <div id="botao-toggle-filtro" class="hidden mb-4 flex items-center justify-between">
+                <button type="button" onclick="toggleFiltroRitual()"
+                    class="bg-gray-200 text-gray-700 px-4 py-2 rounded flex items-center gap-2 text-sm shadow hover:bg-gray-300 transition">
+                    <i class="fa-solid fa-search"></i> Filtrar
                 </button>
-                <button type="button" id="limpar-pesquisa-btn" onclick="limparPesquisa()" style="display: none;"
-                    class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition font-semibold">
-                    Limpar
+                <button type="button" id="limpar-filtro-btn" onclick="limparFiltroCompleto()" style="display: none;"
+                    class="bg-red-600 text-white px-4 py-2 rounded flex items-center gap-2 text-sm shadow hover:bg-red-700 transition">
+                    <i class="fa-solid fa-broom mr-1"></i> Limpar Filtro
                 </button>
             </div>
-        </form>
+
+            <!-- Formulário de pesquisa - inicialmente visível -->
+            <form id="pesquisa-participante-form" onsubmit="return false;" class="space-y-4">
+                <input type="hidden" name="ritual_id" value="<?= $id ?>">
+
+                <div>
+                    <input type="text" id="nome_pesquisa" name="nome_pesquisa"
+                        placeholder="Digite o nome ou CPF (com ou sem pontos)" oninput="aplicarMascaraCPF(this)"
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <p class="text-xs text-gray-500 mt-1">
+                        <i class="fa-solid fa-info-circle mr-1"></i>
+                        Aceita nome (mín. 3 caracteres) ou CPF (exatos 11 dígitos)
+                    </p>
+                </div>
+
+                <div class="flex gap-2">
+                    <button type="button" id="pesquisar-btn" onclick="pesquisarParticipantes()"
+                        class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold">
+                        <i class="fa-solid fa-search mr-1"></i> Pesquisar
+                    </button>
+                    <button type="button" id="limpar-pesquisa-btn" onclick="limparPesquisa()" style="display: none;"
+                        class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition font-semibold">
+                        Limpar
+                    </button>
+                </div>
+            </form>
+        </div>
 
         <!-- Área de resultados -->
         <div id="resultados-pesquisa" class="mt-4" style="display: none;">

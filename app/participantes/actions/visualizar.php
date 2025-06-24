@@ -142,4 +142,4 @@ $stmt_total->execute([$id]);
 $total_rituais_participante = $stmt_total->fetch()['total'];
 
 // Carregar template
-require __DIR__ . '/../templates/visualizar.php';
+require_once __DIR__ . '/../templates/visualizar.php';

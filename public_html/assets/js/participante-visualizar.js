@@ -534,7 +534,7 @@ document.addEventListener('DOMContentLoaded', function () {
     nomePesquisaInput.addEventListener('keypress', function (event) {
       if (event.key === 'Enter') {
         event.preventDefault();
-        pesquisarRituaisComColapso();
+        pesquisarRituais();
       }
     });
   }
@@ -567,7 +567,7 @@ document.addEventListener('DOMContentLoaded', function () {
         console.log('🔍 Enter detectado');
 
         // Executa pesquisa diretamente
-        pesquisarRituaisComColapso();
+        pesquisarRituais();
 
         return false;
       }
@@ -584,7 +584,7 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 
-function pesquisarRituaisComColapso() {
+function pesquisarRituais() {
   const nomePesquisa = document.getElementById('nome_pesquisa').value.trim();
 
   // Validação mínima de 3 caracteres
@@ -681,6 +681,8 @@ function pesquisarRituaisComColapso() {
             '<mark class="bg-yellow-200 px-1 rounded">$1</mark>'
           ) : 'Nome não informado';
 
+        const dataFormatada = formatarData(ritual.data_ritual);
+
         li.innerHTML = `
           <div class="grid grid-cols-[auto_1fr] gap-4">
             <div class="flex-shrink-0">
@@ -696,7 +698,7 @@ function pesquisarRituaisComColapso() {
               <div class="flex items-center gap-1">
                 <span class="text-sm font-semibold">Data:</span>
                 <p class="text-sm text-gray-600">
-                  ${ritual.data_ritual ? formatarData(ritual.data_ritual) : 'Data não informada'}
+                  ${ritual.data_ritual ? `<i class="fa-solid fa-calendar mr-1"></i>${dataFormatada}` : 'Data não informada'}
                 </p>
               </div>
               <div class="pt-1">
@@ -732,7 +734,7 @@ function pesquisarRituaisComColapso() {
           <li class="p-4 text-center text-red-500">
             <i class="fa-solid fa-exclamation-triangle text-2xl mb-2 block"></i>
             <p>Erro ao carregar rituais</p>
-            <button onclick="pesquisarRituaisComColapso()"
+            <button onclick="pesquisarRituais()"
                     class="mt-2 text-sm underline hover:no-underline">
               Tentar novamente
             </button>

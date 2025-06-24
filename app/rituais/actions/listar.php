@@ -54,4 +54,4 @@ $stmt->execute($params);
 $rituais = $stmt->fetchAll();
 
 // Incluir template
-require __DIR__ . '/../templates/listar.php';
+require_once __DIR__ . '/../templates/listar.php';

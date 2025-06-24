@@ -322,11 +322,16 @@ if (!isset($pessoa)) {
         <div>
           <input type="text" id="nome_pesquisa" name="nome_pesquisa" placeholder="Digite o nome do ritual"
             class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+          <p class="text-xs text-gray-500 mt-1">
+            <i class="fa-solid fa-info-circle mr-1"></i>
+            Aceita nome (mín. 3 caracteres)
+          </p>
         </div>
 
         <div class="flex gap-2">
-          <button type="button" id="pesquisar-btn" onclick="pesquisarRituaisComColapso()"
+          <button type="button" id="pesquisar-btn" onclick="pesquisarRituais()"
             class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold">
+            <i class="fa-solid fa-search mr-1"></i>
             Pesquisar
           </button>
           <button type="button" id="limpar-pesquisa-btn" onclick="limparPesquisa()" style="display: none;"

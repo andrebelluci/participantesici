@@ -47,4 +47,4 @@ $stmt_participantes->execute($params);
 $participantes = $stmt_participantes->fetchAll();
 
 // Carregar template
-require __DIR__ . '/../templates/visualizar.php';
+require_once __DIR__ . '/../templates/visualizar.php';

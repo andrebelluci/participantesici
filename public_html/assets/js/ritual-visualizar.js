@@ -529,10 +529,6 @@ function pesquisarParticipantes() {
     return;
   }
 
-  console.log('🔍 Pesquisando:', nomePesquisa);
-  console.log('📱 É CPF?', ehCPF);
-  console.log('📝 É Nome?', ehNome);
-
   // Loading state no botão
   const pesquisarBtn = document.getElementById('pesquisar-btn');
   const originalText = pesquisarBtn ? pesquisarBtn.textContent : 'Pesquisar';
@@ -541,6 +537,15 @@ function pesquisarParticipantes() {
     pesquisarBtn.textContent = 'Pesquisando...';
     pesquisarBtn.disabled = true;
   }
+
+  // Colapsa o filtro
+  const formularioFiltro = document.getElementById('pesquisa-participante-form');
+  const botaoToggle = document.getElementById('botao-toggle-filtro');
+  const limparFiltroBtn = document.getElementById('limpar-filtro-btn');
+
+  if (formularioFiltro) formularioFiltro.style.display = 'none';
+  if (botaoToggle) botaoToggle.classList.remove('hidden');
+  if (limparFiltroBtn) limparFiltroBtn.style.display = 'inline-flex';
 
   // Mostra resultados
   const limparPesquisaBtn = document.getElementById('limpar-pesquisa-btn');
@@ -556,7 +561,7 @@ function pesquisarParticipantes() {
   // Executa pesquisa
   Promise.all([
     fetch(`/participantesici/public_html/api/ritual/buscar-participante?nome=${encodeURIComponent(nomePesquisa)}`),
-    fetch(`/participantesici/public_html/api/inscricoes/rituais-vinculados?ritual_id=${ritualId}`)
+    fetch(`/participantesici/public_html/api/inscricoes/participantes-vinculados?ritual_id=${ritualId}`)
   ])
     .then(responses => Promise.all(responses.map(r => r.json())))
     .then(([participantesData, participantesVinculadosData]) => {
@@ -609,10 +614,7 @@ function pesquisarParticipantes() {
           );
         }
 
-        // Para CPF, mostrar indicador que foi encontrado por CPF
-        const infoAdicional = ehCPF ?
-          `<p class="text-xs text-green-600 mt-1"><i class="fa-solid fa-check mr-1"></i>Encontrado pelo CPF informado</p>` :
-          '';
+        const cpfFormatado = formatarCPF(participante.cpf);
 
         li.innerHTML = `
           <div class="grid grid-cols-[auto_1fr] gap-4">
@@ -626,7 +628,12 @@ function pesquisarParticipantes() {
               <h3 class="!font-semibold !text-gray-900 !text-lg !leading-tight !m-0 !p-0">
                 ${nomeDestacado}
               </h3>
-              ${infoAdicional}
+              <div class="flex items-center gap-1">
+                <span class="text-sm font-semibold">CPF:</span>
+                <p class="text-sm text-gray-600">
+                  ${cpfFormatado ? `<i class="fa-solid fa-id-card mr-1"></i>${cpfFormatado}` : 'CPF não informado'}
+                </p>
+              </div>
               <div class="pt-1">
                 ${jaAdicionado ?
             `<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -675,6 +682,40 @@ function pesquisarParticipantes() {
         pesquisarBtn.disabled = false;
       }
     });
+}
+
+// Funções de filtro
+function toggleFiltroRitual() {
+  const formularioFiltro = document.getElementById('pesquisa-participante-form');
+  const botaoToggle = document.getElementById('botao-toggle-filtro');
+
+  if (formularioFiltro && formularioFiltro.style.display === 'none') {
+    formularioFiltro.style.display = 'block';
+    if (botaoToggle) botaoToggle.classList.add('hidden');
+  } else {
+    if (formularioFiltro) formularioFiltro.style.display = 'none';
+    if (botaoToggle) botaoToggle.classList.remove('hidden');
+  }
+}
+
+function limparFiltroCompleto() {
+  const elements = {
+    nomePesquisa: document.getElementById('nome_pesquisa'),
+    listaParticipantes: document.getElementById('lista-participantes'),
+    resultados: document.getElementById('resultados-pesquisa'),
+    limparPesquisa: document.getElementById('limpar-pesquisa-btn'),
+    formulario: document.getElementById('pesquisa-participante-form'),
+    botaoToggle: document.getElementById('botao-toggle-filtro'),
+    limparFiltro: document.getElementById('limpar-filtro-btn')
+  };
+
+  if (elements.nomePesquisa) elements.nomePesquisa.value = '';
+  if (elements.listaParticipantes) elements.listaParticipantes.innerHTML = '';
+  if (elements.resultados) elements.resultados.style.display = 'none';
+  if (elements.limparPesquisa) elements.limparPesquisa.style.display = 'none';
+  if (elements.formulario) elements.formulario.style.display = 'block';
+  if (elements.botaoToggle) elements.botaoToggle.classList.add('hidden');
+  if (elements.limparFiltro) elements.limparFiltro.style.display = 'none';
 }
 
 function limparPesquisa() {
@@ -784,17 +825,45 @@ function setupConditionalFields() {
 function aplicarMascaraCPF(input) {
   let valor = input.value;
 
-  // ✅ Só aplica máscara se for APENAS números (CPF)
-  const apenasNumeros = valor.replace(/\D/g, '');
+  // Remove tudo que não é número
+  let apenasNumeros = valor.replace(/\D/g, '');
 
-  // Se tem só números e até 11 dígitos, aplica máscara de CPF
-  if (valor === apenasNumeros && apenasNumeros.length <= 11) {
-    valor = apenasNumeros.replace(/(\d{3})(\d)/, '$1.$2');
-    valor = valor.replace(/(\d{3})(\d)/, '$1.$2');
-    valor = valor.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
-    input.value = valor;
+  // Se digitou só números e tem pelo menos 1 dígito, aplica a máscara
+  if (apenasNumeros.length > 0) {
+    // Limita a 11 dígitos
+    apenasNumeros = apenasNumeros.substring(0, 11);
+
+    // Aplica a máscara progressivamente
+    let valorFormatado = apenasNumeros;
+
+    if (apenasNumeros.length >= 4) {
+      valorFormatado = apenasNumeros.replace(/(\d{3})(\d+)/, '$1.$2');
+    }
+    if (apenasNumeros.length >= 7) {
+      valorFormatado = apenasNumeros.replace(/(\d{3})(\d{3})(\d+)/, '$1.$2.$3');
+    }
+    if (apenasNumeros.length >= 10) {
+      valorFormatado = apenasNumeros.replace(/(\d{3})(\d{3})(\d{3})(\d+)/, '$1.$2.$3-$4');
+    }
+
+    // Só atualiza se o valor mudou (evita loop infinito)
+    if (input.value !== valorFormatado) {
+      input.value = valorFormatado;
+    }
   }
-  // Se tem letras, deixa como está (nome)
+}
+
+function formatarCPF(cpf) {
+  // Remove todos os caracteres que não são números
+  const apenasNumeros = cpf.replace(/\D/g, '');
+
+  // Verifica se tem 11 dígitos (CPF válido)
+  if (apenasNumeros.length !== 11) {
+    return cpf; // Retorna o valor original se não tiver 11 dígitos
+  }
+
+  // Aplica a máscara: 000.000.000-00
+  return apenasNumeros.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4');
 }
 
 // Confirmação excluir participante

@@ -79,14 +79,20 @@ require_once __DIR__ . '/../../includes/header.php';
                         </div>
                     </div>
 
-                    <div class="flex flex-col md:flex-row gap-2 mt-3">
+                    <div class="flex flex-row md:flex-row gap-2 mt-3">
                         <button type="button" id="substituir-imagem-btn"
                             class="bg-blue-600 text-white py-2 px-2 md:px-4 rounded-lg hover:bg-blue-700 transition-colors font-medium text-xs md:text-sm">
-                            Substituir
+                            <div class="flex items-center gap-1">
+                                <i class="fa-solid fa-arrows-rotate"></i>
+                                Substituir
+                            </div>
                         </button>
                         <button type="button" id="excluir-imagem-btn"
                             class="bg-red-600 text-white py-2 px-2 md:px-4 rounded-lg hover:bg-red-700 transition-colors font-medium text-xs md:text-sm">
-                            Remover
+                            <div class="flex items-center gap-1">
+                                <i class="fa-solid fa-trash"></i>
+                                Remover
+                            </div>
                         </button>
                     </div>
                 </div>
