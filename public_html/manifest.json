@@ -1,10 +1,10 @@
 {
   "name": "Participantes ICI",
-  "short_name": "ICI",
+  "short_name": "Participantes ICI",
   "start_url": "/participantesici/public_html/login",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#1D4ED8",
+  "background_color": "#1D4ED8",
+  "theme_color": "#fff200",
   "orientation": "portrait",
   "icons": [
     {

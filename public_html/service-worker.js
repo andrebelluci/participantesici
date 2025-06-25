@@ -2,7 +2,6 @@ const CACHE_NAME = "ici-v1";
 const urlsToCache = [
   "/participantesici/public_html/login",
   "/participantesici/public_html/assets/css/tailwind.css",
-  "/participantesici/public_html/assets/css/styles.css",
   "/participantesici/public_html/assets/js/global-scripts.js",
   "/participantesici/public_html/assets/images/logo.png",
   "/participantesici/public_html/assets/images/favicon.ico",

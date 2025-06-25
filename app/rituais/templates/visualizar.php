@@ -49,7 +49,7 @@ if (!isset($ritual)) {
                 <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
             </a>
 
-            <button onclick="document.getElementById('modal-adicionar').style.display='flex'"
+            <button onclick="abrirModalAdicionar()"
                 class="bg-[#00bfff] text-black px-2 md:px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
                 <i class="fa-solid fa-plus mr-2"></i> Adicionar participante
             </button>
@@ -109,7 +109,7 @@ if (!isset($ritual)) {
 
                     <div class="flex-1 min-w-0">
                         <h3 class="font-bold text-gray-800 text-lg mb-1 truncate">
-                            <a href="/participantesici/public_html/participantes?pagina=1&filtro_cpf=<?= urlencode(htmlspecialchars($participante['cpf'])) ?>&redirect=ritual-visualizar?id=<?= $id ?>"
+                            <a href="/participantesici/public_html/rituais?pagina=1&filtro_cpf=<?= urlencode(htmlspecialchars($participante['cpf'])) ?>&redirect=/participantesici/public_html/ritual/<?= $id ?>"
                                 class="hover:text-[#00bfff] transition">
                                 <?= htmlspecialchars($participante['nome_completo']) ?>
                             </a>
@@ -239,7 +239,7 @@ if (!isset($ritual)) {
                     </div>
                     <p class="text-gray-500 text-lg mb-2">Nenhum participante encontrado</p>
                     <p class="text-gray-400 text-sm">Este ritual ainda não possui participantes inscritos.</p>
-                    <button onclick="document.getElementById('modal-adicionar').style.display='flex'"
+                    <button onclick="abrirModalAdicionar()"
                         class="mt-4 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
                         <i class="fa-solid fa-plus mr-2"></i> Adicionar primeiro participante
                     </button>
@@ -255,7 +255,7 @@ if (!isset($ritual)) {
                             class="inline-flex items-center gap-2 bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition font-semibold shadow">
                             <i class="fa-solid fa-list"></i> Ver todos os participantes
                         </a>
-                        <button onclick="document.getElementById('modal-adicionar').style.display='flex'"
+                        <button onclick="abrirModalAdicionar()"
                             class="inline-flex items-center gap-2 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
                             <i class="fa-solid fa-plus"></i> Adicionar participante
                         </button>

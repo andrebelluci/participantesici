@@ -4,10 +4,12 @@ function openImageModal(imageSrc) {
   const modalImage = document.getElementById('modal-image-content');
   modalImage.src = imageSrc;
   modal.classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
 }
 
 // Fechar modal de imagem
 function closeImageModal() {
+  document.body.style.overflow = 'auto';
   const modal = document.getElementById('modal-image');
   modal.classList.add('hidden');
 }
@@ -45,11 +47,13 @@ function openConfirmModal(texto, callback) {
     callback();
     closeConfirmModal();
   };
+  document.body.style.overflow = 'hidden';
 }
 
 function closeConfirmModal() {
   document.getElementById('confirmModal').classList.add('hidden');
   confirmCallback = null;
+  document.body.style.overflow = 'auto';
 }
 
 document.getElementById('confirmModalBtn').addEventListener('click', () => {

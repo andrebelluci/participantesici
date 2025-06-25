@@ -68,12 +68,6 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^([^/]+)$ $1.php [L]
 
-# --- Variáveis de ambiente do banco de dados ---
-SetEnv DB_HOST localhost
-SetEnv DB_NAME participantesici_sistema
-SetEnv DB_USER participantesici_sistema
-SetEnv DB_PASS HAztRO;b6~.P
-
 # --- Segurança: Bloqueia acesso ao .htaccess ---
 <Files ".htaccess">
     Order allow,deny

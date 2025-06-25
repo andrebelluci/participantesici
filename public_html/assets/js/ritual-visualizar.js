@@ -15,42 +15,105 @@ function showToast(message, type = 'error') {
   }).showToast();
 }
 
-// ============= MODAL MANAGER =============
-document.addEventListener("DOMContentLoaded", function () {
-  // Lista de IDs das modals que devem ter fechamento ao clicar fora
+// Variável para armazenar a posição do scroll
+let scrollPosition = 0;
+
+// Função para bloquear scroll
+function disableScroll() {
+  scrollPosition = window.pageYOffset;
+  document.body.style.overflow = 'hidden';
+  document.body.style.position = 'fixed';
+  document.body.style.top = `-${scrollPosition}px`;
+  document.body.style.width = '100%';
+}
+
+// Função para restaurar scroll
+function enableScroll() {
+  document.body.style.removeProperty('overflow');
+  document.body.style.removeProperty('position');
+  document.body.style.removeProperty('top');
+  document.body.style.removeProperty('width');
+  window.scrollTo(0, scrollPosition);
+}
+
+// ============= MODAL MANAGER - USANDO DELEGAÇÃO DE EVENTOS =============
+function initModalEventListeners() {
+  // Remove listeners antigos se existirem para evitar duplicação
+  document.removeEventListener('click', handleModalClick);
+  document.removeEventListener('keydown', handleModalKeydown);
+
+  // Adiciona novos listeners com delegação de eventos
+  document.addEventListener('click', handleModalClick);
+  document.addEventListener('keydown', handleModalKeydown);
+}
+
+// Função para lidar com cliques nas modais (delegação de eventos)
+function handleModalClick(event) {
+  // Lista de IDs das modais que devem ter fechamento ao clicar fora
   const modalIds = [
     'modal-detalhes-inscricao',
     'modal-observacao',
     'modal-adicionar'
   ];
 
-  // Aplica o evento de fechamento para cada modal
+  // Verifica se o clique foi diretamente na modal (background)
   modalIds.forEach(modalId => {
     const modal = document.getElementById(modalId);
-    if (modal) {
-      modal.addEventListener("click", function (event) {
-        if (event.target === modal) {
-          modal.style.display = "none";
-        }
-      });
+    if (modal && event.target === modal) {
+      modal.style.display = "none";
+      enableScroll();
     }
   });
 
-  // Para modals com classe .modal (fallback)
-  const modals = document.querySelectorAll(".modal");
-  modals.forEach(modal => {
-    modal.addEventListener("click", function (event) {
-      if (event.target === modal) {
-        modal.style.display = "none";
+  // Fallback para modals com classe .modal
+  if (event.target.classList.contains('modal')) {
+    event.target.style.display = "none";
+    enableScroll();
+  }
+}
+
+// Função para lidar com teclas (ESC para fechar)
+function handleModalKeydown(event) {
+  if (event.key === 'Escape') {
+    const modalIds = [
+      'modal-detalhes-inscricao',
+      'modal-observacao',
+      'modal-adicionar'
+    ];
+
+    modalIds.forEach(modalId => {
+      const modal = document.getElementById(modalId);
+      if (modal && modal.style.display === 'flex') {
+        modal.style.display = 'none';
+        enableScroll();
       }
     });
-  });
+  }
+}
+
+// ============= INICIALIZAÇÃO PRINCIPAL =============
+document.addEventListener("DOMContentLoaded", function () {
+  console.log('🚀 Inicializando modal listeners...');
+
+  // Inicializa os event listeners das modais
+  initModalEventListeners();
+
+  // Form de detalhes da inscrição
+  initFormDetalhes();
+
+  // Form de observação
+  initFormObservacao();
+
+  // Outras inicializações
+  setupConditionalFields();
+  aplicarFocoModalAdicionar();
 });
 
 // ============= FUNÇÕES DE MODAL =============
 
 // Função para abrir o modal de detalhes da inscrição
 function abrirModalDetalhes(participanteId) {
+  disableScroll();
   currentParticipanteId = participanteId;
 
   // Limpa todos os campos do formulário
@@ -117,6 +180,7 @@ function abrirModalDetalhes(participanteId) {
 
 // Função para abrir o modal de observação
 function abrirModalObservacao(participanteId) {
+  disableScroll();
   currentParticipanteId = participanteId;
 
   fetch(`/participantesici/public_html/api/inscricoes/buscar-id?participante_id=${participanteId}&ritual_id=${ritualId}`)
@@ -175,12 +239,33 @@ function abrirModalObservacao(participanteId) {
 // Funções para fechar modals
 function fecharModalDetalhes() {
   document.getElementById('modal-detalhes-inscricao').style.display = 'none';
+  enableScroll();
   currentParticipanteId = null;
 }
 
 function fecharModalObservacao() {
   document.getElementById('modal-observacao').style.display = 'none';
+  enableScroll();
   currentParticipanteId = null;
+}
+
+function abrirModalAdicionar() {
+  disableScroll();
+  document.getElementById('modal-adicionar').style.display = 'flex';
+
+  // Foco automático no campo de pesquisa
+  setTimeout(() => {
+    const inputPesquisa = document.getElementById('nome_pesquisa');
+    if (inputPesquisa) {
+      inputPesquisa.focus();
+    }
+  }, 100);
+}
+
+function fecharModalAdicionar() {
+  enableScroll();
+  document.getElementById('modal-adicionar').style.display = 'none';
+  limparPesquisa();
 }
 
 function aplicarFocoModalAdicionar() {
@@ -208,14 +293,6 @@ function aplicarFocoModalAdicionar() {
 
     observer.observe(modal, { attributes: true, attributeFilter: ['style'] });
   }
-}
-
-// Chama a função quando a página carrega
-document.addEventListener('DOMContentLoaded', aplicarFocoModalAdicionar);
-
-function fecharModalAdicionar() {
-  document.getElementById('modal-adicionar').style.display = 'none';
-  limparPesquisa();
 }
 
 // ============= FUNÇÕES DE NOTIFICAÇÃO =============
@@ -261,22 +338,13 @@ function removerNotificacaoDetalhes(participanteId) {
 }
 
 // ============= EVENT LISTENERS DE FORMULÁRIOS =============
-document.addEventListener("DOMContentLoaded", function () {
-  // Form de detalhes da inscrição
-  initFormDetalhes();
-
-  // Form de observação
-  initFormObservacao();
-
-  // Outras inicializações
-  setupConditionalFields();
-});
 
 // Função para inicializar form de detalhes
 function initFormDetalhes() {
   const formDetalhes = document.getElementById('form-detalhes-inscricao');
   if (formDetalhes && !formDetalhes.hasAttribute('data-initialized')) {
     formDetalhes.setAttribute('data-initialized', 'true');
+    console.log('📝 Inicializando form detalhes...');
 
     formDetalhes.addEventListener('submit', function (event) {
       event.preventDefault();
@@ -372,6 +440,7 @@ function initFormObservacao() {
   const formObservacao = document.getElementById('form-observacao');
   if (formObservacao && !formObservacao.hasAttribute('data-initialized')) {
     formObservacao.setAttribute('data-initialized', 'true');
+    console.log('📝 Inicializando form observação...');
 
     formObservacao.addEventListener('submit', function (event) {
       event.preventDefault();
@@ -497,17 +566,11 @@ function atualizarContadorParticipantes() {
 }
 
 // ============= PESQUISA DE PARTICIPANTES =============
-// Event listener para Enter no campo de pesquisa
-document.addEventListener('DOMContentLoaded', function () {
-  const nomePesquisaInput = document.getElementById('nome_pesquisa');
-
-  if (nomePesquisaInput) {
-    nomePesquisaInput.addEventListener('keypress', function (event) {
-      if (event.key === 'Enter') {
-        event.preventDefault();
-        pesquisarParticipantes();
-      }
-    });
+// Event listener para Enter no campo de pesquisa - USANDO DELEGAÇÃO DE EVENTOS
+document.addEventListener('keypress', function (event) {
+  if (event.target && event.target.id === 'nome_pesquisa' && event.key === 'Enter') {
+    event.preventDefault();
+    pesquisarParticipantes();
   }
 });
 

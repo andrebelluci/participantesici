@@ -60,7 +60,7 @@ if (!isset($pessoa)) {
         <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
       </a>
 
-      <button onclick="document.getElementById('modal-adicionar').style.display='flex'"
+      <button onclick="abrirModalAdicionar()"
         class="bg-[#00bfff] text-black px-2 md:px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
         <i class="fa-solid fa-plus mr-2"></i> Adicionar ritual
       </button>
@@ -120,7 +120,10 @@ if (!isset($pessoa)) {
 
           <div class="flex-1 min-w-0">
             <h3 class="font-bold text-gray-800 text-lg mb-1 truncate">
-              <?= htmlspecialchars($ritual['nome']) ?>
+              <a href="/participantesici/public_html/rituais?pagina=1&filtro_nome=<?= urlencode(htmlspecialchars($ritual['nome'])) ?>&redirect=/participantesici/public_html/participante/<?= $pessoa['id'] ?>"
+                class="hover:text-[#00bfff] transition">
+                <?= htmlspecialchars($ritual['nome']) ?>
+              </a>
             </h3>
             <div class="text-sm text-gray-600 space-y-1">
               <p><span class="font-semibold">Data:</span>
@@ -247,7 +250,7 @@ if (!isset($pessoa)) {
           </div>
           <p class="text-gray-500 text-lg mb-2">Nenhum ritual encontrado</p>
           <p class="text-gray-400 text-sm">Este participante ainda não está inscrito em nenhum ritual.</p>
-          <button onclick="document.getElementById('modal-adicionar').style.display='flex'"
+          <button onclick="abrirModalAdicionar()"
             class="mt-4 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
             <i class="fa-solid fa-plus mr-2"></i> Adicionar primeiro ritual
           </button>
@@ -263,7 +266,7 @@ if (!isset($pessoa)) {
               class="inline-flex items-center gap-2 bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition font-semibold shadow">
               <i class="fa-solid fa-list"></i> Ver todos os rituais
             </a>
-            <button onclick="document.getElementById('modal-adicionar').style.display='flex'"
+            <button onclick="abrirModalAdicionar()"
               class="inline-flex items-center gap-2 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
               <i class="fa-solid fa-plus"></i> Adicionar ritual
             </button>
