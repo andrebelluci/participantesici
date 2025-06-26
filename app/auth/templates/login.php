@@ -68,6 +68,7 @@ unset($_SESSION['login_error']);
       <h2 class="mt-4 text-xl font-semibold text-center text-white">Gestão de participantes</h2>
     </div>
 
+    <div class="form-container mobile-compact">
     <form method="POST" action="/participantesici/public_html/entrar" class="space-y-4" novalidate>
       <div>
         <input type="text" name="usuario" id="usuario" placeholder="Usuário" required
@@ -92,22 +93,27 @@ unset($_SESSION['login_error']);
         Entrar
       </button>
     </form>
+    </div>
   </div>
 
   <?php if ($error): ?>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        Toastify({
-          text: <?= json_encode($error) ?>,
-          duration: 4000,
-          gravity: "top",
-          position: "center",
-          close: true,
-          backgroundColor: "#dc2626",
-          stopOnFocus: true
-        }).showToast();
+        // USA A NOVA FUNÇÃO showToast
+        showToast(<?= json_encode($error) ?>, 'error');
       });
     </script>
+  <?php endif; ?>
+
+  <!-- ✅ ADICIONADO: TOAST DE SUCESSO NO LOGIN -->
+  <?php if (isset($_SESSION['login_success'])): ?>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        // Exibe toast de sucesso e redireciona
+        showLoginSuccessToast('/participantesici/public_html/home');
+      });
+    </script>
+    <?php unset($_SESSION['login_success']); ?>
   <?php endif; ?>
 
   <!-- Service Worker: forçar atualização imediata -->

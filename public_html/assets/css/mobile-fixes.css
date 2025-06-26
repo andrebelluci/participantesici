@@ -1,0 +1,391 @@
+/* 📱 MOBILE FIXES - Correções para dispositivos móveis */
+/* Arquivo: public_html/assets/css/mobile-fixes.css */
+
+/* ============================================= */
+/* UTILITIES CUSTOMIZADAS PARA COMPLEMENTAR TAILWIND */
+/* ============================================= */
+
+/* Tap highlight transparente - Remove highlight azul do iOS/Android */
+.tap-highlight-transparent {
+  -webkit-tap-highlight-color: transparent !important;
+}
+
+/* Touch manipulation - Previne zoom duplo-tap */
+.touch-manipulation {
+  touch-action: manipulation !important;
+}
+
+/* Previne zoom em inputs pequenos (iOS) */
+.no-zoom {
+  font-size: 16px !important;
+}
+
+/* Callout transparente - Remove menu de contexto do iOS */
+.no-callout {
+  -webkit-touch-callout: none !important;
+}
+
+/* ============================================= */
+/* CLASSES UTILITÁRIAS COMBINADAS */
+/* ============================================= */
+
+/* Classe completa para elementos não-selecionáveis */
+.no-select-mobile {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: transparent !important;
+  touch-action: manipulation !important;
+}
+
+/* Classe para botões com feedback tátil */
+.btn-mobile {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1) !important;
+  touch-action: manipulation !important;
+  transition: transform 0.1s ease !important;
+}
+
+.btn-mobile:active {
+  transform: scale(0.95) !important;
+}
+
+/* ============================================= */
+/* APLICAÇÃO AUTOMÁTICA EM DISPOSITIVOS MÓVEIS */
+/* ============================================= */
+
+@media (max-width: 768px) {
+
+  /* Aplica correções automaticamente em elementos interativos */
+  button,
+  [onclick],
+  .cursor-pointer,
+  .hover\:bg-gray-100,
+  .hover\:bg-blue-200,
+  .hover\:bg-green-200,
+  .hover\:bg-red-200,
+  .hover\:bg-yellow-400,
+  .hover\:text-blue-600,
+  .transition {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0.1) !important;
+    touch-action: manipulation !important;
+  }
+
+  /* Ícones nunca devem ser selecionáveis ou capturar eventos */
+  i,
+  .fa-solid,
+  .fa-regular,
+  .fa-light,
+  .fa-thin,
+  .fa-brands {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    pointer-events: none !important;
+  }
+
+  /* Inputs com tamanho adequado para prevenir zoom automático no iOS */
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Cards clicáveis - previne seleção acidental */
+  .bg-white.p-4.rounded-lg.shadow,
+  .bg-white.p-6.rounded-lg.shadow {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+  }
+
+  /* Permite seleção apenas em títulos e textos importantes */
+  .bg-white.p-4.rounded-lg.shadow h1,
+  .bg-white.p-4.rounded-lg.shadow h2,
+  .bg-white.p-4.rounded-lg.shadow h3,
+  .bg-white.p-6.rounded-lg.shadow h1,
+  .bg-white.p-6.rounded-lg.shadow h2,
+  .bg-white.p-6.rounded-lg.shadow h3 {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+  }
+
+  /* Remove outline em foco por toque (mantém para navegação por teclado) */
+  button:focus:not(:focus-visible),
+  [onclick]:focus:not(:focus-visible) {
+    outline: none !important;
+  }
+}
+
+/* ============================================= */
+/* CORREÇÕES ESPECÍFICAS PARA COMPONENTES DO SISTEMA */
+/* ============================================= */
+
+/* Botões de presença */
+.presence-btn {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+  touch-action: manipulation !important;
+  transition: transform 0.1s ease, background-color 0.2s ease !important;
+}
+
+.presence-btn:active {
+  transform: scale(0.95) !important;
+}
+
+.presence-btn span,
+.presence-btn i {
+  pointer-events: none !important;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+}
+
+/* Modals */
+.modal-overlay {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+}
+
+.modal-content {
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+}
+
+/* Botões de fechar modal */
+[onclick*="fechar"],
+[onclick*="close"],
+.fa-window-close,
+.fa-times,
+.fa-x {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+  touch-action: manipulation !important;
+}
+
+/* ============================================= */
+/* CLASSES DE OVERRIDE PARA CASOS ESPECÍFICOS */
+/* ============================================= */
+
+/* Força seleção de texto */
+.force-select,
+.select-text,
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="search"],
+textarea,
+.text-content,
+.selectable {
+  -webkit-user-select: text !important;
+  user-select: text !important;
+}
+
+/* Remove qualquer possibilidade de seleção */
+.force-no-select,
+.select-none {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important;
+  touch-action: manipulation !important;
+}
+
+/* ============================================= */
+/* MELHORIAS ADICIONAIS PARA UX MOBILE */
+/* ============================================= */
+
+/* Melhora o scroll em áreas específicas */
+.mobile-scroll {
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior: contain !important;
+}
+
+/* Previne bounce scroll em iOS */
+.no-bounce {
+  overscroll-behavior: none !important;
+}
+
+/* Melhora performance de animações */
+.mobile-optimized {
+  -webkit-transform: translateZ(0) !important;
+  transform: translateZ(0) !important;
+  -webkit-backface-visibility: hidden !important;
+  backface-visibility: hidden !important;
+}
+
+/* ============================================= */
+/* CORREÇÕES PARA PROBLEMAS ESPECÍFICOS DO SISTEMA */
+/* ============================================= */
+
+/* Cards de participantes e rituais */
+@media (max-width: 768px) {
+
+  /* Área de upload de imagem */
+  #upload-area,
+  #preview-container {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+  }
+
+  /* Botões de ação nos cards */
+  .bg-blue-100,
+  .bg-green-100,
+  .bg-red-100,
+  .bg-orange-100 {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+    touch-action: manipulation !important;
+  }
+
+  /* Links que devem ser clicáveis mas não selecionáveis */
+  a:not(.selectable):not(.select-text) {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+    -webkit-touch-callout: none !important;
+  }
+
+  /* Filtros e formulários */
+  .filters,
+  #filtros {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+  }
+
+  /* Mantém seleção em labels e textos informativos */
+  label,
+  .text-gray-600,
+  .text-gray-700 {
+    -webkit-user-select: text !important;
+    user-select: text !important;
+  }
+}
+
+/* 📱 CSS para lidar com teclado virtual */
+
+/* Usa viewport dinâmico (suporta teclado virtual) */
+.mobile-viewport {
+  min-height: 100dvh;
+  /* dvh = dynamic viewport height */
+  min-height: 100vh;
+  /* Fallback para navegadores antigos */
+}
+
+/* Container principal que se adapta ao teclado */
+.main-container {
+  min-height: 100dvh;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Conteúdo principal flexível */
+.content-area {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Específico para formulários */
+.form-container {
+  padding-bottom: env(safe-area-inset-bottom, 20px);
+  margin-bottom: env(keyboard-inset-height, 0px);
+  -webkit-transform: translate3d(0, 0, 0);
+    transform: translate3d(0, 0, 0);
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
+}
+
+/* Para iOS - previne zoom quando foca em inputs */
+@supports (-webkit-touch-callout: none) {
+
+  input,
+  select,
+  textarea {
+    font-size: 16px !important;
+    transform: scale(1) !important;
+  }
+}
+
+/* Ajuste para quando teclado está visível */
+@media screen and (max-height: 500px) {
+  .mobile-compact {
+    padding: 8px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .mobile-compact .space-y-6>*+* {
+    margin-top: 1rem !important;
+  }
+}
+
+/* Estados específicos para quando teclado está aberto */
+.keyboard-open {
+  /* Reduz padding quando teclado estiver aberto */
+  --mobile-padding: 8px;
+}
+
+.keyboard-open .form-container {
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.keyboard-open .space-y-6>*+* {
+  margin-top: 1rem;
+}
+
+/* Garante que inputs ficam visíveis */
+input:focus,
+textarea:focus,
+select:focus {
+  position: relative;
+  z-index: 1000;
+}
+
+/* Para iOS Safari - força reflow quando teclado abre */
+@supports (-webkit-touch-callout: none) {
+  .mobile-viewport {
+    min-height: -webkit-fill-available;
+  }
+
+  input:focus {
+    transform: translateZ(0);
+  }
+}
+
+/* Smooth scroll para toda a página */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Remove setas do input number no Chrome/Safari */
+input[type=number]::-webkit-outer-spin-button,
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove setas do input number no Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}
+
+/* Destaca campos numéricos no mobile */
+@media (max-width: 768px) {
+
+  input[inputmode="numeric"],
+  input[inputmode="tel"],
+  input[inputmode="decimal"] {
+    font-variant-numeric: tabular-nums;
+    /* Números alinhados */
+  }
+}

@@ -38,6 +38,7 @@ require_once __DIR__ . '/../../includes/header.php';
     <!-- Título -->
     <h1 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">🪵 Novo Ritual</h1>
 
+    <div class="form-container mobile-compact">
     <form method="POST" enctype="multipart/form-data" id="formulario-ritual"
         class="bg-white p-6 rounded-lg shadow space-y-6 border border-gray-200" novalidate>
 
@@ -130,11 +131,12 @@ require_once __DIR__ . '/../../includes/header.php';
             </div>
         </div>
     </form>
+    </div>
 </div>
 
 <!-- Botão Voltar ao Topo -->
 <button id="scroll-to-top"
-    class="fixed bottom-12 right-4 bg-[#00bfff] hover:bg-yellow-400 text-black p-3 rounded-full shadow-lg transform transition-all duration-300 ease-in-out opacity-0 invisible translate-y-4 z-50">
+    class="fixed bottom-12 right-4 bg-[#00bfff] md:hover:bg-yellow-400 text-black p-3 rounded-full shadow-lg transform transition-all duration-300 ease-in-out opacity-0 invisible translate-y-4 z-50">
     <i class="fa-solid fa-chevron-up md:text-lg"></i>
 </button>
 

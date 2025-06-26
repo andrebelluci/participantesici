@@ -34,6 +34,7 @@ require_once __DIR__ . '/../../includes/header.php';
   </div>
 
   <!-- Filtros -->
+  <div class="form-container mobile-compact">
   <form id="filtros" method="GET"
     class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-3 rounded-lg shadow border border-gray-200 mb-6 <?= empty($_GET['filtro_nome']) && empty($_GET['data_inicio']) && empty($_GET['data_fim']) ? 'hidden md:grid' : '' ?>">
     <div>
@@ -63,6 +64,7 @@ require_once __DIR__ . '/../../includes/header.php';
       </a>
     </div>
   </form>
+  </div>
 
   <!-- Lista de Rituais -->
   <div class="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
@@ -129,6 +131,12 @@ require_once __DIR__ . '/../../includes/header.php';
     <?php endfor; ?>
   </div>
 </div>
+
+<!-- Botão Voltar ao Topo -->
+<button id="scroll-to-top"
+  class="fixed bottom-12 right-4 bg-[#00bfff] md:hover:bg-yellow-400 text-black p-3 rounded-full shadow-lg transform transition-all duration-300 ease-in-out opacity-0 invisible translate-y-4 z-50">
+  <i class="fa-solid fa-chevron-up md:text-lg"></i>
+</button>
 
 <!-- Modal de Imagem -->
 <div id="modal-image" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">

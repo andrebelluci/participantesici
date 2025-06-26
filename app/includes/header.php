@@ -37,20 +37,33 @@ $_SESSION['last_activity'] = time();
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
     <title>Participantes - ICI</title>
     <link rel="icon" type="image/x-icon" href="/participantesici/public_html/assets/images/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/participantesici/public_html/assets/css/mobile-fixes.css?v=1.0">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#00bfff',
+                    }
+                }
+            }
+        };
+    </script>
 
 </head>
 
-<body class="bg-black min-h-screen flex flex-col">
+<body class="bg-black min-h-screen flex flex-col mobile-viewport">
     <header class="fixed top-0 left-0 right-0 z-50 bg-black text-white shadow-lg">
         <div class="flex items-center justify-between px-4 py-1 max-w-6xl mx-auto">
             <a href="/participantesici/public_html/home">
@@ -98,4 +111,4 @@ $_SESSION['last_activity'] = time();
         </div>
     </header>
 
-    <main class="flex-grow bg-gray-300 pt-[50px]">
+    <main class="flex-grow bg-gray-300 pt-[50px] content-area">

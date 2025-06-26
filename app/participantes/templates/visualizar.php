@@ -79,6 +79,7 @@ if (!isset($pessoa)) {
     </a>
   </div>
 
+  <div class="form-container mobile-compact">
   <form id="filtros" method="GET"
     class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-3 rounded-lg shadow border border-gray-200 mb-6 <?= empty($filtro_nome) ? 'hidden md:grid' : '' ?>">
     <input type="hidden" name="id" value="<?= $id ?>">
@@ -101,6 +102,7 @@ if (!isset($pessoa)) {
       </a>
     </div>
   </form>
+  </div>
 
   <!-- Título da seção -->
   <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
@@ -290,7 +292,7 @@ if (!isset($pessoa)) {
 
 <!-- Botão Voltar ao Topo -->
 <button id="scroll-to-top"
-  class="fixed bottom-12 right-4 bg-[#00bfff] hover:bg-yellow-400 text-black p-3 rounded-full shadow-lg transform transition-all duration-300 ease-in-out opacity-0 invisible translate-y-4 z-50">
+  class="fixed bottom-12 right-4 bg-[#00bfff] md:hover:bg-yellow-400 text-black p-3 rounded-full shadow-lg transform transition-all duration-300 ease-in-out opacity-0 invisible translate-y-4 z-50">
   <i class="fa-solid fa-chevron-up md:text-lg"></i>
 </button>
 
@@ -319,6 +321,7 @@ if (!isset($pessoa)) {
       </div>
 
       <!-- Formulário de pesquisa - inicialmente visível -->
+      <div class="form-container mobile-compact">
       <form id="pesquisa-ritual-form" onsubmit="return false;" class="space-y-4">
         <input type="hidden" name="participante_id" value="<?= $id ?>">
 
@@ -343,6 +346,7 @@ if (!isset($pessoa)) {
           </button>
         </div>
       </form>
+      </div>
     </div>
 
     <!-- Área de resultados -->
@@ -375,6 +379,7 @@ if (!isset($pessoa)) {
 
     <h2 class="text-xl font-bold mb-4 text-gray-800">Detalhes da inscrição</h2>
 
+    <div class="form-container mobile-compact">
     <form id="form-detalhes-inscricao" method="POST" class="space-y-4" novalidate>
       <input type="hidden" id="id" name="id" value="">
 
@@ -460,6 +465,7 @@ if (!isset($pessoa)) {
         Salvar
       </button>
     </form>
+    </div>
   </div>
 </div>
 
@@ -473,6 +479,7 @@ if (!isset($pessoa)) {
     <!-- ✅ TÍTULO DINÂMICO -->
     <h2 class="text-xl font-bold mb-4 text-gray-800">Adicionar observação</h2>
 
+    <div class="form-container mobile-compact">
     <form id="form-observacao" method="POST" class="space-y-4">
       <input type="hidden" id="inscricao_id_observacao" name="inscricao_id" value="">
 
@@ -498,6 +505,7 @@ if (!isset($pessoa)) {
         Salvar observação
       </button>
     </form>
+    </div>
   </div>
 </div>
 

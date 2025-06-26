@@ -36,18 +36,19 @@ require_once __DIR__ . '/../../includes/header.php';
   </div>
 
   <!-- Filtros -->
+  <div class="form-container mobile-compact">
   <form id="filtros"
     class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-3 rounded-lg shadow border border-gray-200 mb-6 <?= empty($filtro_nome) && empty($filtro_cpf) ? 'hidden md:grid' : '' ?>"
     method="GET">
     <div>
       <label for="filtro_nome" class="block text-sm font-medium text-gray-700 mb-1">Nome:</label>
-      <input type="text" name="filtro_nome" id="filtro_nome" placeholder="Filtrar por nome"
+      <input type="search" inputmode="search" name="filtro_nome" id="filtro_nome" placeholder="Filtrar por nome"
         value="<?= htmlspecialchars($filtro_nome) ?>"
         class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00bfff]">
     </div>
     <div>
       <label for="filtro_cpf" class="block text-sm font-medium text-gray-700 mb-1">CPF:</label>
-      <input type="text" name="filtro_cpf" id="filtro_cpf" placeholder="___.___.___-__"
+      <input type="text" inputmode="numeric" pattern="[0-9]\s\-]*" name="filtro_cpf" id="filtro_cpf" placeholder="___.___.___-__"
         value="<?= htmlspecialchars($filtro_cpf) ?>" oninput="mascaraCPF(this)"
         class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00bfff]">
     </div>
@@ -62,6 +63,7 @@ require_once __DIR__ . '/../../includes/header.php';
       </a>
     </div>
   </form>
+  </div>
 
   <!-- Lista de Cards -->
   <div class="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
@@ -133,7 +135,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
 <!-- Botão Voltar ao Topo -->
 <button id="scroll-to-top"
-    class="fixed bottom-12 right-4 bg-[#00bfff] hover:bg-yellow-400 text-black p-3 rounded-full shadow-lg transform transition-all duration-300 ease-in-out opacity-0 invisible translate-y-4 z-50">
+    class="fixed bottom-12 right-4 bg-[#00bfff] md:hover:bg-yellow-400 text-black p-3 rounded-full shadow-lg transform transition-all duration-300 ease-in-out opacity-0 invisible translate-y-4 z-50">
     <i class="fa-solid fa-chevron-up md:text-lg"></i>
 </button>
 
