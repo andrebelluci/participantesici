@@ -73,7 +73,12 @@ function showPreview(file) {
     uploadArea?.classList.add('hidden');
     previewContainer?.classList.remove('hidden');
 
-    showToast('Imagem carregada! Use "Ajustar" para fazer crop.', 'success');
+    showToast('Imagem carregada!', 'success');
+
+    // Abre automaticamente o modal de crop
+    setTimeout(() => {
+      openCropModal();
+    }, 500);
   };
   reader.readAsDataURL(file);
 }
@@ -147,6 +152,22 @@ function closeCropModal() {
     cropper.destroy();
     cropper = null;
   }
+
+  hidePreview();
+
+  setTimeout(() => {
+    openFileSelector();
+  }, 100);
+}
+
+function closeCropModalOk() {
+  cropModal?.classList.add('hidden');
+  document.body.style.overflow = 'auto';
+
+  if (cropper) {
+    cropper.destroy();
+    cropper = null;
+  }
 }
 
 function applyCrop() {
@@ -171,7 +192,7 @@ function applyCrop() {
         fotoCropadaInput.value = croppedImageSrc;
       }
 
-      closeCropModal();
+      closeCropModalOk();
       showToast('Imagem ajustada com sucesso!', 'success');
     };
     reader.readAsDataURL(blob);

@@ -34,7 +34,6 @@ require_once __DIR__ . '/../../includes/header.php';
 
                     <input type="file" name="foto" id="foto-input" accept="image/*" capture="environment"
                         class="hidden">
-
                     <input type="hidden" name="foto_cropada" id="foto-cropada">
 
                     <!-- Área de Upload -->
@@ -46,7 +45,7 @@ require_once __DIR__ . '/../../includes/header.php';
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
                             </svg>
-                            <p class="text-xs md:text-sm font-medium text-gray-700 mb-1">Adicionar Foto</p>
+                            <p class="text-xs md:text-sm font-medium text-gray-700 mb-1">Tirar Foto</p>
                             <p class="text-xs text-gray-500 hidden md:block">Toque para escolher</p>
                         </div>
                     </div>
@@ -205,8 +204,37 @@ require_once __DIR__ . '/../../includes/header.php';
                     </div>
                     <div>
                         <label for="estado" class="block text-sm font-medium text-gray-700 mb-1">Estado:</label>
-                        <input type="text" name="estado" id="estado" required
-                            class="w-full border border-gray-300 rounded px-3 py-2">
+                        <select name="estado" id="estado" required
+                            class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#00bfff]">
+                            <option value="">Selecione o estado...</option>
+                            <option value="AC">Acre</option>
+                            <option value="AL">Alagoas</option>
+                            <option value="AP">Amapá</option>
+                            <option value="AM">Amazonas</option>
+                            <option value="BA">Bahia</option>
+                            <option value="CE">Ceará</option>
+                            <option value="DF">Distrito Federal</option>
+                            <option value="ES">Espírito Santo</option>
+                            <option value="GO">Goiás</option>
+                            <option value="MA">Maranhão</option>
+                            <option value="MT">Mato Grosso</option>
+                            <option value="MS">Mato Grosso do Sul</option>
+                            <option value="MG">Minas Gerais</option>
+                            <option value="PA">Pará</option>
+                            <option value="PB">Paraíba</option>
+                            <option value="PR">Paraná</option>
+                            <option value="PE">Pernambuco</option>
+                            <option value="PI">Piauí</option>
+                            <option value="RJ">Rio de Janeiro</option>
+                            <option value="RN">Rio Grande do Norte</option>
+                            <option value="RS">Rio Grande do Sul</option>
+                            <option value="RO">Rondônia</option>
+                            <option value="RR">Roraima</option>
+                            <option value="SC">Santa Catarina</option>
+                            <option value="SP">São Paulo</option>
+                            <option value="SE">Sergipe</option>
+                            <option value="TO">Tocantins</option>
+                        </select>
                         <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
                     </div>
                 </div>
@@ -255,24 +283,23 @@ require_once __DIR__ . '/../../includes/header.php';
 
 <!-- Modal de Crop -->
 <div id="crop-modal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg max-w-lg w-full p-6">
+    <div class="bg-white rounded-lg max-w-lg w-full p-6 max-h-[90vh]">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold">Ajustar Foto</h3>
-            <button id="close-crop-modal" class="top-2 right-2 text-red-600 hover:text-red-800 text-lg">
-            <i class="fa-solid fa-window-close"></i>
-            </button>
         </div>
 
-        <div class="mb-4">
-            <img id="crop-image" src="#" alt="Imagem para crop" class="max-w-full">
+        <div class="flex-1 overflow-hidden mb-4 max-h-[70vh]">
+            <img id="crop-image" src="#" alt="Imagem para crop" class="max-w-full max-h-full object-contain">
         </div>
 
         <div class="flex gap-2 justify-end">
-            <button id="cancel-crop" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-900 transition font-semibold">
-                Cancelar
+            <button id="cancel-crop"
+                class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-900 transition font-semibold">
+                Tirar outra
             </button>
-            <button id="apply-crop" class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold">
-                Aplicar
+            <button id="apply-crop"
+                class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold">
+                Cortar e salvar
             </button>
         </div>
     </div>

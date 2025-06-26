@@ -421,3 +421,48 @@ function initMobileKeyboardHandling() {
 
 // Inicia quando DOM carregar
 document.addEventListener('DOMContentLoaded', initMobileKeyboardHandling);
+
+// ============= HIDE ADDRESS BAR ON SCROLL =============
+function initHideAddressBar() {
+    let isFirstScroll = true;
+    let lastScrollY = window.scrollY;
+    let hideTimeout;
+
+    function hideAddressBar() {
+        const currentScrollY = window.scrollY;
+
+        // Na primeira rolagem para cima OU rolagem normal para cima
+        if ((isFirstScroll && currentScrollY < lastScrollY) ||
+            (currentScrollY < lastScrollY && currentScrollY > 5)) {
+
+            clearTimeout(hideTimeout);
+
+            hideTimeout = setTimeout(() => {
+                window.scrollTo(0, 1);
+            }, isFirstScroll ? 50 : 150);
+
+            isFirstScroll = false;
+        }
+
+        lastScrollY = currentScrollY;
+    }
+
+    let ticking = false;
+    function requestTick() {
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                hideAddressBar();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }
+
+    window.addEventListener('scroll', requestTick, { passive: true });
+
+    // Esconde na carga inicial
+    window.addEventListener('load', () => {
+        setTimeout(() => window.scrollTo(0, 1), 500);
+    });
+  }
+

@@ -225,9 +225,41 @@ if (!isset($pessoa)) {
                     </div>
                     <div>
                         <label for="estado" class="block text-sm font-medium text-gray-700 mb-1">Estado:</label>
-                        <input type="text" name="estado" id="estado" required
-                            value="<?= htmlspecialchars($pessoa['estado']) ?>"
-                            class="w-full border border-gray-300 rounded px-3 py-2">
+                        <select name="estado" id="estado" required
+                            class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-[#00bfff]">
+                            <option value="">Selecione o estado...</option>
+                            <option value="AC" <?= $pessoa['estado'] === 'AC' ? 'selected' : '' ?>>Acre</option>
+                            <option value="AL" <?= $pessoa['estado'] === 'AL' ? 'selected' : '' ?>>Alagoas</option>
+                            <option value="AP" <?= $pessoa['estado'] === 'AP' ? 'selected' : '' ?>>Amapá</option>
+                            <option value="AM" <?= $pessoa['estado'] === 'AM' ? 'selected' : '' ?>>Amazonas</option>
+                            <option value="BA" <?= $pessoa['estado'] === 'BA' ? 'selected' : '' ?>>Bahia</option>
+                            <option value="CE" <?= $pessoa['estado'] === 'CE' ? 'selected' : '' ?>>Ceará</option>
+                            <option value="DF" <?= $pessoa['estado'] === 'DF' ? 'selected' : '' ?>>Distrito Federal
+                            </option>
+                            <option value="ES" <?= $pessoa['estado'] === 'ES' ? 'selected' : '' ?>>Espírito Santo</option>
+                            <option value="GO" <?= $pessoa['estado'] === 'GO' ? 'selected' : '' ?>>Goiás</option>
+                            <option value="MA" <?= $pessoa['estado'] === 'MA' ? 'selected' : '' ?>>Maranhão</option>
+                            <option value="MT" <?= $pessoa['estado'] === 'MT' ? 'selected' : '' ?>>Mato Grosso</option>
+                            <option value="MS" <?= $pessoa['estado'] === 'MS' ? 'selected' : '' ?>>Mato Grosso do Sul
+                            </option>
+                            <option value="MG" <?= $pessoa['estado'] === 'MG' ? 'selected' : '' ?>>Minas Gerais</option>
+                            <option value="PA" <?= $pessoa['estado'] === 'PA' ? 'selected' : '' ?>>Pará</option>
+                            <option value="PB" <?= $pessoa['estado'] === 'PB' ? 'selected' : '' ?>>Paraíba</option>
+                            <option value="PR" <?= $pessoa['estado'] === 'PR' ? 'selected' : '' ?>>Paraná</option>
+                            <option value="PE" <?= $pessoa['estado'] === 'PE' ? 'selected' : '' ?>>Pernambuco</option>
+                            <option value="PI" <?= $pessoa['estado'] === 'PI' ? 'selected' : '' ?>>Piauí</option>
+                            <option value="RJ" <?= $pessoa['estado'] === 'RJ' ? 'selected' : '' ?>>Rio de Janeiro</option>
+                            <option value="RN" <?= $pessoa['estado'] === 'RN' ? 'selected' : '' ?>>Rio Grande do Norte
+                            </option>
+                            <option value="RS" <?= $pessoa['estado'] === 'RS' ? 'selected' : '' ?>>Rio Grande do Sul
+                            </option>
+                            <option value="RO" <?= $pessoa['estado'] === 'RO' ? 'selected' : '' ?>>Rondônia</option>
+                            <option value="RR" <?= $pessoa['estado'] === 'RR' ? 'selected' : '' ?>>Roraima</option>
+                            <option value="SC" <?= $pessoa['estado'] === 'SC' ? 'selected' : '' ?>>Santa Catarina</option>
+                            <option value="SP" <?= $pessoa['estado'] === 'SP' ? 'selected' : '' ?>>São Paulo</option>
+                            <option value="SE" <?= $pessoa['estado'] === 'SE' ? 'selected' : '' ?>>Sergipe</option>
+                            <option value="TO" <?= $pessoa['estado'] === 'TO' ? 'selected' : '' ?>>Tocantins</option>
+                        </select>
                         <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
                     </div>
                 </div>
@@ -278,24 +310,23 @@ if (!isset($pessoa)) {
 
 <!-- Modal de Crop -->
 <div id="crop-modal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden flex items-center justify-center p-4">
-    <div class="bg-white rounded-lg max-w-lg w-full p-6">
+    <div class="bg-white rounded-lg max-w-lg w-full p-6 max-h-[90vh]">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold">Ajustar Foto</h3>
-            <button id="close-crop-modal" class="top-2 right-2 text-red-600 hover:text-red-800 text-lg">
-            <i class="fa-solid fa-window-close"></i>
-            </button>
         </div>
 
-        <div class="mb-4">
-            <img id="crop-image" src="#" alt="Imagem para crop" class="max-w-full">
+        <div class="flex-1 overflow-hidden mb-4 max-h-[70vh]">
+            <img id="crop-image" src="#" alt="Imagem para crop" class="max-w-full max-h-full object-contain">
         </div>
 
         <div class="flex gap-2 justify-end">
-            <button id="cancel-crop" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-900 transition font-semibold">
-                Cancelar
+            <button id="cancel-crop"
+                class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-900 transition font-semibold">
+                Tirar outra
             </button>
-            <button id="apply-crop" class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold">
-                Aplicar
+            <button id="apply-crop"
+                class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold">
+                Cortar e salvar
             </button>
         </div>
     </div>

@@ -37,7 +37,12 @@ $_SESSION['last_activity'] = time();
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#000000">
     <title>Participantes - ICI</title>
     <link rel="icon" type="image/x-icon" href="/participantesici/public_html/assets/images/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
@@ -111,4 +116,4 @@ $_SESSION['last_activity'] = time();
         </div>
     </header>
 
-    <main class="flex-grow bg-gray-300 pt-[50px] content-area">
+    <main class="flex-grow bg-gray-300 pt-[50px] pb-[40px]">

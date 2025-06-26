@@ -9,7 +9,11 @@ unset($_SESSION['login_error']);
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="theme-color" content="#000000">
   <meta name="theme-color" content="#1D4ED8">
   <title>Participantes - ICI</title>
   <link rel="icon" href="/participantesici/public_html/assets/images/favicon.ico" type="image/x-icon" />
@@ -54,7 +58,7 @@ unset($_SESSION['login_error']);
   </style>
 </head>
 
-<body class="relative min-h-screen flex items-center justify-center bg-black/70 text-white">
+<body class="relative h-screen flex items-center justify-center bg-black/70 text-white overflow-hidden">
   <div class="video-bg">
     <video autoplay muted loop>
       <source src="/participantesici/public_html/assets/videos/fogueira.mp4" type="video/mp4">
@@ -69,30 +73,30 @@ unset($_SESSION['login_error']);
     </div>
 
     <div class="form-container mobile-compact">
-    <form method="POST" action="/participantesici/public_html/entrar" class="space-y-4" novalidate>
-      <div>
-        <input type="text" name="usuario" id="usuario" placeholder="Usuário" required
-          class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary transition" />
-        <p class="text-sm text-red-500 mt-1 hidden" id="erro-usuario">Campo obrigatório.</p>
-      </div>
-
-      <div class="flex flex-col">
-        <div class="relative">
-          <input type="password" name="senha" id="senha" placeholder="Senha" required
-            class="w-full p-3 pr-12 rounded border border-gray-300 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary transition" />
-          <button type="button" onclick="toggleSenha()"
-            class="absolute right-3 top-1/2 -translate-y-1/2 text-black hover:text-blue-300" title="Mostrar senha"
-            id="toggleSenhaBtn">
-            <i class="fa-solid fa-eye" id="iconOlho"></i>
-          </button>
+      <form method="POST" action="/participantesici/public_html/entrar" class="space-y-4" novalidate>
+        <div>
+          <input type="text" name="usuario" id="usuario" placeholder="Usuário" required autocapitalize="none"
+            class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary transition" />
+          <p class="text-sm text-red-500 mt-1 hidden" id="erro-usuario">Campo obrigatório.</p>
         </div>
-        <p class="text-sm text-red-500 mt-1 hidden" id="erro-senha">Campo obrigatório.</p>
-      </div>
 
-      <button type="submit" class="w-full bg-primary font-bold text-white py-3 rounded hover:bg-blue-900 transition">
-        Entrar
-      </button>
-    </form>
+        <div class="flex flex-col">
+          <div class="relative">
+            <input type="password" name="senha" id="senha" placeholder="Senha" required autocapitalize="none"
+              class="w-full p-3 pr-12 rounded border border-gray-300 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary transition" />
+            <button type="button" onclick="toggleSenha()"
+              class="absolute right-3 top-1/2 -translate-y-1/2 text-black hover:text-blue-300" title="Mostrar senha"
+              id="toggleSenhaBtn">
+              <i class="fa-solid fa-eye" id="iconOlho"></i>
+            </button>
+          </div>
+          <p class="text-sm text-red-500 mt-1 hidden" id="erro-senha">Campo obrigatório.</p>
+        </div>
+
+        <button type="submit" class="w-full bg-primary font-bold text-white py-3 rounded hover:bg-blue-900 transition">
+          Entrar
+        </button>
+      </form>
     </div>
   </div>
 

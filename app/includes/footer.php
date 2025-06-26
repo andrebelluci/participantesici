@@ -1,5 +1,5 @@
 </main>
-<footer class="bg-yellow-400 text-center text-black py-1 text-sm">
+<footer class="fixed bottom-0 left-0 right-0 bg-yellow-400 text-center text-black py-1 text-sm z-40">
     <p>&copy; Instituto Céu Interior <?= date('Y') ?> - Todos os direitos reservados</p>
 </footer>
 

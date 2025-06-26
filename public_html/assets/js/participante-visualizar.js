@@ -63,6 +63,9 @@ function handleModalClick(event) {
     if (modal && event.target === modal) {
       modal.style.display = "none";
       enableScroll();
+      setTimeout(() => {
+        limparFiltroCompleto();
+      }, 300);
     }
   });
 
@@ -70,6 +73,9 @@ function handleModalClick(event) {
   if (event.target.classList.contains('modal')) {
     event.target.style.display = "none";
     enableScroll();
+    setTimeout(() => {
+      limparFiltroCompleto();
+    }, 300);
   }
 }
 
@@ -88,6 +94,9 @@ function handleModalKeydown(event) {
       if (modal && modal.style.display === 'flex') {
         modal.style.display = 'none';
         enableScroll();
+        setTimeout(() => {
+          limparFiltroCompleto();
+        }, 300);
       }
     });
   }
@@ -110,8 +119,6 @@ document.addEventListener("DOMContentLoaded", function () {
   setupConditionalFields();
   aplicarFocoModalAdicionar();
 });
-
-// ============= FUNÇÕES DE MODAL =============
 
 // Função para abrir o modal de detalhes da inscrição
 function abrirModalDetalhes(ritualId) {
@@ -261,20 +268,6 @@ function fecharModalCadastro() {
   enableScroll();
 }
 
-function abrirModalAdicionar() {
-  disableScroll();
-  document.getElementById('modal-adicionar').style.display = 'flex';
-
-  // Foco automático no campo de pesquisa
-  setTimeout(() => {
-    const inputPesquisa = document.getElementById('nome_pesquisa');
-    if (inputPesquisa) {
-      inputPesquisa.focus();
-      console.log('✅ Foco aplicado automaticamente');
-    }
-  }, 100);
-}
-
 function aplicarFocoModalAdicionar() {
   // Observa quando a modal aparece e aplica foco
   const modal = document.getElementById('modal-adicionar');
@@ -318,7 +311,9 @@ function abrirModalAdicionar() {
 function fecharModalAdicionar() {
   enableScroll();
   document.getElementById('modal-adicionar').style.display = 'none';
-  limparFiltroCompleto();
+  setTimeout(() => {
+    limparFiltroCompleto();
+  }, 300);
 }
 
 // ============= FUNÇÕES DE NOTIFICAÇÃO =============
@@ -826,6 +821,12 @@ function limparFiltroCompleto() {
   if (elements.formulario) elements.formulario.style.display = 'block';
   if (elements.botaoToggle) elements.botaoToggle.classList.add('hidden');
   if (elements.limparFiltro) elements.limparFiltro.style.display = 'none';
+
+  setTimeout(() => {
+    if (elements.nomePesquisa) {
+      elements.nomePesquisa.focus();
+    }
+  }, 100);
 }
 
 function limparPesquisa() {
@@ -840,6 +841,12 @@ function limparPesquisa() {
   if (elements.listaRituais) elements.listaRituais.innerHTML = '';
   if (elements.resultados) elements.resultados.style.display = 'none';
   if (elements.limparPesquisa) elements.limparPesquisa.style.display = 'none';
+
+  setTimeout(() => {
+    if (elements.nomePesquisa) {
+      elements.nomePesquisa.focus();
+    }
+  }, 100);
 }
 
 // ============= RITUAL ACTIONS =============
@@ -872,9 +879,18 @@ function adicionarRitual(ritualId) {
     .then(data => {
       if (data.success) {
         showToast('Ritual adicionado com sucesso!', 'success');
+
+        // 1. Atualiza o botão na lista para "Já adicionado"
+        atualizarBotaoParaJaAdicionado(ritualId);
+
+        // 2. Atualiza a página de fundo (sem fechar modal)
+        atualizarPaginaFundo();
+
+        // 3. Expande filtro e limpa para nova pesquisa
         setTimeout(() => {
-          location.reload();
+          expandirFiltroELimpar();
         }, 1000);
+
       } else {
         showToast('Erro ao adicionar ritual: ' + data.error, 'error');
       }
@@ -883,6 +899,106 @@ function adicionarRitual(ritualId) {
       console.error('Erro ao adicionar ritual:', error);
       showToast('Erro ao adicionar ritual', 'error');
     });
+}
+
+function atualizarBotaoParaJaAdicionado(ritualId) {
+  const listaRituais = document.getElementById('lista-rituais');
+  if (!listaRituais) return;
+
+  // Encontra o item da lista do ritual
+  const botaoAdicionar = listaRituais.querySelector(`button[onclick="adicionarRitual(${ritualId})"]`);
+
+  if (botaoAdicionar) {
+    // Substitui o botão por uma tag "Já adicionado"
+    botaoAdicionar.outerHTML = `
+      <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+        <i class="fa-solid fa-check"></i>
+        Já adicionado
+      </span>
+    `;
+  }
+}
+
+function atualizarPaginaFundo() {
+  // Faz uma requisição silenciosa para buscar a lista atualizada
+  const currentUrl = window.location.href;
+
+  fetch(currentUrl)
+    .then(response => response.text())
+    .then(html => {
+      // Cria um parser temporário
+      const parser = new DOMParser();
+      const novoDoc = parser.parseFromString(html, 'text/html');
+
+      // Atualiza apenas a seção de cards dos rituais
+      const novaListaCards = novoDoc.querySelector('.grid.gap-4.grid-cols-1.md\\:grid-cols-2.xl\\:grid-cols-3');
+      const listaCardsAtual = document.querySelector('.grid.gap-4.grid-cols-1.md\\:grid-cols-2.xl\\:grid-cols-3');
+
+      if (novaListaCards && listaCardsAtual) {
+        listaCardsAtual.innerHTML = novaListaCards.innerHTML;
+
+        // Reaplica os event listeners nos novos elementos
+        reaplicarEventListeners();
+      }
+
+      // Atualiza contador no cabeçalho
+      const novoContador = novoDoc.querySelector('span.bg-\\[\\#00bfff\\]');
+      const contadorAtual = document.querySelector('span.bg-\\[\\#00bfff\\]');
+
+      if (novoContador && contadorAtual) {
+        contadorAtual.textContent = novoContador.textContent;
+      }
+    })
+    .catch(error => {
+      console.error('Erro ao atualizar página de fundo:', error);
+    });
+}
+
+// Nova função para reativar event listeners após atualização
+function reaplicarEventListeners() {
+  // Reaplica listeners para botões de presença
+  document.querySelectorAll('.presence-btn').forEach(button => {
+    button.removeEventListener('click', handlePresenceClick);
+    button.addEventListener('click', handlePresenceClick);
+  });
+
+  // Reaplica listeners para modais
+  initModalEventListeners();
+}
+
+// Handler separado para botões de presença
+function handlePresenceClick(event) {
+  const button = event.currentTarget;
+  togglePresenca(button);
+}
+
+function expandirFiltroELimpar() {
+  const elements = {
+    nomePesquisa: document.getElementById('nome_pesquisa'),
+    listaRituais: document.getElementById('lista-rituais'),
+    resultados: document.getElementById('resultados-pesquisa'),
+    limparPesquisa: document.getElementById('limpar-pesquisa-btn'),
+    formulario: document.getElementById('pesquisa-ritual-form'),
+    botaoToggle: document.getElementById('botao-toggle-filtro'),
+    limparFiltro: document.getElementById('limpar-filtro-btn')
+  };
+
+  // Limpa campos e resultados
+  if (elements.nomePesquisa) elements.nomePesquisa.value = '';
+  if (elements.limparPesquisa) elements.limparPesquisa.style.display = 'none';
+
+  // Expande o filtro
+  if (elements.formulario) elements.formulario.style.display = 'block';
+  if (elements.botaoToggle) elements.botaoToggle.classList.add('hidden');
+
+  // Foca no campo de pesquisa
+  setTimeout(() => {
+    if (elements.nomePesquisa) {
+      elements.nomePesquisa.focus();
+    }
+  }, 100);
+
+  showToast('Pronto para adicionar outro ritual!', 'success');
 }
 
 // ============= UTILITÁRIOS =============

@@ -187,7 +187,7 @@ if (!isset($ritual)) {
                         class="relative bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
                         title="Observação do participante neste ritual">
                         <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-                            <i class="fa-solid fa-file-lines md:text-lg"></i>
+                            <i class="fa-solid fa-file-lines text-lg"></i>
                             <span class="block sm:hidden text-xs mt-1">Observação</span>
                         </div>
 
@@ -202,7 +202,7 @@ if (!isset($ritual)) {
                         class="relative bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
                         title="Detalhes da inscrição no ritual">
                         <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-                            <i class="fa-solid fa-pencil md:text-lg"></i>
+                            <i class="fa-solid fa-pencil text-lg"></i>
                             <span class="block sm:hidden text-xs mt-1">Inscrição</span>
                         </div>
 
@@ -223,7 +223,7 @@ if (!isset($ritual)) {
                         class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded flex items-center gap-1"
                         title="Desvincular participante do ritual">
                         <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-                            <i class="fa-solid fa-link-slash md:text-lg"></i>
+                            <i class="fa-solid fa-link-slash text-lg"></i>
                             <span class="block sm:hidden text-xs mt-1">Desvincular</span>
                         </div>
                     </button>

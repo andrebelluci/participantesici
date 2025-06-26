@@ -90,7 +90,7 @@ require_once __DIR__ . '/../../includes/header.php';
             class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
             title="Gerenciar rituais">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-              <i class="fa-solid fa-list-check md:text-lg"></i>
+              <i class="fa-solid fa-list-check text-lg"></i>
               <span class="block sm:hidden text-xs mt-1">Rituais</span>
             </div>
           </a>
@@ -98,7 +98,7 @@ require_once __DIR__ . '/../../includes/header.php';
             class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
             title="Editar participante">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-              <i class="fa-solid fa-pen-to-square md:text-lg"></i>
+              <i class="fa-solid fa-pen-to-square text-lg"></i>
               <span class="block sm:hidden text-xs mt-1">Editar</span>
             </div>
           </a>
@@ -107,7 +107,7 @@ require_once __DIR__ . '/../../includes/header.php';
             class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded flex items-center gap-1"
             title="Excluir participante">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-              <i class="fa-solid fa-trash md:text-lg"></i>
+              <i class="fa-solid fa-trash text-lg"></i>
               <span class="block sm:hidden text-xs mt-1">Excluir</span>
             </div>
           </button>
