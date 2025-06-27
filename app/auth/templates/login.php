@@ -39,12 +39,6 @@ unset($_SESSION['login_success']);
       object-fit: cover;
       z-index: -1;
     }
-
-    /* ::placeholder {
-      color: #d1d5db;
-      opacity: 1;
-    } */
-
   </style>
 </head>
 
@@ -83,11 +77,23 @@ unset($_SESSION['login_success']);
           <p class="text-sm text-red-500 mt-1 hidden" id="erro-senha">Campo obrigatório.</p>
         </div>
 
-        <button type="submit" class="w-full bg-[#00bfff] font-bold text-black py-3 rounded hover:bg-yellow-400 transition">
+        <!-- ✅ NOVA SEÇÃO: CHECKBOX LEMBRAR-ME -->
+        <div class="flex items-center justify-between">
+          <label class="flex items-center cursor-pointer group">
+            <input type="checkbox" name="lembrar_me" id="lembrar_me" value="1"
+              class="w-4 h-4 text-[#00bfff] bg-gray-100 border-gray-300 rounded focus:ring-[#00bfff] focus:ring-2">
+            <span class="ml-2 text-sm text-yellow-400 group-hover:text-[#00bfff] transition">
+              <i class="fa-solid fa-clock mr-1"></i>Lembrar-me por 30 dias
+            </span>
+          </label>
+        </div>
+
+        <button type="submit"
+          class="w-full bg-[#00bfff] font-bold text-black py-3 rounded hover:bg-yellow-400 transition">
           <i class="fa-solid fa-sign-in-alt mr-2"></i>Entrar
         </button>
 
-        <!-- ✅ NOVA SEÇÃO: LINK ESQUECI MINHA SENHA -->
+        <!-- ✅ SEÇÃO: LINK ESQUECI MINHA SENHA -->
         <div class="text-center space-y-3 mt-6">
           <hr class="border-yellow-400">
           <a href="/participantesici/public_html/esqueci-senha"
@@ -121,12 +127,21 @@ unset($_SESSION['login_success']);
     </script>
   <?php endif; ?>
 
-  <!-- ✅ ADICIONAR TOAST DE SUCESSO NO LOGIN -->
+  <!-- ✅ TOAST DE SUCESSO NO LOGIN -->
   <?php if (isset($_GET['success']) && $_GET['success'] == '1'): ?>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         // Exibe toast de sucesso e redireciona
         showLoginSuccessToast('/participantesici/public_html/home');
+      });
+    </script>
+  <?php endif; ?>
+
+  <!-- ✅ TOAST PARA TIMEOUT DE SESSÃO -->
+  <?php if (isset($_GET['timeout']) && $_GET['timeout'] == '1'): ?>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        showToast('Sua sessão expirou. Faça login novamente.', 'warning');
       });
     </script>
   <?php endif; ?>

@@ -2,34 +2,86 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-require_once __DIR__ . '/../functions/check_auth.php';
+
+require_once __DIR__ . '/../config/database.php';
+
+// ✅ FUNÇÃO PARA VERIFICAR TOKEN DE LEMBRAR-ME
+function verificarTokenLembrarMe($pdo) {
+    if (!isset($_COOKIE['remember_token'])) {
+        return false;
+    }
+
+    $token = $_COOKIE['remember_token'];
+
+    try {
+        // Busca token válido no banco
+        $stmt = $pdo->prepare("
+            SELECT u.id, u.nome, u.usuario
+            FROM remember_tokens rt
+            JOIN usuarios u ON rt.user_id = u.id
+            WHERE rt.token = ? AND rt.expires_at > NOW()
+        ");
+        $stmt->execute([$token]);
+        $result = $stmt->fetch();
+
+        if ($result) {
+            // Token válido - restaura sessão
+            $_SESSION['user_id'] = $result['id'];
+            $_SESSION['nome'] = $result['nome'];
+            $_SESSION['last_activity'] = time();
+
+            error_log("[REMEMBER_ME] Sessão restaurada para usuário: {$result['usuario']} (ID: {$result['id']})");
+            return true;
+        } else {
+            // Token inválido/expirado - remove cookie
+            setcookie('remember_token', '', time() - 3600, '/');
+            error_log("[REMEMBER_ME] Token inválido ou expirado removido");
+            return false;
+        }
+
+    } catch (Exception $e) {
+        error_log("[REMEMBER_ME] Erro ao verificar token: " . $e->getMessage());
+        return false;
+    }
+}
+
+// ✅ VERIFICAÇÃO DE AUTENTICAÇÃO MELHORADA
+if (!isset($_SESSION['user_id'])) {
+    // Tenta restaurar sessão via cookie de lembrar-me
+    if (!verificarTokenLembrarMe($pdo)) {
+        // Não está logado e não tem token válido
+        header("Location: /participantesici/public_html/login");
+        exit;
+    }
+}
+
+// ✅ VERIFICAÇÃO DE TIMEOUT DE SESSÃO MELHORADA
+$timeout = 3600; // 1 hora
+
+// Se tem cookie de lembrar-me, não aplica timeout
+$tem_cookie_lembrar = isset($_COOKIE['remember_token']);
+
+if (!$tem_cookie_lembrar && isset($_SESSION['last_activity'])) {
+    if ((time() - $_SESSION['last_activity']) > $timeout) {
+        // Timeout apenas se não tem cookie de lembrar-me
+        session_unset();
+        session_destroy();
+        header("Location: /participantesici/public_html/login?timeout=1");
+        exit;
+    }
+}
+
+// Atualiza última atividade (sempre)
+$_SESSION['last_activity'] = time();
+
+// ✅ FUNÇÃO PARA VERIFICAR PÁGINA ATIVA
 function is_active($pagina_url)
 {
-    // Pega a URL atual (ex: '/participantesici/public_html/rituais')
     $current_url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-
-    // Remove a base se necessário
     $base_path = '/participantesici/public_html/';
     $current_relative = str_replace($base_path, '', $current_url);
-
-    // Compara com a URL passada (ex: 'rituais')
     return trim($current_relative, '/') === trim($pagina_url, '/') ? 'text-yellow-400' : '';
 }
-
-// Define o tempo limite
-$timeout = 3600;
-
-// Registra o horário da última atividade
-if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity'] > $timeout)) {
-    // Se o tempo limite for ultrapassado, destrói a sessão e redireciona para o login
-    session_unset();
-    session_destroy();
-    header("Location: /participantesici/public_html/login?timeout=1"); // Pode adicionar um parâmetro para informar o motivo
-    exit;
-}
-
-// Atualiza o horário da última atividade
-$_SESSION['last_activity'] = time();
 ?>
 
 <!DOCTYPE html>
@@ -53,6 +105,18 @@ $_SESSION['last_activity'] = time();
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/participantesici/public_html/assets/css/mobile-fixes.css?v=1.0">
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#00bfff',
+                    }
+                }
+            }
+        };
+    </script>
 
 </head>
 
@@ -86,7 +150,6 @@ $_SESSION['last_activity'] = time();
                     <a href="/participantesici/public_html/logout" class="px-4 py-2 hover:bg-gray-800">Sair</a>
                 </nav>
             </div>
-
 
             <nav id="main-nav" class="hidden sm:flex space-x-8 items-center">
                 <a href="/participantesici/public_html/home"

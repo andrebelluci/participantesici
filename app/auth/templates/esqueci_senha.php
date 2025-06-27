@@ -31,11 +31,6 @@ session_start();
             object-fit: cover;
             z-index: -1;
         }
-
-        ::placeholder {
-            color: #d1d5db;
-            opacity: 1;
-        }
     </style>
 </head>
 

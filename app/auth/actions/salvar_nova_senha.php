@@ -12,6 +12,30 @@ $token = $_POST['token'] ?? '';
 $nova_senha = $_POST['nova_senha'] ?? '';
 $confirmar_senha = $_POST['confirmar_senha'] ?? '';
 
+// Função para validar senha
+function validarSenha($senha)
+{
+  $erros = [];
+
+  if (strlen($senha) < 8) {
+    $erros[] = 'A senha deve ter pelo menos 8 caracteres';
+  }
+
+  if (!preg_match('/[A-Z]/', $senha)) {
+    $erros[] = 'A senha deve conter pelo menos 1 letra maiúscula';
+  }
+
+  if (!preg_match('/[0-9]/', $senha)) {
+    $erros[] = 'A senha deve conter pelo menos 1 número';
+  }
+
+  if (!preg_match('/[^a-zA-Z0-9]/', $senha)) {
+    $erros[] = 'A senha deve conter pelo menos 1 caractere especial';
+  }
+
+  return $erros;
+}
+
 // Validações
 if (empty($token)) {
   $_SESSION['error'] = 'Token inválido.';
@@ -31,8 +55,10 @@ if ($nova_senha !== $confirmar_senha) {
   exit;
 }
 
-if (strlen($nova_senha) < 6) {
-  $_SESSION['error'] = 'A senha deve ter pelo menos 6 caracteres.';
+// Validação robusta da senha
+$errosSenha = validarSenha($nova_senha);
+if (!empty($errosSenha)) {
+  $_SESSION['error'] = 'Senha inválida: ' . implode(', ', $errosSenha);
   header("Location: /participantesici/public_html/redefinir-senha?token=" . urlencode($token));
   exit;
 }
@@ -126,7 +152,8 @@ try {
         </p>
 
         <div class="w-full bg-gray-600 rounded-full h-2">
-          <div id="progress-bar" class="bg-[#00bfff] h-2 rounded-full transition-all duration-100" style="width: 0%"></div>
+          <div id="progress-bar" class="bg-[#00bfff] h-2 rounded-full transition-all duration-100" style="width: 0%">
+          </div>
         </div>
 
         <p class="text-xs text-gray-400">
