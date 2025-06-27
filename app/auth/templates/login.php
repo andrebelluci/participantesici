@@ -29,18 +29,6 @@ unset($_SESSION['login_success']);
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#00bfff',
-          }
-        }
-      }
-    };
-  </script>
-
   <style>
     .video-bg video {
       position: fixed;
@@ -52,14 +40,11 @@ unset($_SESSION['login_success']);
       z-index: -1;
     }
 
-    ::placeholder {
+    /* ::placeholder {
       color: #d1d5db;
       opacity: 1;
-    }
+    } */
 
-    .eye {
-      text-color: #00bfff;
-    }
   </style>
 </head>
 
@@ -71,7 +56,7 @@ unset($_SESSION['login_success']);
     </video>
   </div>
 
-  <div class="w-full max-w-md bg-white/5 rounded-lg p-6 shadow-lg mx-4">
+  <div class="w-full max-w-md bg-black/50 rounded-lg p-6 shadow-lg mx-4">
     <div class="flex flex-col items-center mb-6">
       <img src="/participantesici/public_html/assets/images/logo.png" alt="Logo" class="w-40 h-auto object-contain" />
       <h2 class="mt-4 text-xl font-semibold text-center text-white">Gestão de participantes</h2>
@@ -81,14 +66,14 @@ unset($_SESSION['login_success']);
       <form method="POST" action="/participantesici/public_html/entrar" class="space-y-4" novalidate>
         <div>
           <input type="text" name="usuario" id="usuario" placeholder="Usuário" required autocapitalize="none"
-            class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary transition" />
+            class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary transition" />
           <p class="text-sm text-red-500 mt-1 hidden" id="erro-usuario">Campo obrigatório.</p>
         </div>
 
         <div class="flex flex-col">
           <div class="relative">
             <input type="password" name="senha" id="senha" placeholder="Senha" required autocapitalize="none"
-              class="w-full p-3 pr-12 rounded border border-gray-300 text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary transition" />
+              class="w-full p-3 pr-12 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary transition" />
             <button type="button" onclick="toggleSenha()"
               class="absolute right-3 top-1/2 -translate-y-1/2 text-black hover:text-blue-300" title="Mostrar senha"
               id="toggleSenhaBtn">
@@ -98,19 +83,19 @@ unset($_SESSION['login_success']);
           <p class="text-sm text-red-500 mt-1 hidden" id="erro-senha">Campo obrigatório.</p>
         </div>
 
-        <button type="submit" class="w-full bg-primary font-bold text-white py-3 rounded hover:bg-blue-900 transition">
+        <button type="submit" class="w-full bg-[#00bfff] font-bold text-black py-3 rounded hover:bg-yellow-400 transition">
           <i class="fa-solid fa-sign-in-alt mr-2"></i>Entrar
         </button>
 
         <!-- ✅ NOVA SEÇÃO: LINK ESQUECI MINHA SENHA -->
         <div class="text-center space-y-3 mt-6">
-          <hr class="border-gray-400">
+          <hr class="border-yellow-400">
           <a href="/participantesici/public_html/esqueci-senha"
-            class="inline-flex items-center text-sm text-gray-300 hover:text-primary transition group">
+            class="inline-flex items-center text-sm text-yellow-400 hover:text-primary transition group font-semibold">
             <i class="fa-solid fa-key mr-2 group-hover:scale-110 transition-transform"></i>
             Esqueci minha senha
           </a>
-          <p class="text-xs text-gray-400">
+          <p class="text-xs text-yellow-400">
             Você receberá um link de recuperação por email
           </p>
         </div>

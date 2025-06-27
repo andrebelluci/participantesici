@@ -1,3 +1,4 @@
 .senha
 storage/uploads/*
+/app/test/*
 .env

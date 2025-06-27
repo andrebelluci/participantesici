@@ -14,9 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $_SESSION['user_id'] = $user['id'];
     $_SESSION['nome'] = $user['nome'];
 
-    // ✅ ADICIONA MENSAGEM DE SUCESSO
-    $_SESSION['login_success'] = 'Login efetuado com sucesso!';
-
     header("Location: /participantesici/public_html/login?success=1");
     exit;
   } else {

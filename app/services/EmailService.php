@@ -1,5 +1,5 @@
 <?php
-// app/services/EmailService.php - VERSÃO MELHORADA
+// app/services/EmailService.php - VERSÃO CORRIGIDA PARA RESPOSTAS MULTILINHAS
 require_once __DIR__ . '/../config/config.php';
 
 class EmailService {
@@ -27,28 +27,28 @@ class EmailService {
             return false;
         }
 
-        // ✅ CONFIGURAÇÕES ESPECÍFICAS BASEADAS NAS SUAS INFORMAÇÕES
+        // ✅ CONFIGURAÇÕES CORRIGIDAS PARA O SEU SERVIDOR
         $configs = [
             // Tenta SSL na porta 465 primeiro (mais seguro)
             [
                 'host' => $host,
                 'port' => 465,
                 'crypto' => 'ssl',
-                'timeout' => 15
+                'timeout' => 30
             ],
             // Depois TLS na porta 587 com configurações mais flexíveis
             [
                 'host' => $host,
                 'port' => 587,
                 'crypto' => 'tls',
-                'timeout' => 15
+                'timeout' => 30
             ],
-            // Se necessário, tenta porta não criptografada (não recomendado)
+            // Última tentativa: porta 587 sem criptografia
             [
                 'host' => $host,
                 'port' => 587,
                 'crypto' => 'none',
-                'timeout' => 10
+                'timeout' => 15
             ]
         ];
 
@@ -97,36 +97,42 @@ class EmailService {
             // ✅ MELHOR TRATAMENTO DE TIMEOUT
             stream_set_timeout($connection, $timeout);
 
-            // Lê resposta inicial
-            $response = self::lerResposta($connection);
-            if (!$response || substr($response, 0, 3) !== '220') {
+            // 🔧 CORREÇÃO: Lê resposta inicial COMPLETA (multilinhas)
+            $response = self::lerRespostaCompleta($connection);
+            if (!$response || !str_starts_with($response, '220')) {
                 error_log("❌ Resposta inicial inválida: $response");
                 fclose($connection);
                 return false;
             }
 
-            // EHLO/HELO
-            $domain = $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? 'localhost';
+            // 🔧 CORREÇÃO: EHLO/HELO com melhor tratamento
+            $domain = self::obterDominio();
+
+            // Tenta EHLO primeiro
             self::enviarComando($connection, "EHLO $domain");
-            $response = self::lerResposta($connection);
+            $response = self::lerRespostaCompleta($connection);
 
             // Se EHLO falhou, tenta HELO
-            if (substr($response, 0, 3) !== '250') {
+            if (!str_starts_with($response, '250')) {
+                error_log("📝 EHLO falhou, tentando HELO...");
                 self::enviarComando($connection, "HELO $domain");
-                $response = self::lerResposta($connection);
-                if (substr($response, 0, 3) !== '250') {
+                $response = self::lerRespostaCompleta($connection);
+
+                if (!str_starts_with($response, '250')) {
                     error_log("❌ HELO/EHLO falhou: $response");
                     fclose($connection);
                     return false;
                 }
             }
 
+            error_log("✅ Handshake SMTP bem-sucedido");
+
             // ✅ STARTTLS (só se não for SSL e crypto = tls)
             if ($crypto === 'tls') {
                 self::enviarComando($connection, "STARTTLS");
-                $response = self::lerResposta($connection);
+                $response = self::lerRespostaCompleta($connection);
 
-                if (substr($response, 0, 3) === '220') {
+                if (str_starts_with($response, '220')) {
                     // ✅ MELHORIA: Configurações TLS mais flexíveis
                     $cryptoMethod = STREAM_CRYPTO_METHOD_TLS_CLIENT;
 
@@ -143,7 +149,13 @@ class EmailService {
 
                     // EHLO novamente após TLS
                     self::enviarComando($connection, "EHLO $domain");
-                    $response = self::lerResposta($connection);
+                    $response = self::lerRespostaCompleta($connection);
+
+                    if (!str_starts_with($response, '250')) {
+                        error_log("❌ EHLO pós-TLS falhou: $response");
+                        fclose($connection);
+                        return false;
+                    }
                 } else {
                     error_log("❌ Servidor não suporta STARTTLS: $response");
 
@@ -163,8 +175,8 @@ class EmailService {
 
             // MAIL FROM
             self::enviarComando($connection, "MAIL FROM: <$fromEmail>");
-            $response = self::lerResposta($connection);
-            if (substr($response, 0, 3) !== '250') {
+            $response = self::lerRespostaCompleta($connection);
+            if (!str_starts_with($response, '250')) {
                 error_log("❌ MAIL FROM rejeitado: $response");
                 fclose($connection);
                 return false;
@@ -172,8 +184,8 @@ class EmailService {
 
             // RCPT TO
             self::enviarComando($connection, "RCPT TO: <$para>");
-            $response = self::lerResposta($connection);
-            if (substr($response, 0, 3) !== '250') {
+            $response = self::lerRespostaCompleta($connection);
+            if (!str_starts_with($response, '250')) {
                 error_log("❌ RCPT TO rejeitado: $response");
                 fclose($connection);
                 return false;
@@ -181,8 +193,8 @@ class EmailService {
 
             // DATA
             self::enviarComando($connection, "DATA");
-            $response = self::lerResposta($connection);
-            if (substr($response, 0, 3) !== '354') {
+            $response = self::lerRespostaCompleta($connection);
+            if (!str_starts_with($response, '354')) {
                 error_log("❌ DATA rejeitado: $response");
                 fclose($connection);
                 return false;
@@ -194,8 +206,8 @@ class EmailService {
             $corpo = self::construirCorpo($html, $texto, $boundary);
 
             self::enviarComando($connection, $headers . $corpo . "\r\n.");
-            $response = self::lerResposta($connection);
-            if (substr($response, 0, 3) !== '250') {
+            $response = self::lerRespostaCompleta($connection);
+            if (!str_starts_with($response, '250')) {
                 error_log("❌ Envio rejeitado: $response");
                 fclose($connection);
                 return false;
@@ -218,24 +230,84 @@ class EmailService {
     }
 
     /**
-     * ✅ NOVA FUNÇÃO: Autenticação melhorada
+     * 🔧 NOVA FUNÇÃO: Lê resposta SMTP completa (multilinhas)
+     */
+    private static function lerRespostaCompleta($connection) {
+        $response = '';
+        $finalResponse = '';
+
+        do {
+            $line = fgets($connection, 515);
+            if ($line === false) {
+                break;
+            }
+
+            $line = rtrim($line);
+            $response .= $line . "\n";
+
+            error_log("📥 SMTP: $line");
+
+            // Se a linha tem 4+ caracteres e o 4º caractere é espaço, é a linha final
+            if (strlen($line) >= 4 && $line[3] === ' ') {
+                $finalResponse = $line;
+                break;
+            }
+
+            // Se a linha tem 4+ caracteres e o 4º caractere é hífen, continua lendo
+            if (strlen($line) >= 4 && $line[3] === '-') {
+                continue;
+            }
+
+            // Se não tem formato padrão, assume que é a resposta final
+            $finalResponse = $line;
+            break;
+
+        } while (!feof($connection));
+
+        return $finalResponse ?: trim($response);
+    }
+
+    /**
+     * 🔧 NOVA FUNÇÃO: Obtém domínio adequado para EHLO/HELO
+     */
+    private static function obterDominio() {
+        // Tenta obter domínio real do servidor
+        if (isset($_SERVER['HTTP_HOST'])) {
+            return $_SERVER['HTTP_HOST'];
+        }
+
+        if (isset($_SERVER['SERVER_NAME'])) {
+            return $_SERVER['SERVER_NAME'];
+        }
+
+        // 🔧 CORREÇÃO: Usar IP local real em vez de localhost
+        $ip = gethostbyname(gethostname());
+        if ($ip && $ip !== gethostname()) {
+            return "[$ip]"; // Formato [IP] para EHLO
+        }
+
+        return 'localhost.localdomain';
+    }
+
+    /**
+     * ✅ AUTENTICAÇÃO MELHORADA
      */
     private static function autenticar($connection, $username, $password) {
         // Tenta AUTH LOGIN primeiro
         self::enviarComando($connection, "AUTH LOGIN");
-        $response = self::lerResposta($connection);
+        $response = self::lerRespostaCompleta($connection);
 
-        if (substr($response, 0, 3) === '334') {
+        if (str_starts_with($response, '334')) {
             // Username
             self::enviarComando($connection, base64_encode($username));
-            $response = self::lerResposta($connection);
+            $response = self::lerRespostaCompleta($connection);
 
-            if (substr($response, 0, 3) === '334') {
+            if (str_starts_with($response, '334')) {
                 // Password
                 self::enviarComando($connection, base64_encode($password));
-                $response = self::lerResposta($connection);
+                $response = self::lerRespostaCompleta($connection);
 
-                if (substr($response, 0, 3) === '235') {
+                if (str_starts_with($response, '235')) {
                     error_log("✅ Autenticação LOGIN bem-sucedida");
                     return true;
                 } else {
@@ -251,9 +323,9 @@ class EmailService {
         // Se AUTH LOGIN falhou, tenta AUTH PLAIN
         $authString = base64_encode("\0$username\0$password");
         self::enviarComando($connection, "AUTH PLAIN $authString");
-        $response = self::lerResposta($connection);
+        $response = self::lerRespostaCompleta($connection);
 
-        if (substr($response, 0, 3) === '235') {
+        if (str_starts_with($response, '235')) {
             error_log("✅ Autenticação PLAIN bem-sucedida");
             return true;
         } else {
@@ -263,21 +335,11 @@ class EmailService {
     }
 
     /**
-     * ✅ NOVA FUNÇÃO: Enviar comando SMTP
+     * ✅ FUNÇÃO: Enviar comando SMTP
      */
     private static function enviarComando($connection, $comando) {
         fputs($connection, $comando . "\r\n");
         error_log("📤 SMTP: $comando");
-    }
-
-    /**
-     * ✅ NOVA FUNÇÃO: Ler resposta SMTP
-     */
-    private static function lerResposta($connection) {
-        $response = fgets($connection, 515);
-        $response = rtrim($response);
-        error_log("📥 SMTP: $response");
-        return $response;
     }
 
     /**

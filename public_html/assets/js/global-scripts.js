@@ -247,6 +247,14 @@ function showLoginSuccessToast(redirectUrl = '/participantesici/public_html/home
     }, 1000);
 }
 
+function showPasswordChangeToast(redirectUrl = '/participantesici/public_html/login') {
+    showToast('Senha alterada! Redirecionando para login.', 'success', 3000);
+
+    setTimeout(() => {
+        window.location.href = redirectUrl;
+    }, 2000);
+}
+
 /**
  * CSS otimizado - sem conflitos de posicionamento
  */
