@@ -1,7 +1,12 @@
 <?php
+// app/auth/templates/login.php - VERSÃO ATUALIZADA
 session_start();
 $error = $_SESSION['login_error'] ?? null;
 unset($_SESSION['login_error']);
+
+// ✅ ADICIONAR MENSAGEM DE SUCESSO DA RECUPERAÇÃO
+$loginSuccess = $_SESSION['login_success'] ?? null;
+unset($_SESSION['login_success']);
 ?>
 
 <!DOCTYPE html>
@@ -94,30 +99,51 @@ unset($_SESSION['login_error']);
         </div>
 
         <button type="submit" class="w-full bg-primary font-bold text-white py-3 rounded hover:bg-blue-900 transition">
-          Entrar
+          <i class="fa-solid fa-sign-in-alt mr-2"></i>Entrar
         </button>
+
+        <!-- ✅ NOVA SEÇÃO: LINK ESQUECI MINHA SENHA -->
+        <div class="text-center space-y-3 mt-6">
+          <hr class="border-gray-400">
+          <a href="/participantesici/public_html/esqueci-senha"
+            class="inline-flex items-center text-sm text-gray-300 hover:text-primary transition group">
+            <i class="fa-solid fa-key mr-2 group-hover:scale-110 transition-transform"></i>
+            Esqueci minha senha
+          </a>
+          <p class="text-xs text-gray-400">
+            Você receberá um link de recuperação por email
+          </p>
+        </div>
       </form>
     </div>
   </div>
 
+  <!-- Mensagens de Erro -->
   <?php if ($error): ?>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
-        // USA A NOVA FUNÇÃO showToast
         showToast(<?= json_encode($error) ?>, 'error');
       });
     </script>
   <?php endif; ?>
 
-  <!-- ✅ ADICIONADO: TOAST DE SUCESSO NO LOGIN -->
-  <?php if (isset($_SESSION['login_success'])): ?>
+  <!-- ✅ MENSAGEM DE SUCESSO DA RECUPERAÇÃO -->
+  <?php if ($loginSuccess): ?>
+    <script>
+      document.addEventListener("DOMContentLoaded", () => {
+        showToast(<?= json_encode($loginSuccess) ?>, 'success');
+      });
+    </script>
+  <?php endif; ?>
+
+  <!-- ✅ ADICIONAR TOAST DE SUCESSO NO LOGIN -->
+  <?php if (isset($_GET['success']) && $_GET['success'] == '1'): ?>
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         // Exibe toast de sucesso e redireciona
         showLoginSuccessToast('/participantesici/public_html/home');
       });
     </script>
-    <?php unset($_SESSION['login_success']); ?>
   <?php endif; ?>
 
   <!-- Service Worker: forçar atualização imediata -->

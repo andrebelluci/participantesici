@@ -152,7 +152,7 @@ require_once __DIR__ . '/../../includes/header.php';
 <!-- Modal de Confirmação Genérico -->
 <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
-    <h2 class="text-xl font-bold mb-4 text-red-600" id="confirmModalTitle">ATENÇÃO!</h2>
+    <h2 class="text-xl font-bold mb-4 text-red-600" id="confirmModalTitle"><i class="fa-solid fa-exclamation-triangle mr-2"></i>ATENÇÃO!</h2>
     <p class="text-gray-700 mb-6" id="confirmModalText">Tem certeza que deseja continuar?</p>
     <div class="flex justify-end gap-3">
     <button id="confirmModalBtn"

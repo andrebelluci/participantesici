@@ -28,6 +28,7 @@
 <?php endif; ?>
 
 <script src="/participantesici/public_html/assets/js/global-scripts.js?t=<?= time() ?>"></script>
+<script src="/participantesici/public_html/assets/js/unsaved-changes-detector.js"></script>
 
 </body>
 </html>

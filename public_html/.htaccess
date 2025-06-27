@@ -7,6 +7,12 @@ RewriteRule ^$ /participantesici/app/auth/templates/login.php [L]
 # URL amigável para login
 RewriteRule ^login/?$ /participantesici/app/auth/templates/login.php [L]
 RewriteRule ^entrar/?$ /participantesici/app/auth/actions/login.php [L]
+# URLs de recuperação de senha
+RewriteRule ^esqueci-senha/?$ /participantesici/app/auth/templates/esqueci_senha.php [L]
+RewriteRule ^enviar-recuperacao/?$ /participantesici/app/auth/actions/enviar_recuperacao.php [L]
+RewriteRule ^redefinir-senha/?$ /participantesici/app/auth/templates/redefinir_senha.php [L]
+RewriteRule ^salvar-nova-senha/?$ /participantesici/app/auth/actions/salvar_nova_senha.php [L]
+
 # URL amigável para logout
 RewriteRule ^logout/?$ /participantesici/app/auth/actions/logout.php [L]
 

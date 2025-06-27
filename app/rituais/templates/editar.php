@@ -10,7 +10,7 @@ if (!isset($ritual)) {
 <div class="max-w-screen-lg mx-auto px-4 py-8">
     <!-- Ações -->
     <div class="flex items-center justify-between mb-6">
-        <a href="/participantesici/public_html/rituais"
+        <a href="<?= isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : '/participantesici/public_html/rituais' ?>"
             class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
             <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
         </a>
@@ -28,6 +28,10 @@ if (!isset($ritual)) {
     <div class="form-container mobile-compact">
     <form method="POST" enctype="multipart/form-data" id="formulario-ritual"
         class="bg-white p-6 rounded-lg shadow space-y-6 border border-gray-200" novalidate>
+
+        <?php if (isset($_GET['redirect'])): ?>
+            <input type="hidden" name="redirect" value="<?= htmlspecialchars($_GET['redirect']) ?>">
+        <?php endif; ?>
 
         <!-- Dados do Ritual -->
         <div>
