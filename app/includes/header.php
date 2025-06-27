@@ -54,18 +54,6 @@ $_SESSION['last_activity'] = time();
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/participantesici/public_html/assets/css/mobile-fixes.css?v=1.0">
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#00bfff',
-                    }
-                }
-            }
-        };
-    </script>
-
 </head>
 
 <body class="bg-black min-h-screen flex flex-col mobile-viewport">

@@ -66,14 +66,14 @@ unset($_SESSION['login_success']);
       <form method="POST" action="/participantesici/public_html/entrar" class="space-y-4" novalidate>
         <div>
           <input type="text" name="usuario" id="usuario" placeholder="Usuário" required autocapitalize="none"
-            class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary transition" />
+            class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00bfff] transition" />
           <p class="text-sm text-red-500 mt-1 hidden" id="erro-usuario">Campo obrigatório.</p>
         </div>
 
         <div class="flex flex-col">
           <div class="relative">
             <input type="password" name="senha" id="senha" placeholder="Senha" required autocapitalize="none"
-              class="w-full p-3 pr-12 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary transition" />
+              class="w-full p-3 pr-12 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00bfff] transition" />
             <button type="button" onclick="toggleSenha()"
               class="absolute right-3 top-1/2 -translate-y-1/2 text-black hover:text-blue-300" title="Mostrar senha"
               id="toggleSenhaBtn">
@@ -91,7 +91,7 @@ unset($_SESSION['login_success']);
         <div class="text-center space-y-3 mt-6">
           <hr class="border-yellow-400">
           <a href="/participantesici/public_html/esqueci-senha"
-            class="inline-flex items-center text-sm text-yellow-400 hover:text-primary transition group font-semibold">
+            class="inline-flex items-center text-sm text-yellow-400 hover:text-[#00bfff] transition group font-semibold">
             <i class="fa-solid fa-key mr-2 group-hover:scale-110 transition-transform"></i>
             Esqueci minha senha
           </a>

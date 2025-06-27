@@ -86,18 +86,6 @@ try {
     <script src="/participantesici/public_html/assets/js/global-scripts.js?t=<?= time() ?>"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            colors: {
-              primary: '#00bfff',
-            }
-          }
-        }
-      };
-    </script>
-
     <style>
       .video-bg video {
         position: fixed;

@@ -21,18 +21,6 @@ session_start();
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#00bfff',
-                    }
-                }
-            }
-        };
-    </script>
-
     <style>
         .video-bg video {
             position: fixed;
@@ -70,7 +58,7 @@ session_start();
             <form method="POST" action="/participantesici/public_html/enviar-recuperacao" class="space-y-4" novalidate>
                 <div>
                     <input type="text" name="usuario" id="usuario" placeholder="Usuário" required autocapitalize="none"
-                        class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary transition" />
+                        class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00bfff] transition" />
                     <p class="text-sm text-red-500 mt-1 hidden" id="erro-usuario">Campo obrigatório.</p>
                 </div>
 

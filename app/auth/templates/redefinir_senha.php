@@ -46,18 +46,6 @@ if (!$user) {
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#00bfff',
-                    }
-                }
-            }
-        };
-    </script>
-
     <style>
         .video-bg video {
             position: fixed;
@@ -98,14 +86,14 @@ if (!$user) {
 
                 <div class="relative group">
                     <input type="password" name="nova_senha" id="nova_senha" placeholder="Nova Senha" required
-                        class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary transition" />
+                        class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00bfff] transition" />
                     <p class="text-sm text-red-500 mt-1 hidden" id="erro-nova-senha">Campo obrigatório.</p>
                 </div>
 
                 <div class="relative group">
                     <input type="password" name="confirmar_senha" id="confirmar_senha"
                         placeholder="Confirmar Nova Senha" required
-                        class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary transition" />
+                        class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00bfff] transition" />
                     <p class="text-sm text-red-500 mt-1 hidden" id="erro-confirmar-senha">Campo obrigatório.</p>
                 </div>
 
