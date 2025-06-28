@@ -244,7 +244,7 @@ function showLoginSuccessToast(redirectUrl = '/participantesici/public_html/home
 
     setTimeout(() => {
         window.location.href = redirectUrl;
-    }, 1000);
+    }, 1500);
 }
 
 function showPasswordChangeToast(redirectUrl = '/participantesici/public_html/login') {

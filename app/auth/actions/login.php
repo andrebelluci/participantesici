@@ -85,6 +85,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       // Log do login
       error_log("[LOGIN] Login bem-sucedido: {$user['usuario']} (ID: {$user['id']})");
 
+      // $_SESSION['login_success'] = 'Login efetuado com sucesso!';
+      header("Location: /participantesici/public_html/login?success=1");
+      exit;
+
     } else {
       // Login falhou
       error_log("[LOGIN] Tentativa de login inválida para usuário: $usuario");

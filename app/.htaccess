@@ -10,8 +10,3 @@ Deny from all
 <Files "logout.php">
     Allow from all
 </Files>
-
-
-<Files "enviar_recuperacao.php">
-    Allow from all
-</Files>

@@ -2,7 +2,7 @@
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
-
+require_once __DIR__ . '/../functions/check_auth.php';
 require_once __DIR__ . '/../config/database.php';
 
 // ✅ FUNÇÃO PARA VERIFICAR TOKEN DE LEMBRAR-ME
@@ -105,18 +105,7 @@ function is_active($pagina_url)
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/participantesici/public_html/assets/css/mobile-fixes.css?v=1.0">
-
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        primary: '#00bfff',
-                    }
-                }
-            }
-        };
-    </script>
+    <script src="/participantesici/public_html/assets/js/global-scripts.js?t=<?= time() ?>"></script>
 
 </head>
 
