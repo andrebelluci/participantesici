@@ -6,7 +6,8 @@ require_once __DIR__ . '/../functions/check_auth.php';
 require_once __DIR__ . '/../config/database.php';
 
 // ✅ FUNÇÃO PARA VERIFICAR TOKEN DE LEMBRAR-ME
-function verificarTokenLembrarMe($pdo) {
+function verificarTokenLembrarMe($pdo)
+{
     if (!isset($_COOKIE['remember_token'])) {
         return false;
     }
@@ -82,6 +83,22 @@ function is_active($pagina_url)
     $current_relative = str_replace($base_path, '', $current_url);
     return trim($current_relative, '/') === trim($pagina_url, '/') ? 'text-yellow-400' : '';
 }
+
+
+// Verifica se usuário é administrador
+$is_admin = false;
+if (isset($_SESSION['user_id'])) {
+    require_once __DIR__ . '/../config/database.php';
+    $stmt = $pdo->prepare("
+        SELECT p.nome as perfil_nome
+        FROM usuarios u
+        JOIN perfis p ON u.perfil_id = p.id
+        WHERE u.id = ?
+    ");
+    $stmt->execute([$_SESSION['user_id']]);
+    $user_perfil = $stmt->fetch();
+    $is_admin = $user_perfil && $user_perfil['perfil_nome'] === 'Administrador';
+}
 ?>
 
 <!DOCTYPE html>
@@ -133,6 +150,10 @@ function is_active($pagina_url)
                         class="px-4 py-2 hover:bg-gray-800 <?= is_active('participantes') ?>">Participantes</a>
                     <a href="/participantesici/public_html/rituais"
                         class="px-4 py-2 hover:bg-gray-800 <?= is_active('rituais') ?>">Rituais</a>
+                    <?php if ($is_admin): ?>
+                        <a href="/participantesici/public_html/usuarios"
+                            class="px-4 py-2 hover:bg-gray-800 <?= is_active('usuarios') ?>">Usuários</a>
+                    <?php endif; ?>
                     <a href="/participantesici/public_html/alterar_senha"
                         class="px-4 py-2 hover:bg-gray-800 <?= basename($_SERVER['PHP_SELF']) === 'alterar_senha.php' ? 'text-yellow-400' : '' ?>">Alterar
                         Senha</a>
@@ -147,6 +168,9 @@ function is_active($pagina_url)
                     class="hover:text-[#00bfff] <?= is_active('participantes') ?>">Participantes</a>
                 <a href="/participantesici/public_html/rituais"
                     class="hover:text-[#00bfff] <?= is_active('rituais') ?>">Rituais</a>
+                <?php if ($is_admin): ?>
+                    <a href="/participantesici/public_html/usuarios" class="hover:text-[#00bfff] <?= is_active('usuarios') ?>">Usuários</a>
+                <?php endif; ?>
                 <a href="/participantesici/public_html/alterar_senha"
                     class="hover:text-[#00bfff] <?= basename($_SERVER['PHP_SELF']) === 'alterar_senha.php' ? 'text-yellow-400' : '' ?>">
                     Alterar Senha

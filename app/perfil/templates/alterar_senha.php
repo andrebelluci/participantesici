@@ -16,13 +16,13 @@ require_once __DIR__ . '/../../includes/header.php';
         </button>
     </div>
 
-    <h1 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">🔐 Alterar Senha</h1>
+    <h1 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2"><i class="fa-solid fa-user-lock text-yellow-600"></i> Alterar Senha</h1>
 
     <div class="form-container mobile-compact">
         <form method="POST" action="/participantesici/app/perfil/actions/atualizar_senha.php" id="formulario-senha"
             class="bg-white p-6 rounded-lg shadow space-y-6 border border-gray-200" novalidate>
 
-            <h2 class="text-lg font-semibold text-gray-700 mb-4">🔒 Alteração de Senha</h2>
+            <h2 class="text-lg font-semibold text-gray-700 mb-4"><i class="fa-solid fa-lock text-yellow-600"></i> Alteração de Senha</h2>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Senha Atual -->

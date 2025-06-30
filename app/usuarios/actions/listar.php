@@ -2,6 +2,22 @@
 require_once __DIR__ . '/../../functions/check_auth.php';
 require_once __DIR__ . '/../../config/database.php';
 
+// Verificar se usuário é administrador
+$stmt = $pdo->prepare("
+    SELECT p.nome as perfil_nome
+    FROM usuarios u
+    JOIN perfis p ON u.perfil_id = p.id
+    WHERE u.id = ?
+");
+$stmt->execute([$_SESSION['user_id']]);
+$user_perfil = $stmt->fetch();
+
+if (!$user_perfil || $user_perfil['perfil_nome'] !== 'Administrador') {
+  $_SESSION['error'] = 'Acesso negado. Área restrita para administradores.';
+  header('Location: /participantesici/public_html/home');
+  exit;
+}
+
 // Processar parâmetros
 $pagina = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
 $itens_por_pagina = 9;
@@ -13,45 +29,42 @@ $params = [];
 $filtros = [];
 
 if (!empty($_GET['filtro_nome'])) {
-  $where .= " AND r.nome LIKE ?";
+  $where .= " AND (u.nome LIKE ? OR u.usuario LIKE ?)";
+  $params[] = "%{$_GET['filtro_nome']}%";
   $params[] = "%{$_GET['filtro_nome']}%";
   $filtros['filtro_nome'] = $_GET['filtro_nome'];
 }
 
-if (!empty($_GET['data_inicio']) && !empty($_GET['data_fim'])) {
-  $where .= " AND r.data_ritual BETWEEN ? AND ?";
-  $params[] = $_GET['data_inicio'];
-  $params[] = $_GET['data_fim'];
-  $filtros['data_inicio'] = $_GET['data_inicio'];
-  $filtros['data_fim'] = $_GET['data_fim'];
-}
-
 // Ordenação
-$order_by = in_array($_GET['order_by'] ?? '', ['nome', 'data_ritual', 'inscritos'])
+$order_by = in_array($_GET['order_by'] ?? '', ['nome', 'usuario', 'email', 'perfil_nome'])
   ? $_GET['order_by']
-  : 'data_ritual';
+  : 'nome';
 $order_dir = ($_GET['order_dir'] ?? '') === 'ASC' ? 'ASC' : 'DESC';
 
 // Contar total
-$stmt_count = $pdo->prepare("SELECT COUNT(*) AS total FROM rituais r WHERE $where");
+$stmt_count = $pdo->prepare("
+    SELECT COUNT(*) AS total
+    FROM usuarios u
+    JOIN perfis p ON u.perfil_id = p.id
+    WHERE $where
+");
 $stmt_count->execute($params);
 $total_registros = $stmt_count->fetch()['total'];
 $total_paginas = ceil($total_registros / $itens_por_pagina);
 
 // Buscar dados
 $sql = "
-    SELECT r.*, COUNT(i.id) AS inscritos
-    FROM rituais r
-    LEFT JOIN inscricoes i ON r.id = i.ritual_id
+    SELECT u.*, p.nome as perfil_nome
+    FROM usuarios u
+    JOIN perfis p ON u.perfil_id = p.id
     WHERE $where
-    GROUP BY r.id
     ORDER BY $order_by $order_dir
     LIMIT $itens_por_pagina OFFSET $offset
 ";
 
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
-$rituais = $stmt->fetchAll();
+$usuarios = $stmt->fetchAll();
 
 // Incluir template
 require_once __DIR__ . '/../templates/listar.php';

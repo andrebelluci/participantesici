@@ -10,7 +10,7 @@ require_once __DIR__ . '/../../includes/header.php';
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
         <a href="/participantesici/public_html/participantes"
            class="bg-[#00bfff] text-black text-lg font-semibold py-6 rounded-lg text-center shadow hover:bg-yellow-400 transition">
-           <i class="fa-solid fa-user-group"></i>
+           <i class="fa-solid fa-users"></i>
            Participantes
         </a>
         <a href="/participantesici/public_html/rituais"

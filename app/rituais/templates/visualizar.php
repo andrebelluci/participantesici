@@ -56,6 +56,21 @@ if (!isset($ritual)) {
         </div>
     </div>
 
+    <!-- Título da seção -->
+    <div class="flex flex-col sm:flex-row justify-between md:items-end gap-4">
+        <h2 class="text-xl font-bold text-gray-800 md:mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-users text-blue-500"></i>Participantes do Ritual
+        </h2>
+
+        <div class="flex justify-end md:mb-4">
+            <button type="button" id="view-toggle"
+                class="hidden md:flex items-center justify-center bg-gray-100 text-gray-700 w-10 h-10 rounded hover:bg-gray-200 transition border border-gray-300"
+                title="Alternar visualização">
+                <i class="fa-solid fa-list text-lg"></i>
+            </button>
+        </div>
+    </div>
+
     <!-- Filtros -->
     <div class="md:hidden flex items-center justify-between">
         <button type="button" onclick="document.getElementById('filtros').classList.toggle('hidden')"
@@ -69,37 +84,33 @@ if (!isset($ritual)) {
     </div>
 
     <div class="form-container mobile-compact">
-    <form id="filtros" method="GET"
-        class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-3 rounded-lg shadow border border-gray-200 mb-6 <?= empty($_GET['filtro_nome']) ? 'hidden md:grid' : '' ?>">
-        <input type="hidden" name="id" value="<?= $id ?>">
+        <form id="filtros" method="GET"
+            class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-3 rounded-lg shadow border border-gray-200 mb-6 <?= empty($_GET['filtro_nome']) ? 'hidden md:grid' : '' ?>">
+            <input type="hidden" name="id" value="<?= $id ?>">
 
-        <div class="md:col-span-2">
-            <label for="filtro_nome" class="block text-sm font-medium text-gray-700 mb-1">Nome do Participante:</label>
-            <input type="text" name="filtro_nome" id="filtro_nome" placeholder="Filtrar por nome do participante"
-                value="<?= htmlspecialchars($_GET['filtro_nome'] ?? '') ?>"
-                class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00bfff]">
-        </div>
+            <div class="md:col-span-2">
+                <label for="filtro_nome" class="block text-sm font-medium text-gray-700 mb-1">Nome do
+                    Participante:</label>
+                <input type="text" name="filtro_nome" id="filtro_nome" placeholder="Filtrar por nome do participante"
+                    value="<?= htmlspecialchars($_GET['filtro_nome'] ?? '') ?>"
+                    class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00bfff]">
+            </div>
 
-        <div class="flex items-end gap-2 md:col-span-2">
-            <button type="submit"
-                class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
-                <i class="fa-solid fa-search mr-1"></i> Buscar
-            </button>
-            <a href="/participantesici/public_html/ritual/<?= $id ?>"
-                class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition font-semibold shadow">
-                <i class="fa-solid fa-broom mr-1"></i> Limpar
-            </a>
-        </div>
-    </form>
+            <div class="flex items-end gap-2 md:col-span-2">
+                <button type="submit"
+                    class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
+                    <i class="fa-solid fa-search mr-1"></i> Buscar
+                </button>
+                <a href="/participantesici/public_html/ritual/<?= $id ?>"
+                    class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition font-semibold shadow">
+                    <i class="fa-solid fa-broom mr-1"></i> Limpar
+                </a>
+            </div>
+        </form>
     </div>
 
-    <!-- Título da seção -->
-    <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center gap-2">
-        👥 Participantes do Ritual
-    </h2>
-
     <!-- Cards dos Participantes -->
-    <div class="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+    <div id="cards-view" class="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
         <?php foreach ($participantes as $participante): ?>
             <div class="bg-white p-4 rounded-lg shadow border border-gray-200 flex flex-col gap-3">
                 <!-- Header do card com foto e info básica -->
@@ -266,7 +277,167 @@ if (!isset($ritual)) {
             </div>
         <?php endif; ?>
     </div>
+
+    <!-- Table View para Participantes do Ritual (adicionar APÓS os cards) -->
+    <div id="table-view" class="hidden bg-white rounded-lg shadow overflow-hidden border border-gray-200">
+        <div class="overflow-x-auto">
+            <table class="w-full">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Foto</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Participante</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">CPF</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Presente</th>
+                        <th class="px-4 py-3 text-left text-sm font-medium text-gray-700">Observação</th>
+                        <th class="px-4 py-3 text-center text-sm font-medium text-gray-700">Ações</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    <?php if (empty($participantes)): ?>
+                        <tr>
+                            <td colspan="6" class="px-4 py-8 text-center text-gray-500">
+                                <div class="text-center py-8">
+                                    <div class="text-gray-400 mb-4">
+                                        <i class="fa-solid fa-users text-4xl"></i>
+                                    </div>
+                                    <p class="text-gray-500 text-lg mb-2">Nenhum participante encontrado</p>
+                                    <p class="text-gray-400 text-sm">Este ritual ainda não possui participantes inscritos.
+                                    </p>
+                                    <button onclick="abrirModalAdicionar()"
+                                        class="mt-4 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
+                                        <i class="fa-solid fa-plus mr-2"></i> Adicionar primeiro participante
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    <?php else: ?>
+                        <?php foreach ($participantes as $participante): ?>
+                            <tr class="hover:bg-gray-50">
+                                <!-- Foto -->
+                                <td class="px-4 py-3">
+                                    <img src="<?= htmlspecialchars($participante['foto']) ?>" alt="Foto do Participante"
+                                        class="w-12 h-12 rounded-lg object-cover border border-gray-300 cursor-pointer"
+                                        onclick="openImageModal('<?= htmlspecialchars($participante['foto']) ?>')"
+                                        onerror="this.src='/participantesici/public_html/assets/images/no-image.png'; this.onclick=null; this.classList.remove('cursor-pointer');">
+                                </td>
+
+                                <!-- Nome do Participante -->
+                                <td class="px-4 py-3">
+                                    <div class="font-bold text-gray-800 text-sm">
+                                        <a href="/participantesici/public_html/participantes?pagina=1&filtro_cpf=<?= urlencode(htmlspecialchars($participante['cpf'])) ?>&redirect=/participantesici/public_html/ritual/<?= $id ?>"
+                                            class="hover:text-[#00bfff] transition">
+                                            <?= htmlspecialchars($participante['nome_completo']) ?>
+                                        </a>
+                                    </div>
+                                    <div class="text-xs text-gray-500">
+                                        <?= (new DateTime($participante['nascimento']))->format('d/m/Y') ?>
+                                    </div>
+                                </td>
+
+                                <!-- CPF -->
+                                <td class="px-4 py-3 text-sm text-gray-600">
+                                    <?php
+                                    $cpf = preg_replace('/[^0-9]/', '', $participante['cpf']);
+                                    echo substr($cpf, 0, 3) . '.' . substr($cpf, 3, 3) . '.' . substr($cpf, 6, 3) . '-' . substr($cpf, 9, 2);
+                                    ?>
+                                </td>
+
+                                <!-- Presente -->
+                                <td class="px-4 py-3 text-center">
+                                    <button
+                                        class="presence-btn <?= $participante['presente'] === 'Sim' ? 'active bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200' ?> px-3 py-1 rounded-lg text-sm font-medium transition-all duration-200 min-w-[70px] flex items-center justify-center gap-1"
+                                        data-participante-id="<?= $participante['id'] ?>"
+                                        data-current-status="<?= $participante['presente'] ?>" onclick="togglePresenca(this)">
+                                        <?php if ($participante['presente'] === 'Sim'): ?>
+                                            <i class="fa-solid fa-check"></i>
+                                            <span>Sim</span>
+                                        <?php else: ?>
+                                            <i class="fa-solid fa-xmark"></i>
+                                            <span>Não</span>
+                                        <?php endif; ?>
+                                    </button>
+                                </td>
+
+                                <!-- Observação -->
+                                <td class="px-4 py-3">
+                                    <?php if (!empty($participante['observacao'])): ?>
+                                        <!-- Tem observação: mostra preview de 2 linhas + tag -->
+                                            <!-- Preview da observação (1 linha) -->
+                                            <div class="text-sm text-gray-700 leading-relaxed">
+                                                <a href="javascript:void(0);"
+                                                   onclick="abrirModalObservacao(<?= $participante['id'] ?>)"
+                                                   class="text-blue-600 hover:underline cursor-pointer font-semibold">
+                                                    <?= htmlspecialchars(mb_strimwidth($participante['observacao'], 0, 30, '...')) ?>
+                                                </a>
+                                            </div>
+                                            <!-- Tag para abrir modal -->
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-xs text-gray-500">
+                                                    (<?= mb_strlen($participante['observacao']) ?> caracteres)
+                                                </span>
+                                            </div>
+                                    <?php else: ?>
+                                        <!-- Não tem observação: mostra mensagem e botão para adicionar -->
+                                        <div class="flex items-center justify-between">
+                                            <button onclick="abrirModalObservacao(<?= $participante['id'] ?>)"
+                                                class="inline-flex items-center gap-1 px-3 py-1 bg-gray-50 hover:bg-gray-100 text-gray-700 border border-gray-200 rounded-lg text-xs font-medium transition-colors">
+                                                <i class="fa-solid fa-plus text-xs"></i>
+                                                Adicionar observação
+                                            </button>
+                                        </div>
+                                    <?php endif; ?>
+                                </td>
+
+                                <!-- Ações -->
+                                <td class="px-4 py-3 text-center">
+                                    <div class="flex justify-center gap-1">
+                                        <!-- Botão Observação -->
+                                        <button onclick="abrirModalObservacao(<?= $participante['id'] ?>)"
+                                            class="relative bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
+                                            title="Observação do participante neste ritual">
+                                            <i class="fa-solid fa-file-lines"></i>
+                                            <!-- Bolinha vermelha se não tem observação -->
+                                            <?php if (empty($participante['observacao'])): ?>
+                                                <span
+                                                    class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                                            <?php endif; ?>
+                                        </button>
+
+                                        <!-- Botão Detalhes -->
+                                        <button onclick="abrirModalDetalhes(<?= $participante['id'] ?>)"
+                                            class="relative bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
+                                            title="Detalhes da inscrição do participante">
+                                            <i class="fa-solid fa-pencil"></i>
+                                            <!-- Bolinha vermelha se detalhes estão vazios -->
+                                            <?php
+                                                $temDetalhes = !empty($participante['primeira_vez_instituto']) ||
+                                                    !empty($participante['primeira_vez_ayahuasca']) ||
+                                                    !empty($participante['doenca_psiquiatrica']);
+                                                ?>
+                                            <?php if (!$temDetalhes): ?>
+                                                <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                                            <?php endif; ?>
+                                        </button>
+
+                                        <!-- Botão Remover -->
+                                        <button
+                                            onclick="openConfirmModal('Tem certeza que deseja remover este participante do ritual?', () => { window.location.href = '/participantesici/public_html/api/ritual/remover-participante?ritual_id=<?= $id ?>&participante_id=<?= $participante['id'] ?>&redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>' })"
+                                            class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded flex items-center gap-1"
+                                            title="Remover participante do ritual">
+                                            <i class="fa-solid fa-link-slash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
+
 
 <!-- Botão Voltar ao Topo -->
 <button id="scroll-to-top"
@@ -300,30 +471,30 @@ if (!isset($ritual)) {
 
             <!-- Formulário de pesquisa - inicialmente visível -->
             <div class="form-container mobile-compact">
-            <form id="pesquisa-participante-form" onsubmit="return false;" class="space-y-4">
-                <input type="hidden" name="ritual_id" value="<?= $id ?>">
+                <form id="pesquisa-participante-form" onsubmit="return false;" class="space-y-4">
+                    <input type="hidden" name="ritual_id" value="<?= $id ?>">
 
-                <div>
-                    <input type="text" id="nome_pesquisa" name="nome_pesquisa"
-                        placeholder="Digite o nome ou CPF (com ou sem pontos)" oninput="aplicarMascaraCPF(this)"
-                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <p class="text-xs text-gray-500 mt-1">
-                        <i class="fa-solid fa-info-circle mr-1"></i>
-                        Aceita nome (mín. 3 caracteres) ou CPF (exatos 11 dígitos)
-                    </p>
-                </div>
+                    <div>
+                        <input type="text" id="nome_pesquisa" name="nome_pesquisa"
+                            placeholder="Digite o nome ou CPF (com ou sem pontos)" oninput="aplicarMascaraCPF(this)"
+                            class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <p class="text-xs text-gray-500 mt-1">
+                            <i class="fa-solid fa-info-circle mr-1"></i>
+                            Aceita nome (mín. 3 caracteres) ou CPF (exatos 11 dígitos)
+                        </p>
+                    </div>
 
-                <div class="flex gap-2">
-                    <button type="button" id="pesquisar-btn" onclick="pesquisarParticipantes()"
-                        class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold">
-                        <i class="fa-solid fa-search mr-1"></i> Pesquisar
-                    </button>
-                    <button type="button" id="limpar-pesquisa-btn" onclick="limparPesquisa()" style="display: none;"
-                        class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition font-semibold">
-                        Limpar
-                    </button>
-                </div>
-            </form>
+                    <div class="flex gap-2">
+                        <button type="button" id="pesquisar-btn" onclick="pesquisarParticipantes()"
+                            class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold">
+                            <i class="fa-solid fa-search mr-1"></i> Pesquisar
+                        </button>
+                        <button type="button" id="limpar-pesquisa-btn" onclick="limparPesquisa()" style="display: none;"
+                            class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition font-semibold">
+                            Limpar
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
 
@@ -359,92 +530,97 @@ if (!isset($ritual)) {
         <h2 class="text-xl font-bold mb-4 text-gray-800">Detalhes da inscrição</h2>
 
         <div class="form-container mobile-compact">
-        <form id="form-detalhes-inscricao" method="POST" class="space-y-4" novalidate>
-            <input type="hidden" id="id" name="id" value="">
+            <form id="form-detalhes-inscricao" method="POST" class="space-y-4" novalidate>
+                <input type="hidden" id="id" name="id" value="">
 
-            <div>
-                <label for="primeira_vez_instituto" class="block text-sm font-medium text-gray-700 mb-1">Primeira vez no
-                    Instituto?</label>
-                <select name="primeira_vez_instituto" required
-                    class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-                    <option value="">Selecione...</option>
-                    <option value="Sim">Sim</option>
-                    <option value="Não">Não</option>
-                </select>
-                <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
-            </div>
+                <div>
+                    <label for="primeira_vez_instituto" class="block text-sm font-medium text-gray-700 mb-1">Primeira
+                        vez no
+                        Instituto?</label>
+                    <select name="primeira_vez_instituto" required
+                        class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Selecione...</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                    <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
+                </div>
 
-            <div>
-                <label for="primeira_vez_ayahuasca" class="block text-sm font-medium text-gray-700 mb-1">Primeira vez
-                    consagrando Ayahuasca?</label>
-                <select name="primeira_vez_ayahuasca" required
-                    class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                    <option value="">Selecione...</option>
-                    <option value="Sim">Sim</option>
-                    <option value="Não">Não</option>
-                </select>
-                <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
-            </div>
+                <div>
+                    <label for="primeira_vez_ayahuasca" class="block text-sm font-medium text-gray-700 mb-1">Primeira
+                        vez
+                        consagrando Ayahuasca?</label>
+                    <select name="primeira_vez_ayahuasca" required
+                        class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                        <option value="">Selecione...</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                    <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
+                </div>
 
-            <div>
-                <label for="doenca_psiquiatrica" class="block text-sm font-medium text-gray-700 mb-1">Possui doença
-                    psiquiátrica diagnosticada?</label>
-                <select name="doenca_psiquiatrica" id="doenca_psiquiatrica" required
-                    class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                    <option value="">Selecione...</option>
-                    <option value="Sim">Sim</option>
-                    <option value="Não">Não</option>
-                </select>
-                <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
-            </div>
+                <div>
+                    <label for="doenca_psiquiatrica" class="block text-sm font-medium text-gray-700 mb-1">Possui doença
+                        psiquiátrica diagnosticada?</label>
+                    <select name="doenca_psiquiatrica" id="doenca_psiquiatrica" required
+                        class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                        <option value="">Selecione...</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                    <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
+                </div>
 
-            <div>
-                <label for="nome_doenca" class="block text-sm font-medium text-gray-700 mb-1">Se sim, escreva o nome da
-                    doença:</label>
-                <input type="text" name="nome_doenca" id="nome_doenca" value="" disabled
-                    class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 text-sm">
-                <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório quando doença psiquiátrica for "Sim"</p>
-            </div>
+                <div>
+                    <label for="nome_doenca" class="block text-sm font-medium text-gray-700 mb-1">Se sim, escreva o nome
+                        da
+                        doença:</label>
+                    <input type="text" name="nome_doenca" id="nome_doenca" value="" disabled
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 text-sm">
+                    <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório quando doença psiquiátrica for "Sim"
+                    </p>
+                </div>
 
-            <div>
-                <label for="uso_medicao" class="block text-sm font-medium text-gray-700 mb-1">Faz uso de alguma
-                    medicação?</label>
-                <select name="uso_medicao" id="uso_medicao" required
-                    class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
-                    <option value="">Selecione...</option>
-                    <option value="Sim">Sim</option>
-                    <option value="Não">Não</option>
-                </select>
-                <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
-            </div>
+                <div>
+                    <label for="uso_medicao" class="block text-sm font-medium text-gray-700 mb-1">Faz uso de alguma
+                        medicação?</label>
+                    <select name="uso_medicao" id="uso_medicao" required
+                        class="w-full border border-gray-300 rounded px-3 py-2 bg-white focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm">
+                        <option value="">Selecione...</option>
+                        <option value="Sim">Sim</option>
+                        <option value="Não">Não</option>
+                    </select>
+                    <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
+                </div>
 
-            <div>
-                <label for="nome_medicao" class="block text-sm font-medium text-gray-700 mb-1">Se sim, escreva o nome da
-                    medicação:</label>
-                <input type="text" name="nome_medicao" id="nome_medicao" value="" disabled
-                    class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 text-sm">
-                <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório quando uso de medicação for "Sim"</p>
-            </div>
+                <div>
+                    <label for="nome_medicao" class="block text-sm font-medium text-gray-700 mb-1">Se sim, escreva o
+                        nome da
+                        medicação:</label>
+                    <input type="text" name="nome_medicao" id="nome_medicao" value="" disabled
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent disabled:bg-gray-100 text-sm">
+                    <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório quando uso de medicação for "Sim"</p>
+                </div>
 
-            <div>
-                <label for="mensagem" class="block text-sm font-medium text-gray-700 mb-1">Mensagem do
-                    participante:</label>
-                <textarea name="mensagem" rows="3"
-                    class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"></textarea>
-            </div>
+                <div>
+                    <label for="mensagem" class="block text-sm font-medium text-gray-700 mb-1">Mensagem do
+                        participante:</label>
+                    <textarea name="mensagem" rows="3"
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"></textarea>
+                </div>
 
-            <div>
-                <label for="salvo_em" class="block text-sm font-medium text-gray-700 mb-1">Salvo em:</label>
-                <input type="text" id="salvo_em" name="salvo_em" readonly value=""
-                    class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-sm">
-            </div>
+                <div>
+                    <label for="salvo_em" class="block text-sm font-medium text-gray-700 mb-1">Salvo em:</label>
+                    <input type="text" id="salvo_em" name="salvo_em" readonly value=""
+                        class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-sm">
+                </div>
 
-            <button type="submit"
-                class="w-full bg-[#00bfff] text-black py-2 rounded hover:bg-yellow-400 transition font-semibold">
-                <i class="fa-solid fa-save mr-1"></i>
-                Salvar
-            </button>
-        </form>
+                <button type="submit"
+                    class="w-full bg-[#00bfff] text-black py-2 rounded hover:bg-yellow-400 transition font-semibold">
+                    <i class="fa-solid fa-save mr-1"></i>
+                    Salvar
+                </button>
+            </form>
         </div>
     </div>
 </div>
@@ -459,31 +635,31 @@ if (!isset($ritual)) {
         <h2 class="text-xl font-bold mb-4 text-gray-800">Adicionar observação</h2>
 
         <div class="form-container mobile-compact">
-        <form id="form-observacao" method="POST" class="space-y-4">
-            <input type="hidden" id="inscricao_id_observacao" name="inscricao_id" value="">
+            <form id="form-observacao" method="POST" class="space-y-4">
+                <input type="hidden" id="inscricao_id_observacao" name="inscricao_id" value="">
 
-            <div>
-                <label for="observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação:</label>
-                <textarea name="observacao" required rows="6"
-                    placeholder="Digite sua observação sobre este participante..."
-                    class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
-                <p class="text-xs text-gray-500 mt-1">
-                    Descreva qualquer informação relevante sobre a participação neste ritual
-                </p>
-            </div>
+                <div>
+                    <label for="observacao" class="block text-sm font-medium text-gray-700 mb-1">Observação:</label>
+                    <textarea name="observacao" required rows="6"
+                        placeholder="Digite sua observação sobre este participante..."
+                        class="w-full border border-gray-300 rounded px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"></textarea>
+                    <p class="text-xs text-gray-500 mt-1">
+                        Descreva qualquer informação relevante sobre a participação neste ritual
+                    </p>
+                </div>
 
-            <div>
-                <label for="obs_salvo_em" class="block text-sm font-medium text-gray-700 mb-1">Salvo em:</label>
-                <input type="text" id="obs_salvo_em" name="obs_salvo_em" readonly value=""
-                    class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-sm">
-            </div>
+                <div>
+                    <label for="obs_salvo_em" class="block text-sm font-medium text-gray-700 mb-1">Salvo em:</label>
+                    <input type="text" id="obs_salvo_em" name="obs_salvo_em" readonly value=""
+                        class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-sm">
+                </div>
 
-            <button type="submit"
-                class="w-full bg-[#00bfff] text-black py-2 rounded hover:bg-yellow-400 transition font-semibold flex items-center justify-center gap-2">
-                <i class="fa-solid fa-plus"></i>
-                Salvar observação
-            </button>
-        </form>
+                <button type="submit"
+                    class="w-full bg-[#00bfff] text-black py-2 rounded hover:bg-yellow-400 transition font-semibold flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-plus"></i>
+                    Salvar observação
+                </button>
+            </form>
         </div>
     </div>
 </div>
@@ -501,7 +677,8 @@ if (!isset($ritual)) {
 <!-- Modal de Confirmação Genérico -->
 <div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
-        <h2 class="text-xl font-bold mb-4 text-red-600" id="confirmModalTitle"><i class="fa-solid fa-exclamation-triangle mr-2"></i>ATENÇÃO!</h2>
+        <h2 class="text-xl font-bold mb-4 text-red-600" id="confirmModalTitle"><i
+                class="fa-solid fa-exclamation-triangle mr-2"></i>ATENÇÃO!</h2>
         <p class="text-gray-700 mb-6" id="confirmModalText">Tem certeza que deseja remover este participante do ritual?
         </p>
         <div class="flex justify-end gap-3">

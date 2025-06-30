@@ -4,7 +4,7 @@ require_once __DIR__ . '/../../config/database.php';
 
 // Paginação
 $pagina = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
-$itens_por_pagina = 10;
+$itens_por_pagina = 9;
 $offset = ($pagina - 1) * $itens_por_pagina;
 
 // Ordenação

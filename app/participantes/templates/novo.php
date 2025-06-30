@@ -19,7 +19,9 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 
     <!-- Título -->
-    <h1 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">👤 Novo Participante</h1>
+    <h1 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+        <i class="fa-solid fa-user-plus text-blue-500"></i> Novo Participante
+    </h1>
 
     <div class="form-container mobile-compact">
         <form method="POST" enctype="multipart/form-data" id="formulario-participante"
@@ -27,7 +29,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
             <!-- Dados Pessoais -->
             <div>
-                <h2 class="text-lg font-semibold text-gray-700 mb-4">ℹ️ Dados Pessoais</h2>
+                <h2 class="text-lg font-semibold text-gray-700 mb-4"><i class="fa-solid fa-id-card text-purple-500"></i> Dados Pessoais</h2>
 
                 <div class="mb-6 w-full md:w-1/6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Foto do Participante:</label>
@@ -149,7 +151,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
             <!-- Endereço -->
             <div>
-                <h2 class="text-lg font-semibold text-gray-700 mb-4">📍 Endereço</h2>
+                <h2 class="text-lg font-semibold text-gray-700 mb-4"><i class="fa-solid fa-location-dot text-red-500"></i> Endereço</h2>
 
                 <div class="grid grid-cols-2 lg:grid-cols-6 gap-4">
 
@@ -242,7 +244,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
             <!-- Informações Adicionais -->
             <div>
-                <h2 class="text-lg font-semibold text-gray-700 mb-4">➕ Informações Adicionais</h2>
+                <h2 class="text-lg font-semibold text-gray-700 mb-4"><i class="fa-solid fa-info-circle text-yellow-700"></i> Informações Adicionais</h2>
 
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>

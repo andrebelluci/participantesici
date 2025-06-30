@@ -474,3 +474,88 @@ function initHideAddressBar() {
     });
   }
 
+/**
+ * Toggle entre visualização Cards e Lista
+ * Apenas para desktop (mobile sempre fica em cards)
+ */
+function initViewToggle() {
+    // Verifica se existem os elementos necessários
+    const cardsContainer = document.getElementById('cards-view');
+    const tableContainer = document.getElementById('table-view');
+    const toggleButton = document.getElementById('view-toggle');
+
+    if (!cardsContainer || !tableContainer || !toggleButton) {
+        return; // Se não existir os elementos, não faz nada
+    }
+
+    // Recupera preferência salva ou usa 'cards' como padrão
+    let currentView = localStorage.getItem('viewPreference') || 'table';
+
+    // Se for mobile, força sempre cards
+    if (window.innerWidth < 768) {
+        currentView = 'cards';
+        toggleButton.style.display = 'none'; // Esconde botão no mobile
+    }
+
+    // Aplica a visualização inicial
+    setView(currentView);
+
+    // Event listener para o toggle
+    toggleButton.addEventListener('click', function() {
+        // Só funciona em desktop
+        if (window.innerWidth < 768) return;
+
+        currentView = currentView === 'cards' ? 'table' : 'cards';
+        setView(currentView);
+
+        // Salva preferência
+        localStorage.setItem('viewPreference', currentView);
+    });
+
+    // Event listener para mudanças de tamanho da tela
+    window.addEventListener('resize', function() {
+        if (window.innerWidth < 768) {
+            // Mobile: força cards e esconde toggle
+            setView('cards');
+            toggleButton.style.display = 'none';
+            currentView = 'cards';
+        } else {
+            // Desktop: mostra toggle e restaura preferência
+            toggleButton.style.display = 'flex';
+            const savedView = localStorage.getItem('viewPreference') || 'cards';
+            if (savedView !== currentView) {
+                currentView = savedView;
+                setView(currentView);
+            }
+        }
+    });
+
+    function setView(view) {
+        const icon = toggleButton.querySelector('i');
+
+        if (view === 'cards') {
+            // Mostra cards, esconde tabela
+            cardsContainer.classList.remove('hidden');
+            tableContainer.classList.add('hidden');
+
+            // Atualiza ícone para "lista"
+            icon.className = 'fa-solid fa-list text-lg';
+            toggleButton.title = 'Alternar para visualização em lista';
+        } else {
+            // Mostra tabela, esconde cards
+            cardsContainer.classList.add('hidden');
+            tableContainer.classList.remove('hidden');
+
+            // Atualiza ícone para "cards"
+            icon.className = 'fa-solid fa-th-large text-lg';
+            toggleButton.title = 'Alternar para visualização em cards';
+        }
+
+        currentView = view;
+    }
+}
+
+// Inicializa quando a página carrega
+document.addEventListener('DOMContentLoaded', function() {
+    initViewToggle();
+});

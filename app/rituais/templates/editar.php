@@ -23,7 +23,11 @@ if (!isset($ritual)) {
     </div>
 
     <!-- Título -->
-    <h1 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">🪵 Editar Ritual</h1>
+    <h1 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
+    <div class="flex-shrink-0 text-orange-500">
+        <i class="fa-solid fa-fire-flame-simple"></i><i class="fa-solid fa-pen text-sm"></i>
+    </div>
+    Editar Ritual</h1>
 
     <div class="form-container mobile-compact">
     <form method="POST" enctype="multipart/form-data" id="formulario-ritual"
@@ -35,7 +39,7 @@ if (!isset($ritual)) {
 
         <!-- Dados do Ritual -->
         <div>
-            <h2 class="text-lg font-semibold text-gray-700 mb-4">🍃 Dados do Ritual</h2>
+            <h2 class="text-lg font-semibold text-gray-700 mb-4"><i class="fa-solid fa-leaf text-green-600"></i> Dados do Ritual</h2>
 
             <!-- Upload de imagem -->
             <div class="mb-6 w-full md:w-1/6">

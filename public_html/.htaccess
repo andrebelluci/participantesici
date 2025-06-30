@@ -41,6 +41,12 @@ RewriteRule ^api/participante/verifica-cpf/?$ /participantesici/app/participante
 RewriteRule ^api/participante/adicionar-ritual/?$ /participantesici/app/participantes/api/adicionar_ritual.php [L]
 RewriteRule ^api/participante/buscar-ritual/?$ /participantesici/app/participantes/api/buscar_ritual.php [L]
 
+# URL amigável para usuários (adicionar após as outras URLs)
+RewriteRule ^usuarios/?$ /participantesici/app/usuarios/actions/listar.php [L,QSA]
+RewriteRule ^usuario/novo/?$ /participantesici/app/usuarios/actions/novo.php [L,QSA]
+RewriteRule ^usuario/([0-9]+)/editar/?$ /participantesici/app/usuarios/actions/editar.php?id=$1 [L,QSA]
+RewriteRule ^usuario/([0-9]+)/excluir/?$ /participantesici/app/usuarios/actions/excluir.php?id=$1 [L,QSA]
+
 # URL amigável para incricoes
 RewriteRule ^api/inscricoes/atualizar-presenca/?$ /participantesici/app/inscricoes/api/atualizar_presenca.php [L]
 RewriteRule ^api/inscricoes/buscar-id/?$ /participantesici/app/inscricoes/api/buscar_id.php [L]
