@@ -435,6 +435,31 @@ if (!isset($ritual)) {
             </table>
         </div>
     </div>
+
+    <!-- Info da listagem -->
+  <div class="mt-4 text-sm text-gray-600">
+    <?php if (!empty($participantes)): ?>
+            <p>
+                Mostrando <?= count($participantes) ?> de <?= $total_registros ?> participante(s) do ritual
+                <?= $ritual['nome'] ?>
+                <?php if (!empty($filtros)): ?>
+                    (filtrado)
+                <?php endif; ?>
+            </p>
+        <?php endif; ?>
+    </div>
+
+    <!-- Paginação (mesmo padrão do listar.php) -->
+    <div class="flex justify-center mt-6 flex-wrap gap-2">
+        <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
+            <a href="?pagina=<?= $i ?>&id=<?= $id ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&order_by=<?= $order_by ?>&order_dir=<?= $order_dir ?>"
+                class="px-4 py-2 rounded border transition
+               <?= $pagina == $i ? 'bg-[#00bfff] text-black font-semibold shadow' : 'bg-white text-gray-600 hover:bg-gray-100' ?>">
+                <?= $i ?>
+            </a>
+        <?php endfor; ?>
+    </div>
+
 </div>
 
 

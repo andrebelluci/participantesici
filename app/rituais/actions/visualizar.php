@@ -20,8 +20,38 @@ if (!$ritual) {
   exit;
 }
 
+// ✅ PAGINAÇÃO - Adicionar estas variáveis
+$pagina = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
+$itens_por_pagina = 10;
+$offset = ($pagina - 1) * $itens_por_pagina;
+
 // Buscar participantes com filtro e dados completos de inscrição
 $filtro_nome = isset($_GET['filtro_nome']) ? trim($_GET['filtro_nome']) : '';
+
+// ✅ ORDENAÇÃO - Adicionar estas variáveis
+$order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'nome_completo'; // Coluna padrão: nome_completo
+$order_dir = isset($_GET['order_dir']) ? $_GET['order_dir'] : 'ASC'; // Direção padrão: ASC
+
+// ✅ CONSULTA DE CONTAGEM - Para calcular total de páginas
+$sql_count = "
+    SELECT COUNT(*) AS total
+    FROM inscricoes i
+    JOIN participantes p ON i.participante_id = p.id
+    WHERE i.ritual_id = ?
+";
+$params_count = [$id];
+
+if (!empty($filtro_nome)) {
+  $sql_count .= " AND p.nome_completo LIKE ?";
+  $params_count[] = "%$filtro_nome%";
+}
+
+$stmt_count = $pdo->prepare($sql_count);
+$stmt_count->execute($params_count);
+$total_registros = $stmt_count->fetch()['total'];
+$total_paginas = ceil($total_registros / $itens_por_pagina);
+
+// ✅ CONSULTA PRINCIPAL - Modificar a consulta existente para incluir paginação
 $sql_participantes = "
     SELECT p.*, i.presente, i.observacao,
            i.primeira_vez_instituto, i.primeira_vez_ayahuasca,
@@ -39,8 +69,8 @@ if (!empty($filtro_nome)) {
   $params[] = "%$filtro_nome%";
 }
 
-// Ordenação por nome do participante
-$sql_participantes .= " ORDER BY p.nome_completo ASC";
+// ✅ Adicionar ordenação e paginação
+$sql_participantes .= " ORDER BY $order_by $order_dir LIMIT $itens_por_pagina OFFSET $offset";
 
 $stmt_participantes = $pdo->prepare($sql_participantes);
 $stmt_participantes->execute($params);
