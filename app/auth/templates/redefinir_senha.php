@@ -67,7 +67,7 @@ if (!$user) {
         </video>
     </div>
 
-    <div class="w-full max-w-md bg-black/50 rounded-lg p-6 shadow-lg mx-4">
+    <div class="w-full max-w-md bg-black/50 rounded-lg p-6 shadow-lg mx-4 backdrop-blur-sm">
         <div class="flex flex-col items-center mb-6">
             <img src="/participantesici/public_html/assets/images/logo.png" alt="Logo"
                 class="w-40 h-auto object-contain" />

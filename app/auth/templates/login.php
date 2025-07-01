@@ -1,12 +1,20 @@
 <?php
-// app/auth/templates/login.php - VERSÃO ATUALIZADA
+// app/auth/templates/login.php - VERSÃO ATUALIZADA + CAPTCHA
 session_start();
+require_once __DIR__ . '/../../services/CaptchaService.php';
+
 $error = $_SESSION['login_error'] ?? null;
 unset($_SESSION['login_error']);
 
 // ✅ ADICIONAR MENSAGEM DE SUCESSO DA RECUPERAÇÃO
 $loginSuccess = $_SESSION['login_success'] ?? null;
 unset($_SESSION['login_success']);
+
+// Verifica se deve mostrar captcha
+$identificador = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+CaptchaService::verificarTempoReset($identificador);
+$mostrarCaptcha = CaptchaService::deveMostrarCaptcha($identificador);
+$tentativas = CaptchaService::obterTentativas($identificador);
 ?>
 
 <!DOCTYPE html>
@@ -29,6 +37,10 @@ unset($_SESSION['login_success']);
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
 
+  <?php if ($mostrarCaptcha): ?>
+    <?= CaptchaService::gerarScriptCaptcha() ?>
+  <?php endif; ?>
+
   <style>
     .video-bg video {
       position: fixed;
@@ -39,10 +51,32 @@ unset($_SESSION['login_success']);
       object-fit: cover;
       z-index: -1;
     }
+
+    /* Estilização do captcha para se adequar ao design */
+    .g-recaptcha {
+      transform: scale(0.9);
+      transform-origin: 0 0;
+      margin: 10px 0;
+    }
+
+    @media (max-width: 640px) {
+      .g-recaptcha {
+        transform: scale(0.77);
+      }
+    }
+
+    /* Alerta de segurança estilizado */
+    .security-alert {
+      background: rgba(239, 68, 68, 0.1);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
   </style>
 </head>
 
-<body class="relative h-screen flex items-center justify-center bg-black/70 text-white overflow-hidden">
+<body class="relative h-screen flex items-center justify-center bg-black/70 text-white">
   <div class="video-bg">
     <video autoplay muted loop>
       <source src="/participantesici/public_html/assets/videos/fogueira.mp4" type="video/mp4">
@@ -50,11 +84,24 @@ unset($_SESSION['login_success']);
     </video>
   </div>
 
-  <div class="w-full max-w-md bg-black/50 rounded-lg p-6 shadow-lg mx-4">
+  <div class="w-full max-w-md bg-black/50 rounded-lg p-6 shadow-lg mx-4 backdrop-blur-sm">
     <div class="flex flex-col items-center mb-6">
       <img src="/participantesici/public_html/assets/images/logo.png" alt="Logo" class="w-40 h-auto object-contain" />
       <h2 class="mt-4 text-xl font-semibold text-center text-white">Gestão de participantes</h2>
     </div>
+
+    <!-- Alerta de Segurança (só aparece quando necessário) -->
+    <?php if ($mostrarCaptcha && $tentativas >= 5): ?>
+      <div class="security-alert">
+        <div class="flex items-center text-red-300">
+          <i class="fa-solid fa-shield-exclamation mr-2 text-red-400"></i>
+          <div class="text-sm">
+            <strong>Verificação de segurança necessária</strong><br>
+            Muitas tentativas de login. Complete a verificação abaixo.
+          </div>
+        </div>
+      </div>
+    <?php endif; ?>
 
     <div class="form-container mobile-compact">
       <form method="POST" action="/participantesici/public_html/entrar" class="space-y-4" novalidate>
@@ -76,6 +123,18 @@ unset($_SESSION['login_success']);
           </div>
           <p class="text-sm text-red-500 mt-1 hidden" id="erro-senha">Campo obrigatório.</p>
         </div>
+
+        <!-- Captcha (só aparece após 5 tentativas) -->
+        <?php if ($mostrarCaptcha): ?>
+          <div class="captcha-container">
+            <div class="bg-white/10 p-3 rounded border border-white/20">
+              <label class="block text-sm text-yellow-400 mb-2">
+                <i class="fa-solid fa-shield-check mr-1"></i>Verificação de Segurança
+              </label>
+              <?= CaptchaService::gerarHtmlCaptcha() ?>
+            </div>
+          </div>
+        <?php endif; ?>
 
         <!-- ✅ NOVA SEÇÃO: CHECKBOX LEMBRAR-ME -->
         <div class="flex items-center justify-between">
@@ -114,6 +173,46 @@ unset($_SESSION['login_success']);
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         showToast(<?= json_encode($error) ?>, 'error');
+      });
+    </script>
+
+    <script>
+      // Função toggle senha (do código original)
+      function toggleSenha() {
+        const senhaInput = document.getElementById('senha');
+        const iconOlho = document.getElementById('iconOlho');
+
+        if (senhaInput.type === 'password') {
+          senhaInput.type = 'text';
+          iconOlho.classList.remove('fa-eye');
+          iconOlho.classList.add('fa-eye-slash');
+        } else {
+          senhaInput.type = 'password';
+          iconOlho.classList.remove('fa-eye-slash');
+          iconOlho.classList.add('fa-eye');
+        }
+      }
+
+      // Validação do formulário com captcha
+      document.querySelector('form').addEventListener('submit', function (e) {
+        const usuario = document.getElementById('usuario').value.trim();
+        const senha = document.getElementById('senha').value.trim();
+
+        if (!usuario || !senha) {
+          e.preventDefault();
+          showToast('Usuário e senha são obrigatórios', 'error');
+          return;
+        }
+
+        <?php if ($mostrarCaptcha): ?>
+          // Verifica se o captcha foi preenchido
+          const captchaResponse = grecaptcha.getResponse();
+          if (!captchaResponse) {
+            e.preventDefault();
+            showToast('Por favor, complete a verificação de segurança', 'error');
+            return;
+          }
+        <?php endif; ?>
       });
     </script>
   <?php endif; ?>
@@ -160,7 +259,6 @@ unset($_SESSION['login_success']);
       });
     }
   </script>
-
 </body>
 
 </html>

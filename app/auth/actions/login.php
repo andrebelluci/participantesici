@@ -1,7 +1,8 @@
 <?php
-// app/auth/actions/login.php - VERSÃO ATUALIZADA COM LEMBRAR-ME
+// app/auth/actions/login.php - VERSÃO ATUALIZADA COM CAPTCHA
 session_start();
 require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../../services/CaptchaService.php';
 
 // Função para gerar token seguro
 function gerarTokenSeguro($length = 64)
@@ -51,12 +52,43 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $usuario = $_POST['usuario'] ?? '';
   $senha = $_POST['senha'] ?? '';
   $lembrar_me = isset($_POST['lembrar_me']) && $_POST['lembrar_me'] == '1';
+  $captcha_token = $_POST['g-recaptcha-response'] ?? '';
+
+  // Identifica o usuário pelo IP
+  $identificador = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+
+  // Verifica se o tempo de reset expirou
+  CaptchaService::verificarTempoReset($identificador);
 
   // Validação básica
   if (empty($usuario) || empty($senha)) {
+    CaptchaService::incrementarTentativas($identificador);
     $_SESSION['login_error'] = 'Usuário e senha são obrigatórios!';
     header("Location: /participantesici/public_html/login?t=" . time());
     exit;
+  }
+
+  // Verifica se deve mostrar captcha e se foi preenchido
+  $deveMostrarCaptcha = CaptchaService::deveMostrarCaptcha($identificador);
+
+  if ($deveMostrarCaptcha) {
+    if (empty($captcha_token)) {
+      $_SESSION['login_error'] = 'Por favor, complete a verificação de segurança (captcha).';
+      header("Location: /participantesici/public_html/login?t=" . time());
+      exit;
+    }
+
+    // Verifica o captcha
+    $resultadoCaptcha = CaptchaService::verificarCaptcha($captcha_token, $identificador);
+
+    if (!$resultadoCaptcha['success']) {
+      CaptchaService::incrementarTentativas($identificador);
+      $_SESSION['login_error'] = 'Verificação de segurança inválida. Tente novamente.';
+      header("Location: /participantesici/public_html/login?t=" . time());
+      exit;
+    }
+
+    error_log("[LOGIN] Captcha verificado com sucesso para $identificador");
   }
 
   $senha_hash = hash('sha256', $senha);
@@ -67,7 +99,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $user = $stmt->fetch();
 
     if ($user) {
-      // Login bem-sucedido
+      // Login bem-sucedido - reseta tentativas de captcha
+      CaptchaService::resetarTentativas($identificador);
+
       $_SESSION['user_id'] = $user['id'];
       $_SESSION['nome'] = $user['nome'];
       $_SESSION['last_activity'] = time();
@@ -90,14 +124,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       exit;
 
     } else {
-      // Login falhou
-      error_log("[LOGIN] Tentativa de login inválida para usuário: $usuario");
+      // Login falhou - incrementa tentativas
+      CaptchaService::incrementarTentativas($identificador);
+
+      error_log("[LOGIN] Tentativa de login inválida para usuário: $usuario (Tentativas: " . CaptchaService::obterTentativas($identificador) . ")");
       $_SESSION['login_error'] = 'Usuário ou senha inválidos!';
       header("Location: /participantesici/public_html/login?t=" . time());
       exit;
     }
 
   } catch (Exception $e) {
+    CaptchaService::incrementarTentativas($identificador);
     error_log("[LOGIN] Erro no banco de dados: " . $e->getMessage());
     $_SESSION['login_error'] = 'Erro interno. Tente novamente mais tarde.';
     header("Location: /participantesici/public_html/login?t=" . time());
