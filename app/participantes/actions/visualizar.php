@@ -141,5 +141,22 @@ $stmt_total = $pdo->prepare($sql_total_rituais);
 $stmt_total->execute([$id]);
 $total_rituais_participante = $stmt_total->fetch()['total'];
 
+// Determinar o tipo e ID baseado na URL atual
+$current_path = $_SERVER['REQUEST_URI'];
+$is_participante = strpos($current_path, '/participante/') !== false;
+$is_ritual = strpos($current_path, '/ritual/') !== false;
+
+// Extrair ID da URL
+if ($is_participante && preg_match('/\/participante\/(\d+)/', $current_path, $matches)) {
+  $export_id = $matches[1];
+  $export_type = 'participante';
+} elseif ($is_ritual && preg_match('/\/ritual\/(\d+)/', $current_path, $matches)) {
+  $export_id = $matches[1];
+  $export_type = 'ritual';
+} else {
+  $export_id = null;
+  $export_type = null;
+}
+
 // Carregar template
 require_once __DIR__ . '/../templates/visualizar.php';

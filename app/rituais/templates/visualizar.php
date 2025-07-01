@@ -59,10 +59,41 @@ if (!isset($ritual)) {
     <!-- Título da seção -->
     <div class="flex flex-col sm:flex-row justify-between md:items-end gap-4">
         <h2 class="text-xl font-bold text-gray-800 md:mb-4 flex items-center gap-2">
-        <i class="fa-solid fa-users text-blue-500"></i>Participantes do Ritual
+            <i class="fa-solid fa-users text-blue-500"></i>Participantes do Ritual
         </h2>
 
-        <div class="flex justify-end md:mb-4">
+        <div class="flex justify-end md:mb-4 gap-2">
+
+            <?php if ($is_admin && $export_id && $export_type): ?>
+                <!-- Botão de Exportação (só para admins) -->
+                <div class="relative inline-block">
+                    <button type="button" id="export-button" onclick="toggleExportDropdown(event)"
+                        class="flex items-center justify-center bg-orange-100 text-orange-700 w-10 h-10 rounded hover:bg-orange-200 transition border border-orange-300"
+                        title="Exportar relatório">
+                        <i class="fa-solid fa-file-export text-lg"></i>
+                    </button>
+
+                    <div id="export-dropdown"
+                        class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+                        <div class="py-2">
+                            <div class="px-4 py-2 text-sm font-medium text-gray-700 border-b border-gray-100">
+                                Exportar como:
+                            </div>
+                            <button onclick="exportar<?= ucfirst($export_type) ?>(<?= $export_id ?>, 'pdf')"
+                                class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                <i class="fa-solid fa-file-pdf text-red-500"></i>
+                                PDF
+                            </button>
+                            <button onclick="exportar<?= ucfirst($export_type) ?>(<?= $export_id ?>, 'excel')"
+                                class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                                <i class="fa-solid fa-file-excel text-green-500"></i>
+                                Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            <?php endif; ?>
+
             <button type="button" id="view-toggle"
                 class="hidden md:flex items-center justify-center bg-gray-100 text-gray-700 w-10 h-10 rounded hover:bg-gray-200 transition border border-gray-300"
                 title="Alternar visualização">
@@ -362,20 +393,19 @@ if (!isset($ritual)) {
                                 <td class="px-4 py-3">
                                     <?php if (!empty($participante['observacao'])): ?>
                                         <!-- Tem observação: mostra preview de 2 linhas + tag -->
-                                            <!-- Preview da observação (1 linha) -->
-                                            <div class="text-sm text-gray-700 leading-relaxed">
-                                                <a href="javascript:void(0);"
-                                                   onclick="abrirModalObservacao(<?= $participante['id'] ?>)"
-                                                   class="text-blue-600 hover:underline cursor-pointer font-semibold">
-                                                    <?= htmlspecialchars(mb_strimwidth($participante['observacao'], 0, 30, '...')) ?>
-                                                </a>
-                                            </div>
-                                            <!-- Tag para abrir modal -->
-                                            <div class="flex items-center justify-between">
-                                                <span class="text-xs text-gray-500">
-                                                    (<?= mb_strlen($participante['observacao']) ?> caracteres)
-                                                </span>
-                                            </div>
+                                        <!-- Preview da observação (1 linha) -->
+                                        <div class="text-sm text-gray-700 leading-relaxed">
+                                            <a href="javascript:void(0);" onclick="abrirModalObservacao(<?= $participante['id'] ?>)"
+                                                class="text-blue-600 hover:underline cursor-pointer font-semibold">
+                                                <?= htmlspecialchars(mb_strimwidth($participante['observacao'], 0, 30, '...')) ?>
+                                            </a>
+                                        </div>
+                                        <!-- Tag para abrir modal -->
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-xs text-gray-500">
+                                                (<?= mb_strlen($participante['observacao']) ?> caracteres)
+                                            </span>
+                                        </div>
                                     <?php else: ?>
                                         <!-- Não tem observação: mostra mensagem e botão para adicionar -->
                                         <div class="flex items-center justify-between">
@@ -410,12 +440,13 @@ if (!isset($ritual)) {
                                             <i class="fa-solid fa-pencil"></i>
                                             <!-- Bolinha vermelha se detalhes estão vazios -->
                                             <?php
-                                                $temDetalhes = !empty($participante['primeira_vez_instituto']) ||
-                                                    !empty($participante['primeira_vez_ayahuasca']) ||
-                                                    !empty($participante['doenca_psiquiatrica']);
-                                                ?>
+                                            $temDetalhes = !empty($participante['primeira_vez_instituto']) ||
+                                                !empty($participante['primeira_vez_ayahuasca']) ||
+                                                !empty($participante['doenca_psiquiatrica']);
+                                            ?>
                                             <?php if (!$temDetalhes): ?>
-                                                <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                                                <span
+                                                    class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
                                             <?php endif; ?>
                                         </button>
 
@@ -437,8 +468,8 @@ if (!isset($ritual)) {
     </div>
 
     <!-- Info da listagem -->
-  <div class="mt-4 text-sm text-gray-600">
-    <?php if (!empty($participantes)): ?>
+    <div class="mt-4 text-sm text-gray-600">
+        <?php if (!empty($participantes)): ?>
             <p>
                 Mostrando <?= count($participantes) ?> de <?= $total_registros ?> participante(s) do ritual
                 <?= $ritual['nome'] ?>
@@ -735,5 +766,6 @@ if (!isset($ritual)) {
 <script src="/participantesici/public_html/assets/js/ritual-visualizar.js"></script>
 <script src="/participantesici/public_html/assets/js/modal.js"></script>
 <script src="/participantesici/public_html/assets/js/relatorios.js"></script>
+
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
