@@ -826,5 +826,6 @@ if (!isset($pessoa)) {
 
 <script src="/participantesici/public_html/assets/js/participante-visualizar.js"></script>
 <script src="/participantesici/public_html/assets/js/modal.js"></script>
+<script src="/participantesici/public_html/assets/js/relatorios.js"></script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

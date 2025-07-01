@@ -25,7 +25,7 @@ if (!isset($ritual)) {
                         <?= (new DateTime($ritual['data_ritual']))->format('d/m/Y') ?></p>
                     <p><span class="font-semibold">Padrinho/Madrinha:</span>
                         <?= htmlspecialchars($ritual['padrinho_madrinha']) ?></p>
-                    <p><span class="font-semibold">Total de participantes:</span>
+                    <p><span class="font-semibold">Inscritos:</span>
                         <span class="bg-[#00bfff] text-black px-2 py-1 rounded md:text-lg font-medium">
                             <?= count($participantes) ?>
                         </span>
@@ -734,5 +734,6 @@ if (!isset($ritual)) {
 
 <script src="/participantesici/public_html/assets/js/ritual-visualizar.js"></script>
 <script src="/participantesici/public_html/assets/js/modal.js"></script>
+<script src="/participantesici/public_html/assets/js/relatorios.js"></script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

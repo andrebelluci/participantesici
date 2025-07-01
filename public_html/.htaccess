@@ -57,6 +57,18 @@ RewriteRule ^api/inscricoes/participantes-vinculados/?$ /participantesici/app/in
 RewriteRule ^api/inscricoes/salvar-inscricao/?$ /participantesici/app/inscricoes/api/salvar_inscricao.php [L]
 RewriteRule ^api/inscricoes/salvar-observacao/?$ /participantesici/app/inscricoes/api/salvar_observacao.php [L]
 
+# URLs amigáveis para relatórios de participantes
+RewriteRule ^participante/([0-9]+)/relatorio/pdf/?$ /participantesici/app/participantes/relatorios/visualizar.php?id=$1&formato=pdf [L]
+RewriteRule ^participante/([0-9]+)/relatorio/excel/?$ /participantesici/app/participantes/relatorios/visualizar.php?id=$1&formato=excel [L]
+
+# URLs amigáveis para relatórios de rituais
+RewriteRule ^ritual/([0-9]+)/relatorio/pdf/?$ /participantesici/app/rituais/relatorios/visualizar.php?id=$1&formato=pdf [L]
+RewriteRule ^ritual/([0-9]+)/relatorio/excel/?$ /participantesici/app/rituais/relatorios/visualizar.php?id=$1&formato=excel [L]
+
+# URLs genéricas para relatórios (caso queira usar)
+RewriteRule ^api/relatorio/participante/?$ /participantesici/app/participantes/relatorios/visualizar.php [L,QSA]
+RewriteRule ^api/relatorio/ritual/?$ /participantesici/app/rituais/relatorios/visualizar.php [L,QSA]
+
 # ----- Limpeza de URLs -----
 # Remove barra final (exceto para diretórios físicos)
 RewriteCond %{REQUEST_FILENAME} !-d

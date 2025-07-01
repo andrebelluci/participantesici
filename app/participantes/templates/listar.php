@@ -203,12 +203,14 @@ require_once __DIR__ . '/../../includes/header.php';
                       title="Editar participante">
                       <i class="fa-solid fa-edit"></i>
                     </a>
+                    <?php if ($is_admin): ?>
                     <button
                       onclick="abrirConfirmacaoExcluir('/participantesici/public_html/participante/<?= $pessoa['id'] ?>/excluir')"
                       class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded flex items-center gap-1"
                       title="Excluir participante">
                       <i class="fa-solid fa-trash"></i>
                     </button>
+                    <?php endif; ?>
                   </div>
                 </td>
               </tr>
