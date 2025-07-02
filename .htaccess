@@ -3,3 +3,13 @@
     Order allow,deny
     Deny from all
 </Files>
+
+<Files "*.ini">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "composer.*">
+    Order allow,deny
+    Deny from all
+</Files>

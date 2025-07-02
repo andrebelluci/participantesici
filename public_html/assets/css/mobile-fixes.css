@@ -389,3 +389,27 @@ input[type=number] {
     /* Números alinhados */
   }
 }
+
+.pwa-mode {
+  /* Ajustes específicos para quando está instalado */
+  --safe-area-inset-top: env(safe-area-inset-top);
+  --safe-area-inset-bottom: env(safe-area-inset-bottom);
+}
+
+.pwa-mode body {
+  padding-top: var(--safe-area-inset-top);
+  padding-bottom: var(--safe-area-inset-bottom);
+}
+
+#install-button {
+  transform: translateY(100px);
+  transition: transform 0.3s ease;
+}
+
+@media (display-mode: standalone) {
+
+  /* Estilos quando rodando como app instalado */
+  .hide-on-pwa {
+    display: none !important;
+  }
+}

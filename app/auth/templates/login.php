@@ -21,19 +21,26 @@ $tentativas = CaptchaService::obterTentativas($identificador);
 <html lang="pt-br">
 
 <head>
+  <title>Participantes - ICI</title>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Participantes ICI">
   <meta name="mobile-web-app-capable" content="yes">
+  <meta name="application-name" content="Participantes ICI">
   <meta name="theme-color" content="#000000">
   <meta name="theme-color" content="#1D4ED8">
-  <title>Participantes - ICI</title>
+  <link rel="manifest" href="/participantesici/public_html/manifest.json" />
+  <link rel="apple-touch-icon" href="/participantesici/public_html/assets/images/icon-192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/participantesici/public_html/assets/images/icon-152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/participantesici/public_html/assets/images/icon-192.png">
   <link rel="icon" href="/participantesici/public_html/assets/images/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
-  <link rel="manifest" href="/participantesici/public_html/manifest.json" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+  <link rel="stylesheet" href="/participantesici/public_html/assets/css/mobile-fixes.css?v=1.0">
   <script src="/participantesici/public_html/assets/js/global-scripts.js?t=<?= time() ?>"></script>
+  <script src="/participantesici/public_html/assets/js/pwa.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -245,20 +252,6 @@ $tentativas = CaptchaService::obterTentativas($identificador);
     </script>
   <?php endif; ?>
 
-  <!-- Service Worker: forçar atualização imediata -->
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.getRegistrations().then(registrations => {
-        for (let reg of registrations) {
-          reg.unregister(); // Remove antigos
-        }
-        // Registra novamente
-        navigator.serviceWorker.register('/participantesici/public_html/service-worker.js?ts=' + Date.now())
-          .then(() => console.log("Service Worker atualizado!"))
-          .catch(err => console.error("Erro no Service Worker:", err));
-      });
-    }
-  </script>
 </body>
 
 </html>
