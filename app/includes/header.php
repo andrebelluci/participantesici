@@ -123,6 +123,7 @@ if (isset($_SESSION['user_id'])) {
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/participantesici/public_html/assets/css/mobile-fixes.css?v=1.0">
     <script src="/participantesici/public_html/assets/js/global-scripts.js?t=<?= time() ?>"></script>
+    <script src="/participantesici/public_html/assets/js/unsaved-changes-detector.js"></script>
 
 </head>
 

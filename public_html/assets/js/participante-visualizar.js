@@ -123,19 +123,22 @@ document.addEventListener("DOMContentLoaded", function () {
 // Função para abrir o modal de detalhes da inscrição
 function abrirModalDetalhes(ritualId) {
   disableScroll();
-  currentRitualId = ritualId; // ✅ Armazena ID atual
+  currentRitualId = ritualId;
 
   // Limpa todos os campos do formulário
   document.getElementById('id').value = '';
   document.querySelector('select[name="primeira_vez_instituto"]').value = '';
   document.querySelector('select[name="primeira_vez_ayahuasca"]').value = '';
   document.querySelector('select[name="doenca_psiquiatrica"]').value = '';
-  document.querySelector('input[name="nome_doenca"]').value = '';
-  document.querySelector('select[name="uso_medicao"]').value = '';
-  document.querySelector('input[name="nome_medicao"]').value = '';
-  document.querySelector('textarea[name="mensagem"]').value = '';
+  // ... demais campos
 
-  // Busca o ID da inscrição via AJAX
+  // Remove avisos anteriores se existirem
+  document.querySelectorAll('.aviso-dados-anteriores').forEach(el => el.remove());
+
+  // Reabilita os campos por padrão
+  document.querySelector('select[name="primeira_vez_instituto"]').disabled = false;
+  document.querySelector('select[name="primeira_vez_ayahuasca"]').disabled = false;
+
   fetch(`/participantesici/public_html/api/inscricoes/buscar-id?participante_id=${pessoaId}&ritual_id=${ritualId}`)
     .then(response => response.json())
     .then(data => {
@@ -144,7 +147,6 @@ function abrirModalDetalhes(ritualId) {
         return;
       }
       const inscricaoId = data.inscricao_id;
-
       document.getElementById('id').value = inscricaoId;
 
       fetch(`/participantesici/public_html/api/inscricoes/detalhes-inscricao?id=${inscricaoId}`)
@@ -155,14 +157,17 @@ function abrirModalDetalhes(ritualId) {
             return;
           }
 
-          // Preenche os campos
-          document.querySelector('select[name="primeira_vez_instituto"]').value = detalhes.primeira_vez_instituto || '';
-          document.querySelector('select[name="primeira_vez_ayahuasca"]').value = detalhes.primeira_vez_ayahuasca || '';
-          document.querySelector('select[name="doenca_psiquiatrica"]').value = detalhes.doenca_psiquiatrica || '';
-          document.querySelector('input[name="nome_doenca"]').value = detalhes.nome_doenca || '';
-          document.querySelector('select[name="uso_medicao"]').value = detalhes.uso_medicao || '';
-          document.querySelector('input[name="nome_medicao"]').value = detalhes.nome_medicao || '';
-          document.querySelector('textarea[name="mensagem"]').value = detalhes.mensagem || '';
+          // Preenche todos os campos com os dados da inscrição
+          Object.keys(detalhes).forEach(key => {
+            const element = document.querySelector(`[name="${key}"]`);
+            if (element) {
+              element.value = detalhes[key] || '';
+            }
+          });
+
+          // Verifica se os dados de primeira vez vieram de inscrição anterior
+            verificarDadosAnteriores(pessoaId, inscricaoId, detalhes);
+
 
           const salvoEm = detalhes.salvo_em ?
             new Date(detalhes.salvo_em).toLocaleDateString('pt-BR') : 'Nunca salvo';
@@ -180,11 +185,115 @@ function abrirModalDetalhes(ritualId) {
 
   document.getElementById('modal-detalhes-inscricao').style.display = 'flex';
 
-  // ✅ Foco no primeiro campo do formulário
+  // Foco no primeiro campo do formulário
   const primeiroCampo = document.querySelector('#form-detalhes-inscricao input, #form-detalhes-inscricao select, #form-detalhes-inscricao textarea');
   if (primeiroCampo) {
     primeiroCampo.focus();
   }
+}
+
+function aplicarAvisosPrimeiraInscricao() {
+  const institutoSelect = document.querySelector('select[name="primeira_vez_instituto"]');
+  const ayahuascaSelect = document.querySelector('select[name="primeira_vez_ayahuasca"]');
+
+  // Remove avisos anteriores se existirem
+  document.querySelectorAll('.aviso-dados-anteriores').forEach(el => el.remove());
+
+  // Adiciona aviso para primeira inscrição
+  const avisoInstituto = document.createElement('div');
+  avisoInstituto.className = 'aviso-dados-anteriores text-green-600 text-xs mt-1 italic';
+  avisoInstituto.textContent = '* Essa é a primeira inscrição desse participante, por isso as próximas inscrições serão preenchidas automaticamente com "Não".';
+  institutoSelect.parentNode.appendChild(avisoInstituto);
+
+  const avisoAyahuasca = document.createElement('div');
+  avisoAyahuasca.className = 'aviso-dados-anteriores text-green-600 text-xs mt-1 italic';
+  avisoAyahuasca.textContent = '* Essa é a primeira inscrição desse participante, por isso as próximas inscrições serão preenchidas automaticamente com "Não".';
+  ayahuascaSelect.parentNode.appendChild(avisoAyahuasca);
+}
+
+
+// Nova função para verificar se os dados vieram de inscrição anterior
+function verificarDadosAnteriores(participanteId, inscricaoAtualId, detalhes) {
+  fetch(`/participantesici/public_html/api/inscricoes/verificar-primeira-inscricao?participante_id=${participanteId}&inscricao_atual_id=${inscricaoAtualId}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.dados_anteriores) {
+        aplicarDadosAnteriores(detalhes);
+      } else {
+        // É primeira inscrição - aplica avisos especiais
+        aplicarAvisosPrimeiraInscricao();
+      }
+    })
+    .catch(error => {
+      console.error('Erro ao verificar dados anteriores:', error);
+    });
+}
+
+// Função para aplicar indicação de dados anteriores na modal
+function aplicarDadosAnteriores(detalhes) {
+  const institutoSelect = document.querySelector('select[name="primeira_vez_instituto"]');
+  const ayahuascaSelect = document.querySelector('select[name="primeira_vez_ayahuasca"]');
+
+  // Desabilita os campos
+  institutoSelect.disabled = true;
+  ayahuascaSelect.disabled = true;
+
+  // Adiciona aviso visual
+  const avisoInstituto = document.createElement('div');
+  avisoInstituto.className = 'aviso-dados-anteriores text-blue-600 text-xs mt-1 italic';
+  avisoInstituto.textContent = '* Como este participante já tem inscrições anteriores, os campos "Primeira vez" foram automaticamente definidos como "Não" e não podem ser alterados.';
+  institutoSelect.parentNode.appendChild(avisoInstituto);
+
+  const avisoAyahuasca = document.createElement('div');
+  avisoAyahuasca.className = 'aviso-dados-anteriores text-blue-600 text-xs mt-1 italic';
+  avisoAyahuasca.textContent = '* Como este participante já tem inscrições anteriores, os campos "Primeira vez" foram automaticamente definidos como "Não" e não podem ser alterados.';
+  ayahuascaSelect.parentNode.appendChild(avisoAyahuasca);
+
+  // Adiciona aviso geral no topo do formulário
+  const avisoGeral = document.createElement('div');
+  avisoGeral.className = 'aviso-dados-anteriores bg-blue-50 border border-blue-200 rounded p-3 mb-4';
+  avisoGeral.innerHTML = `
+    <div class="flex items-center">
+      <i class="fa-solid fa-info-circle text-blue-500 mr-2"></i>
+      <span class="text-blue-700 text-sm">
+        <strong>Informação:</strong> Como este participante já tem inscrições anteriores,
+        os campos "Primeira vez" foram automaticamente definidos como "Não" e não podem ser alterados.
+      </span>
+    </div>
+  `;
+
+  const formContainer = document.querySelector('#form-detalhes-inscricao .space-y-4');
+  formContainer.insertBefore(avisoGeral, formContainer.firstChild);
+}
+
+// Nova função para abrir modal com dados anteriores já aplicados
+function abrirModalDetalhesComDadosAnteriores(ritualId, dadosAPI) {
+  disableScroll();
+  currentRitualId = ritualId;
+
+  // Busca a inscrição recém-criada
+  fetch(`/participantesici/public_html/api/inscricoes/buscar-id?participante_id=${pessoaId}&ritual_id=${ritualId}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.error) {
+        showToast(data.error, 'error');
+        return;
+      }
+
+      document.getElementById('id').value = data.inscricao_id;
+
+      // Preenche os campos com dados anteriores
+      document.querySelector('select[name="primeira_vez_instituto"]').value = dadosAPI.primeira_vez_instituto;
+      document.querySelector('select[name="primeira_vez_ayahuasca"]').value = dadosAPI.primeira_vez_ayahuasca;
+
+      // Aplica a indicação de dados anteriores
+      aplicarDadosAnteriores(dadosAPI);
+
+      document.getElementById('modal-detalhes-inscricao').style.display = 'flex';
+    })
+    .catch(error => {
+      console.error('Erro:', error);
+    });
 }
 
 // Função para abrir o modal de observação
@@ -368,11 +477,11 @@ function initFormDetalhes() {
     console.log('📝 Inicializando form detalhes...');
 
     formDetalhes.addEventListener('submit', function (event) {
-      event.preventDefault(); // Sempre previne o submit padrão
+      event.preventDefault();
 
       console.log('Form detalhes submetido');
 
-      // ✅ Validação manual completa
+      // Validação manual completa
       let formularioValido = true;
       const campos = {
         primeira_vez_instituto: formDetalhes.querySelector('[name="primeira_vez_instituto"]'),
@@ -418,7 +527,7 @@ function initFormDetalhes() {
         nomeMedicacaoInput.classList.remove('border-red-500');
       }
 
-      // ✅ Só envia se válido
+      // Só envia se válido
       if (!formularioValido) {
         showToast("Por favor, preencha todos os campos obrigatórios.", 'error');
         return;
@@ -437,6 +546,7 @@ function initFormDetalhes() {
             showToast("Detalhes da inscrição salvos com sucesso!", 'success');
             fecharModalDetalhes();
 
+            // AGORA remove a bolinha porque os dados foram salvos (salvo_em será preenchido)
             if (currentRitualId) {
               removerNotificacaoDetalhes(currentRitualId);
             }
@@ -934,8 +1044,13 @@ function atualizarPaginaFundo() {
       const novaListaCards = novoDoc.querySelector('.grid.gap-4.grid-cols-1.md\\:grid-cols-2.xl\\:grid-cols-3');
       const listaCardsAtual = document.querySelector('.grid.gap-4.grid-cols-1.md\\:grid-cols-2.xl\\:grid-cols-3');
 
+      //Atualiza tabela
+      const tabelaNova = novoDoc.querySelector('table');
+      const tabelaAtual = document.querySelector('table');
+
       if (novaListaCards && listaCardsAtual) {
         listaCardsAtual.innerHTML = novaListaCards.innerHTML;
+        tabelaAtual.innerHTML = tabelaNova.innerHTML;
 
         // Reaplica os event listeners nos novos elementos
         reaplicarEventListeners();

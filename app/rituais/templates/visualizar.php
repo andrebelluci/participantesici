@@ -250,9 +250,7 @@ if (!isset($ritual)) {
 
                         <!-- Bolinha vermelha se não tem detalhes preenchidos -->
                         <?php
-                        $temDetalhes = !empty($participante['primeira_vez_instituto']) ||
-                            !empty($participante['primeira_vez_ayahuasca']) ||
-                            !empty($participante['doenca_psiquiatrica']);
+                        $temDetalhes = !empty($participante['salvo_em']);
                         ?>
                         <?php if (!$temDetalhes): ?>
                             <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white"></span>
@@ -440,9 +438,7 @@ if (!isset($ritual)) {
                                             <i class="fa-solid fa-pencil"></i>
                                             <!-- Bolinha vermelha se detalhes estão vazios -->
                                             <?php
-                                            $temDetalhes = !empty($participante['primeira_vez_instituto']) ||
-                                                !empty($participante['primeira_vez_ayahuasca']) ||
-                                                !empty($participante['doenca_psiquiatrica']);
+                                            $temDetalhes = !empty($participante['salvo_em']);
                                             ?>
                                             <?php if (!$temDetalhes): ?>
                                                 <span
@@ -452,7 +448,7 @@ if (!isset($ritual)) {
 
                                         <!-- Botão Remover -->
                                         <button
-                                            onclick="openConfirmModal('Tem certeza que deseja remover este participante do ritual?', () => { window.location.href = '/participantesici/public_html/api/ritual/remover-participante?ritual_id=<?= $id ?>&participante_id=<?= $participante['id'] ?>&redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>' })"
+                                            onclick="openConfirmModal('Tem certeza que deseja remover este participante do ritual?', () => { window.location.href = '/participantesici/public_html/api/inscricoes/excluir-participacao?ritual_id=<?= $id ?>&participante_id=<?= $participante['id'] ?>&redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>' })"
                                             class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded flex items-center gap-1"
                                             title="Remover participante do ritual">
                                             <i class="fa-solid fa-link-slash"></i>

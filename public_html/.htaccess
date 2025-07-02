@@ -56,6 +56,7 @@ RewriteRule ^api/inscricoes/rituais-vinculados/?$ /participantesici/app/inscrico
 RewriteRule ^api/inscricoes/participantes-vinculados/?$ /participantesici/app/inscricoes/api/participantes_vinculados.php [L]
 RewriteRule ^api/inscricoes/salvar-inscricao/?$ /participantesici/app/inscricoes/api/salvar_inscricao.php [L]
 RewriteRule ^api/inscricoes/salvar-observacao/?$ /participantesici/app/inscricoes/api/salvar_observacao.php [L]
+RewriteRule ^api/inscricoes/verificar-primeira-inscricao/?$ /participantesici/app/inscricoes/api/verificar_primeira_inscricao.php [L]
 
 # URLs amigáveis para relatórios de participantes
 RewriteRule ^participante/([0-9]+)/relatorio/pdf/?$ /participantesici/app/participantes/relatorios/visualizar.php?id=$1&formato=pdf [L]

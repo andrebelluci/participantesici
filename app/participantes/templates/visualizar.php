@@ -265,9 +265,7 @@ if (!isset($pessoa)) {
 
             <!-- ✅ BOLINHA VERMELHA se não tem detalhes preenchidos -->
             <?php
-            $temDetalhes = !empty($ritual['primeira_vez_instituto']) ||
-              !empty($ritual['primeira_vez_ayahuasca']) ||
-              !empty($ritual['doenca_psiquiatrica']);
+            $temDetalhes = !empty($ritual['salvo_em']);
             ?>
             <?php if (!$temDetalhes): ?>
               <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white"></span>
@@ -276,7 +274,7 @@ if (!isset($pessoa)) {
 
           <!-- ✅ BOTÃO DESVINCULAR -->
           <button
-            onclick="abrirConfirmacaoExcluir('/participantesici/public_html/api/inscricoes/excluir-participacao?participante_id=<?= $pessoa['id'] ?? $participante['id'] ?>&ritual_id=<?= $ritual['id'] ?>&redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>')"
+            onclick="abrirConfirmacaoExcluir('/participantesici/public_html/api/inscricoes/excluir-participacao?participante_id=<?= $pessoa['id']?>&ritual_id=<?= $ritual['id'] ?>&redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>')"
             class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded flex items-center gap-1"
             title="Desvincular ritual do participante">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
@@ -468,9 +466,7 @@ if (!isset($pessoa)) {
                       <i class="fa-solid fa-pencil"></i>
                       <!-- Bolinha vermelha se detalhes estão vazios -->
                       <?php
-                      $temDetalhes = !empty($ritual['primeira_vez_instituto']) ||
-                        !empty($ritual['primeira_vez_ayahuasca']) ||
-                        !empty($ritual['doenca_psiquiatrica']);
+                      $temDetalhes = !empty($ritual['salvo_em']);
                       ?>
                       <?php if (!$temDetalhes): ?>
                         <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
@@ -479,7 +475,7 @@ if (!isset($pessoa)) {
 
                     <!-- Botão Desvincular -->
                     <button
-                      onclick="openConfirmModal('Tem certeza que deseja desvincular este ritual do participante?', () => { window.location.href = '/participantesici/public_html/api/participante/desvincular-ritual?participante_id=<?= $participante['id'] ?>&ritual_id=<?= $ritual['id'] ?>&redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>' })"
+                      onclick="openConfirmModal('Tem certeza que deseja desvincular este ritual do participante?', () => { window.location.href = '/participantesici/public_html/api/inscricoes/excluir-participacao?participante_id=<?= $pessoa['id'] ?>&ritual_id=<?= $ritual['id'] ?>&redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>' })"
                       class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded flex items-center gap-1"
                       title="Desvincular ritual do participante">
                       <i class="fa-solid fa-link-slash"></i>
