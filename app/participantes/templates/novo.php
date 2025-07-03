@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../includes/header.php';
 <div class="max-w-screen-lg mx-auto px-4 py-8">
     <!-- Ações -->
     <div class="flex items-center justify-between mb-6">
-        <a href="/participantesici/public_html/participantes"
+        <a href="/participantes"
             class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
             <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
         </a>
@@ -307,9 +307,9 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 </div>
 
-<script src="/participantesici/public_html/assets/js/participante-novo.js"></script>
-<script src="/participantesici/public_html/assets/js/participante.js"></script>
-<script src="/participantesici/public_html/assets/js/busca-cep.js"></script>
-<script src="/participantesici/public_html/assets/js/modal.js"></script>
+<script src="/assets/js/participante-novo.js"></script>
+<script src="/assets/js/participante.js"></script>
+<script src="/assets/js/busca-cep.js"></script>
+<script src="/assets/js/modal.js"></script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

@@ -7,7 +7,7 @@ $token = $_GET['token'] ?? '';
 
 if (empty($token)) {
     $_SESSION['error'] = 'Token de recuperação inválido.';
-    header('Location: /participantesici/public_html/login');
+    header('Location: /login');
     exit;
 }
 
@@ -23,7 +23,7 @@ $user = $stmt->fetch();
 
 if (!$user) {
     $_SESSION['error'] = 'Token de recuperação inválido ou expirado. Envie novamente.';
-    header('Location: /participantesici/public_html/esqueci-senha');
+    header('Location: /esqueci-senha');
     exit;
 }
 ?>
@@ -39,10 +39,10 @@ if (!$user) {
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
     <title>Redefinir Senha - ICI</title>
-    <link rel="icon" href="/participantesici/public_html/assets/images/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <script src="/participantesici/public_html/assets/js/global-scripts.js?t=<?= time() ?>"></script>
+    <script src="/assets/js/global-scripts.js?t=<?= time() ?>"></script>
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -62,21 +62,21 @@ if (!$user) {
 <body class="relative h-screen flex items-center justify-center bg-black/70 text-white overflow-hidden">
     <div class="video-bg">
         <video autoplay muted loop>
-            <source src="/participantesici/public_html/assets/videos/fogueira.mp4" type="video/mp4">
+            <source src="/assets/videos/fogueira.mp4" type="video/mp4">
             Seu navegador não suporta vídeos.
         </video>
     </div>
 
     <div class="w-full max-w-md bg-black/50 rounded-lg p-6 shadow-lg mx-4 backdrop-blur-sm">
         <div class="flex flex-col items-center mb-6">
-            <img src="/participantesici/public_html/assets/images/logo.png" alt="Logo"
+            <img src="/assets/images/logo.png" alt="Logo"
                 class="w-40 h-auto object-contain" />
             <h2 class="mt-4 text-xl font-semibold text-center text-white">Redefinir Senha</h2>
             <p class="mt-2 text-sm text-gray-300 text-center">Olá, <?= htmlspecialchars($user['nome']) ?></p>
         </div>
 
         <div class="form-container mobile-compact">
-            <form method="POST" action="/participantesici/public_html/salvar-nova-senha" class="space-y-4" novalidate id="redefinir-senha-form">
+            <form method="POST" action="/salvar-nova-senha" class="space-y-4" novalidate id="redefinir-senha-form">
                 <input type="hidden" name="token" value="<?= htmlspecialchars($token) ?>">
 
                 <div class="relative group">
@@ -131,7 +131,7 @@ if (!$user) {
 
                 <div class="text-center space-y-3 mt-6">
                     <hr class="border-yellow-400">
-                    <a href="/participantesici/public_html/login"
+                    <a href="/login"
                         class="inline-flex items-center text-yellow-400 hover:text-[#00bfff] text-sm transition font-semibold">
                         <i class="fa-solid fa-arrow-left mr-1"></i>
                         Voltar ao Login

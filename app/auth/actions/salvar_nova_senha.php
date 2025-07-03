@@ -4,7 +4,7 @@ session_start();
 require_once __DIR__ . '/../../config/database.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-  header('Location: /participantesici/public_html/login');
+  header('Location: /login');
   exit;
 }
 
@@ -39,19 +39,19 @@ function validarSenha($senha)
 // Validações
 if (empty($token)) {
   $_SESSION['error'] = 'Token inválido.';
-  header('Location: /participantesici/public_html/esqueci-senha');
+  header('Location: /esqueci-senha');
   exit;
 }
 
 if (empty($nova_senha) || empty($confirmar_senha)) {
   $_SESSION['error'] = 'Todos os campos são obrigatórios.';
-  header("Location: /participantesici/public_html/redefinir-senha?token=" . urlencode($token));
+  header("Location: /redefinir-senha?token=" . urlencode($token));
   exit;
 }
 
 if ($nova_senha !== $confirmar_senha) {
   $_SESSION['error'] = 'As senhas não coincidem.';
-  header("Location: /participantesici/public_html/redefinir-senha?token=" . urlencode($token));
+  header("Location: /redefinir-senha?token=" . urlencode($token));
   exit;
 }
 
@@ -59,7 +59,7 @@ if ($nova_senha !== $confirmar_senha) {
 $errosSenha = validarSenha($nova_senha);
 if (!empty($errosSenha)) {
   $_SESSION['error'] = 'Senha inválida: ' . implode(', ', $errosSenha);
-  header("Location: /participantesici/public_html/redefinir-senha?token=" . urlencode($token));
+  header("Location: /redefinir-senha?token=" . urlencode($token));
   exit;
 }
 
@@ -76,7 +76,7 @@ try {
 
   if (!$result) {
     $_SESSION['error'] = 'Token de recuperação inválido ou expirado. Envie novamente.';
-    header('Location: /participantesici/public_html/esqueci-senha');
+    header('Location: /esqueci-senha');
     exit;
   }
 
@@ -109,7 +109,7 @@ try {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script src="/participantesici/public_html/assets/js/global-scripts.js?t=<?= time() ?>"></script>
+    <script src="/assets/js/global-scripts.js?t=<?= time() ?>"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
@@ -128,13 +128,13 @@ try {
   <body class="relative h-screen flex items-center justify-center bg-black/70 text-white overflow-hidden">
     <div class="video-bg">
       <video autoplay muted loop>
-        <source src="/participantesici/public_html/assets/videos/fogueira.mp4" type="video/mp4">
+        <source src="/assets/videos/fogueira.mp4" type="video/mp4">
       </video>
     </div>
 
     <div class="w-full max-w-md bg-black/50 rounded-lg p-6 shadow-lg mx-4 text-center">
       <div class="flex flex-col items-center mb-6">
-        <img src="/participantesici/public_html/assets/images/logo.png" alt="Logo" class="w-40 h-auto object-contain" />
+        <img src="/assets/images/logo.png" alt="Logo" class="w-40 h-auto object-contain" />
         <h2 class="mt-4 text-xl font-semibold text-white">Senha Alterada!</h2>
       </div>
 
@@ -175,7 +175,7 @@ try {
 
       function irParaLogin() {
         if (intervalId) clearInterval(intervalId);
-        window.location.href = '/participantesici/public_html/login';
+        window.location.href = '/login';
       }
 
       // Mostra toast imediatamente
@@ -209,6 +209,6 @@ try {
 
   error_log("[RECUPERACAO_DEBUG] Erro ao salvar nova senha: " . $e->getMessage());
   $_SESSION['error'] = 'Erro interno. Tente novamente mais tarde.';
-  header("Location: /participantesici/public_html/redefinir-senha?token=" . urlencode($token));
+  header("Location: /redefinir-senha?token=" . urlencode($token));
   exit;
 }

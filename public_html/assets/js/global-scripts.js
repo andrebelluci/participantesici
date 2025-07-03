@@ -239,7 +239,7 @@ function showToast(message, type = 'error', duration = null) {
 /**
  * Toast para login com redirecionamento
  */
-function showLoginSuccessToast(redirectUrl = '/participantesici/public_html/home') {
+function showLoginSuccessToast(redirectUrl = '/home') {
     showToast('Login efetuado com sucesso! Redirecionando...', 'success', 2000);
 
     setTimeout(() => {
@@ -247,7 +247,7 @@ function showLoginSuccessToast(redirectUrl = '/participantesici/public_html/home
     }, 1500);
 }
 
-function showPasswordChangeToast(redirectUrl = '/participantesici/public_html/login') {
+function showPasswordChangeToast(redirectUrl = '/login') {
     showToast('Senha alterada! Redirecionando para login.', 'success', 3000);
 
     setTimeout(() => {

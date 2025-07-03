@@ -1,6 +1,14 @@
 <?php
 // app/auth/templates/login.php - VERSÃO ATUALIZADA + CAPTCHA
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+  session_start();
+}
+
+// Se já estiver logado, redireciona para home
+if (isset($_SESSION['user_id'])) {
+  header("Location: /home");
+  exit;
+}
 require_once __DIR__ . '/../../services/CaptchaService.php';
 
 $error = $_SESSION['login_error'] ?? null;
@@ -31,16 +39,16 @@ $tentativas = CaptchaService::obterTentativas($identificador);
   <meta name="application-name" content="Participantes ICI">
   <meta name="theme-color" content="#000000">
   <meta name="theme-color" content="#1D4ED8">
-  <link rel="manifest" href="/participantesici/public_html/manifest.json" />
-  <link rel="apple-touch-icon" href="/participantesici/public_html/assets/images/icon-192.png">
-  <link rel="apple-touch-icon" sizes="152x152" href="/participantesici/public_html/assets/images/icon-152.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/participantesici/public_html/assets/images/icon-192.png">
-  <link rel="icon" href="/participantesici/public_html/assets/images/favicon.ico" type="image/x-icon" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/assets/images/icon-192.png">
+  <link rel="apple-touch-icon" sizes="152x152" href="/assets/images/icon-152.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/images/icon-192.png">
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-  <link rel="stylesheet" href="/participantesici/public_html/assets/css/mobile-fixes.css?v=1.0">
-  <script src="/participantesici/public_html/assets/js/global-scripts.js?t=<?= time() ?>"></script>
-  <script src="/participantesici/public_html/assets/js/pwa.js"></script>
+  <link rel="stylesheet" href="/assets/css/mobile-fixes.css?v=1.0">
+  <script src="/assets/js/global-scripts.js?t=<?= time() ?>"></script>
+  <script src="/assets/js/pwa.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -86,14 +94,14 @@ $tentativas = CaptchaService::obterTentativas($identificador);
 <body class="relative h-screen flex items-center justify-center bg-black/70 text-white">
   <div class="video-bg">
     <video autoplay muted loop>
-      <source src="/participantesici/public_html/assets/videos/fogueira.mp4" type="video/mp4">
+      <source src="/assets/videos/fogueira.mp4" type="video/mp4">
       Seu navegador não suporta vídeos.
     </video>
   </div>
 
   <div class="w-full max-w-md bg-black/50 rounded-lg p-6 shadow-lg mx-4 backdrop-blur-sm">
     <div class="flex flex-col items-center mb-6">
-      <img src="/participantesici/public_html/assets/images/logo.png" alt="Logo" class="w-40 h-auto object-contain" />
+      <img src="/assets/images/logo.png" alt="Logo" class="w-40 h-auto object-contain" />
       <h2 class="mt-4 text-xl font-semibold text-center text-white">Gestão de participantes</h2>
     </div>
 
@@ -111,7 +119,7 @@ $tentativas = CaptchaService::obterTentativas($identificador);
     <?php endif; ?>
 
     <div class="form-container mobile-compact">
-      <form method="POST" action="/participantesici/public_html/entrar" class="space-y-4" novalidate>
+      <form method="POST" action="/entrar" class="space-y-4" novalidate>
         <div>
           <input type="text" name="usuario" id="usuario" placeholder="Usuário" required autocapitalize="none"
             class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00bfff] transition" />
@@ -162,7 +170,7 @@ $tentativas = CaptchaService::obterTentativas($identificador);
         <!-- ✅ SEÇÃO: LINK ESQUECI MINHA SENHA -->
         <div class="text-center space-y-3 mt-6">
           <hr class="border-yellow-400">
-          <a href="/participantesici/public_html/esqueci-senha"
+          <a href="/esqueci-senha"
             class="inline-flex items-center text-sm text-yellow-400 hover:text-[#00bfff] transition group font-semibold">
             <i class="fa-solid fa-key mr-2 group-hover:scale-110 transition-transform"></i>
             Esqueci minha senha
@@ -238,7 +246,7 @@ $tentativas = CaptchaService::obterTentativas($identificador);
     <script>
       document.addEventListener("DOMContentLoaded", () => {
         // Exibe toast de sucesso e redireciona
-        showLoginSuccessToast('/participantesici/public_html/home');
+        showLoginSuccessToast('/home');
       });
     </script>
   <?php endif; ?>

@@ -44,5 +44,5 @@ session_start();
 $_SESSION['login_success'] = "Logout realizado com sucesso. Até logo, $nome_usuario!";
 
 // Redireciona para a página de login
-header("Location: /participantesici/public_html/login");
+header("Location: /login");
 exit;

@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../../functions/check_auth.php';
 require_once __DIR__ . '/../../config/database.php';
 
-$redirect = $_GET['redirect'] ?? '/participantesici/public_html/rituais';
+$redirect = $_GET['redirect'] ?? '/rituais';
 
 // ✅ EXTRAIR PARTICIPANTE_ID DO REDIRECT (para vinculação automática)
 $participante_id_from_redirect = null;
@@ -201,7 +201,7 @@ function excluirFotoAntigaRitual($nomeRitual)
     )
   );
 
-  $diretorio = __DIR__ . '/../../../storage/uploads/rituais/';
+  $diretorio = __DIR__ . '/../../../public_html/storage/uploads/rituais/';
 
   if (is_dir($diretorio)) {
     $arquivos = glob($diretorio . '*_' . substr($nomeRitualLimpo, 0, 20) . '.*');
@@ -219,7 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $padrinho_madrinha = $_POST['padrinho_madrinha'];
 
   // ✅ CAPTURAR REDIRECT DO POST (campo hidden)
-  $redirect = $_POST['redirect'] ?? $_GET['redirect'] ?? '/participantesici/public_html/rituais';
+  $redirect = $_POST['redirect'] ?? $_GET['redirect'] ?? '/rituais';
 
   // ✅ EXTRAIR PARTICIPANTE_ID DO REDIRECT NOVAMENTE (do POST)
   $participante_id_from_redirect = null;
@@ -239,7 +239,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $extensao = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
     $foto_nome = gerarNomeArquivoRitual($nome, $extensao);
-    $foto_destino = __DIR__ . '/../../../storage/uploads/rituais/' . $foto_nome;
+    $foto_destino = __DIR__ . '/../../../public_html/storage/uploads/rituais/' . $foto_nome;
 
     // Criar diretório se não existir
     if (!is_dir(dirname($foto_destino))) {
@@ -247,14 +247,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if (move_uploaded_file($_FILES['foto']['tmp_name'], $foto_destino)) {
-      $foto = '/participantesici/storage/uploads/rituais/' . $foto_nome;
+      $foto = '/storage/uploads/rituais/' . $foto_nome;
     }
   }
 
   // Validações básicas
   if (empty($nome)) {
     $_SESSION['error'] = 'Nome do ritual é obrigatório.';
-    $redirectUrl = '/participantesici/public_html/ritual/novo';
+    $redirectUrl = '/ritual/novo';
     if ($redirect) {
       $redirectUrl .= '?redirect=' . urlencode($redirect);
     }
@@ -264,7 +264,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
   if (empty($data_ritual)) {
     $_SESSION['error'] = 'Data do ritual é obrigatória.';
-    $redirectUrl = '/participantesici/public_html/ritual/novo';
+    $redirectUrl = '/ritual/novo';
     if ($redirect) {
       $redirectUrl .= '?redirect=' . urlencode($redirect);
     }
@@ -274,7 +274,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
   if (empty($padrinho_madrinha)) {
     $_SESSION['error'] = 'Padrinho ou Madrinha é obrigatório.';
-    $redirectUrl = '/participantesici/public_html/ritual/novo';
+    $redirectUrl = '/ritual/novo';
     if ($redirect) {
       $redirectUrl .= '?redirect=' . urlencode($redirect);
     }
@@ -317,7 +317,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
   } catch (Exception $e) {
     $_SESSION['error'] = 'Erro ao criar ritual: ' . $e->getMessage();
-    $redirectUrl = '/participantesici/public_html/ritual/novo';
+    $redirectUrl = '/ritual/novo';
     if ($redirect) {
       $redirectUrl .= '?redirect=' . urlencode($redirect);
     }

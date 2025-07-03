@@ -15,7 +15,9 @@ class CaptchaService
    */
   public static function deveMostrarCaptcha($identificador)
   {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+      session_start();
+    }
 
     $chave = 'tentativas_' . md5($identificador);
     $tentativas = $_SESSION[$chave] ?? 0;
@@ -29,7 +31,9 @@ class CaptchaService
    */
   public static function incrementarTentativas($identificador)
   {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
     $chave = 'tentativas_' . md5($identificador);
     $chaveTime = 'primeiro_erro_' . md5($identificador);
@@ -51,7 +55,9 @@ class CaptchaService
    */
   public static function resetarTentativas($identificador)
   {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
     $chave = 'tentativas_' . md5($identificador);
     $chaveTime = 'primeiro_erro_' . md5($identificador);
@@ -68,7 +74,9 @@ class CaptchaService
    */
   public static function verificarTempoReset($identificador)
   {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
 
     $chave = 'tentativas_' . md5($identificador);
     $chaveTime = 'primeiro_erro_' . md5($identificador);
@@ -192,7 +200,9 @@ class CaptchaService
    */
   public static function obterTentativas($identificador)
   {
-    session_start();
+    if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
     $chave = 'tentativas_' . md5($identificador);
     return $_SESSION[$chave] ?? 0;
   }

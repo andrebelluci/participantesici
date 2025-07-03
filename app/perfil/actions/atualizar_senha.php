@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       'tipo' => 'error',
       'texto' => 'Todos os campos são obrigatórios.'
     ];
-    header('Location: /participantesici/public_html/alterar_senha');
+    header('Location: /alterar_senha');
     exit;
   }
 
@@ -50,7 +50,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       'tipo' => 'error',
       'texto' => 'As senhas não coincidem.'
     ];
-    header('Location: /participantesici/public_html/alterar_senha');
+    header('Location: /alterar_senha');
     exit;
   }
 
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       'tipo' => 'error',
       'texto' => 'Nova senha inválida: ' . implode(', ', $errosSenha)
     ];
-    header('Location: /participantesici/public_html/alterar_senha');
+    header('Location: /alterar_senha');
     exit;
   }
 
@@ -72,7 +72,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       'tipo' => 'error',
       'texto' => 'A nova senha deve ser diferente da senha atual.'
     ];
-    header('Location: /participantesici/public_html/alterar_senha');
+    header('Location: /alterar_senha');
     exit;
   }
 
@@ -112,6 +112,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     ];
   }
 
-  header("Location: /participantesici/public_html/alterar_senha?t=" . time());
+  header("Location: /alterar_senha?t=" . time());
   exit;
 }

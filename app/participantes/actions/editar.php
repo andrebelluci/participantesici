@@ -8,7 +8,7 @@ if (!$id) {
   die("ID da pessoa não especificado.");
 }
 
-$redirect = $_GET['redirect'] ?? '/participantesici/public_html/participantes';
+$redirect = $_GET['redirect'] ?? '/participantes';
 
 // Consulta os dados da pessoa no banco de dados
 $stmt = $pdo->prepare("SELECT * FROM participantes WHERE id = ?");
@@ -29,7 +29,7 @@ function gerarNomeArquivoParticipante($cpf, $extensao) {
 // ✅ FUNÇÃO PARA EXCLUIR FOTO ANTIGA
 function excluirFotoAntigaParticipante($cpf) {
   $cpfLimpo = preg_replace('/\D/', '', $cpf);
-  $diretorio = __DIR__ . '/../../../storage/uploads/participantes/';
+  $diretorio = __DIR__ . '/../../../public_html/storage/uploads/participantes/';
 
   if (is_dir($diretorio)) {
     $arquivos = glob($diretorio . '*_' . $cpfLimpo . '.*');
@@ -78,14 +78,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       $imageData = base64_decode($imageData);
 
       $foto_nome = gerarNomeArquivoParticipante($cpf, $imageType);
-      $foto_destino = __DIR__ . '/../../../storage/uploads/participantes/' . $foto_nome;
+      $foto_destino = __DIR__ . '/../../../public_html/storage/uploads/participantes/' . $foto_nome;
 
       if (!is_dir(dirname($foto_destino))) {
         mkdir(dirname($foto_destino), 0755, true);
       }
 
       if (file_put_contents($foto_destino, $imageData)) {
-        $foto = '/participantesici/storage/uploads/participantes/' . $foto_nome;
+        $foto = '/storage/uploads/participantes/' . $foto_nome;
       }
     }
   }
@@ -96,14 +96,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $extensao = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
     $foto_nome = gerarNomeArquivoParticipante($cpf, $extensao);
-    $foto_destino = __DIR__ . '/../../../storage/uploads/participantes/' . $foto_nome;
+    $foto_destino = __DIR__ . '/../../../public_html/storage/uploads/participantes/' . $foto_nome;
 
     if (!is_dir(dirname($foto_destino))) {
       mkdir(dirname($foto_destino), 0755, true);
     }
 
     if (move_uploaded_file($_FILES['foto']['tmp_name'], $foto_destino)) {
-      $foto = '/participantesici/storage/uploads/participantes/' . $foto_nome;
+      $foto = '/storage/uploads/participantes/' . $foto_nome;
     }
   }
   // ✅ VERIFICAR SE FOI SOLICITADA REMOÇÃO DE FOTO
@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   // Verifica se o e-mail é válido
   if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^[a-zA-Z0-9._%+-]{3,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $email)) {
     $_SESSION['error'] = 'Erro: Por favor, digite um e-mail válido.';
-    header("Location: /participantesici/public_html/participante/editar/$id");
+    header("Location: /participante/editar/$id");
     exit;
   }
 
@@ -124,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $stmt_check_cpf->execute([$cpf, $id]);
   if ($stmt_check_cpf->rowCount() > 0) {
     $_SESSION['error'] = 'Erro: Este CPF já está cadastrado.';
-    header("Location: /participantesici/public_html/participante/editar/$id");
+    header("Location: /participante/editar/$id");
     exit;
   }
 
@@ -133,7 +133,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Encontra foto atual
     $cpfAntigo = preg_replace('/\D/', '', $pessoa['cpf']);
     $cpfNovo = preg_replace('/\D/', '', $cpf);
-    $diretorio = __DIR__ . '/../../../storage/uploads/participantes/';
+    $diretorio = __DIR__ . '/../../../public_html/storage/uploads/participantes/';
 
     $arquivosAntigos = glob($diretorio . '*_' . $cpfAntigo . '.*');
     if (!empty($arquivosAntigos)) {
@@ -143,7 +143,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       $novoArquivo = $diretorio . $novoNome;
 
       if (rename($arquivoAntigo, $novoArquivo)) {
-        $foto = '/participantesici/storage/uploads/participantes/' . $novoNome;
+        $foto = '/storage/uploads/participantes/' . $novoNome;
       }
     }
   }

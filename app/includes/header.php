@@ -51,7 +51,7 @@ if (!isset($_SESSION['user_id'])) {
     // Tenta restaurar sessão via cookie de lembrar-me
     if (!verificarTokenLembrarMe($pdo)) {
         // Não está logado e não tem token válido
-        header("Location: /participantesici/public_html/login");
+        header("Location: /login");
         exit;
     }
 }
@@ -67,7 +67,7 @@ if (!$tem_cookie_lembrar && isset($_SESSION['last_activity'])) {
         // Timeout apenas se não tem cookie de lembrar-me
         session_unset();
         session_destroy();
-        header("Location: /participantesici/public_html/login?timeout=1");
+        header("Location: /login?timeout=1");
         exit;
     }
 }
@@ -79,7 +79,7 @@ $_SESSION['last_activity'] = time();
 function is_active($pagina_url)
 {
     $current_url = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
-    $base_path = '/participantesici/public_html/';
+    $base_path = '/';
     $current_relative = str_replace($base_path, '', $current_url);
     return trim($current_relative, '/') === trim($pagina_url, '/') ? 'text-yellow-400' : '';
 }
@@ -113,7 +113,7 @@ if (isset($_SESSION['user_id'])) {
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
     <title>Participantes - ICI</title>
-    <link rel="icon" type="image/x-icon" href="/participantesici/public_html/assets/images/favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/assets/images/favicon.ico">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"
         crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -121,17 +121,17 @@ if (isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="/participantesici/public_html/assets/css/mobile-fixes.css?v=1.0">
-    <script src="/participantesici/public_html/assets/js/global-scripts.js?t=<?= time() ?>"></script>
-    <script src="/participantesici/public_html/assets/js/unsaved-changes-detector.js"></script>
+    <link rel="stylesheet" href="/assets/css/mobile-fixes.css?v=1.0">
+    <script src="/assets/js/global-scripts.js?t=<?= time() ?>"></script>
+    <script src="/assets/js/unsaved-changes-detector.js"></script>
 
 </head>
 
 <body class="bg-black min-h-screen flex flex-col mobile-viewport">
     <header class="fixed top-0 left-0 right-0 z-50 bg-black text-white shadow-lg">
         <div class="flex items-center justify-between px-4 py-1 max-w-6xl mx-auto">
-            <a href="/participantesici/public_html/home">
-                <img src="/participantesici/public_html/assets/images/logo.png" alt="Logo Instituto Céu Interior"
+            <a href="/home">
+                <img src="/assets/images/logo.png" alt="Logo Instituto Céu Interior"
                     class="h-10">
             </a>
 
@@ -145,38 +145,38 @@ if (isset($_SESSION['user_id'])) {
                 <nav id="mobile-nav"
                     class="hidden absolute right-0 mt-2 w-48 bg-black text-white shadow-md rounded-md z-50 flex flex-col"
                     aria-label="Menu de navegação mobile">
-                    <a href="/participantesici/public_html/home"
+                    <a href="/home"
                         class="px-4 py-2 hover:bg-gray-800 <?= basename($_SERVER['PHP_SELF']) === 'home.php' ? 'text-yellow-400' : '' ?>">Home</a>
-                    <a href="/participantesici/public_html/participantes"
+                    <a href="/participantes"
                         class="px-4 py-2 hover:bg-gray-800 <?= is_active('participantes') ?>">Participantes</a>
-                    <a href="/participantesici/public_html/rituais"
+                    <a href="/rituais"
                         class="px-4 py-2 hover:bg-gray-800 <?= is_active('rituais') ?>">Rituais</a>
                     <?php if ($is_admin): ?>
-                        <a href="/participantesici/public_html/usuarios"
+                        <a href="/usuarios"
                             class="px-4 py-2 hover:bg-gray-800 <?= is_active('usuarios') ?>">Usuários</a>
                     <?php endif; ?>
-                    <a href="/participantesici/public_html/alterar_senha"
+                    <a href="/alterar_senha"
                         class="px-4 py-2 hover:bg-gray-800 <?= basename($_SERVER['PHP_SELF']) === 'alterar_senha.php' ? 'text-yellow-400' : '' ?>">Alterar
                         Senha</a>
-                    <a href="/participantesici/public_html/logout" class="px-4 py-2 hover:bg-gray-800">Sair</a>
+                    <a href="/logout" class="px-4 py-2 hover:bg-gray-800">Sair</a>
                 </nav>
             </div>
 
             <nav id="main-nav" class="hidden sm:flex space-x-8 items-center">
-                <a href="/participantesici/public_html/home"
+                <a href="/home"
                     class="hover:text-[#00bfff] <?= basename($_SERVER['PHP_SELF']) === 'home.php' ? 'text-yellow-400' : '' ?>">Home</a>
-                <a href="/participantesici/public_html/participantes"
+                <a href="/participantes"
                     class="hover:text-[#00bfff] <?= is_active('participantes') ?>">Participantes</a>
-                <a href="/participantesici/public_html/rituais"
+                <a href="/rituais"
                     class="hover:text-[#00bfff] <?= is_active('rituais') ?>">Rituais</a>
                 <?php if ($is_admin): ?>
-                    <a href="/participantesici/public_html/usuarios" class="hover:text-[#00bfff] <?= is_active('usuarios') ?>">Usuários</a>
+                        <a href="/usuarios" class="hover:text-[#00bfff] <?= is_active('usuarios') ?>">Usuários</a>
                 <?php endif; ?>
-                <a href="/participantesici/public_html/alterar_senha"
+                <a href="/alterar_senha"
                     class="hover:text-[#00bfff] <?= basename($_SERVER['PHP_SELF']) === 'alterar_senha.php' ? 'text-yellow-400' : '' ?>">
                     Alterar Senha
                 </a>
-                <a href="/participantesici/public_html/logout" class="hover:text-[#00bfff]">Sair</a>
+                <a href="/logout" class="hover:text-[#00bfff]">Sair</a>
             </nav>
         </div>
     </header>

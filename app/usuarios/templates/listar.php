@@ -4,12 +4,12 @@ require_once __DIR__ . '/../../includes/header.php';
 
 <div class="max-w-screen-xl mx-auto px-4 py-6">
   <div class="flex items-center justify-between mb-6">
-    <a href="/participantesici/public_html/home"
+    <a href="/home"
       class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
       <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
     </a>
 
-    <a href="/participantesici/public_html/usuario/novo"
+    <a href="/usuario/novo"
       class="bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
       <i class="fa-solid fa-plus mr-2"></i>Novo Usuário
     </a>
@@ -38,7 +38,7 @@ require_once __DIR__ . '/../../includes/header.php';
       <i class="fa-solid fa-search"></i> Filtrar
     </button>
     <!-- Botão limpar visível no mobile -->
-    <a href="/participantesici/public_html/usuarios"
+    <a href="/usuarios"
       class="<?= empty($filtro_nome) && empty($filtro_cpf) ? 'hidden' : '' ?> bg-red-600 text-white px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-red-300 transition">
       <i class="fa-solid fa-broom mr-1"></i> Limpar Filtro
     </a>
@@ -60,7 +60,7 @@ require_once __DIR__ . '/../../includes/header.php';
           class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
           <i class="fa-solid fa-search mr-1"></i> Filtrar
         </button>
-        <a href="/participantesici/public_html/usuarios"
+        <a href="/usuarios"
           class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition font-semibold shadow">
           <i class="fa-solid fa-times mr-1"></i> Limpar
         </a>
@@ -110,7 +110,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
           <!-- Ações -->
           <div class="flex justify-center gap-6 md:justify-end md:gap-2 mt-2 text-sm">
-            <a href="/participantesici/public_html/usuario/<?= $usuario['id'] ?>/editar"
+            <a href="/usuario/<?= $usuario['id'] ?>/editar"
               class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
               title="Editar usuário">
               <div class="flex flex-col items-center sm:flex-row sm:gap-1">
@@ -119,7 +119,7 @@ require_once __DIR__ . '/../../includes/header.php';
               </div>
             </a>
             <?php if ($usuario['id'] != $_SESSION['user_id']): ?>
-              <button onclick="abrirConfirmacaoExcluir('/participantesici/public_html/usuario/<?= $usuario['id'] ?>/excluir')"
+                    <button onclick="abrirConfirmacaoExcluir('/usuario/<?= $usuario['id'] ?>/excluir')"
                 class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded flex items-center gap-1"
                 title="Excluir usuário">
                 <div class="flex flex-col items-center sm:flex-row sm:gap-1">
@@ -207,14 +207,14 @@ require_once __DIR__ . '/../../includes/header.php';
                 </td>
                 <td class="px-4 py-3 text-center">
                   <div class="flex justify-center gap-2">
-                    <a href="/participantesici/public_html/usuario/<?= $usuario['id'] ?>/editar"
+                    <a href="/usuario/<?= $usuario['id'] ?>/editar"
                       class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
                       title="Editar usuário">
                       <i class="fa-solid fa-edit"></i>
                     </a>
                     <?php if ($usuario['id'] != $_SESSION['user_id']): ?>
                       <button
-                        onclick="abrirConfirmacaoExcluir('/participantesici/public_html/usuario/<?= $usuario['id'] ?>/excluir')"
+                        onclick="abrirConfirmacaoExcluir('/usuario/<?= $usuario['id'] ?>/excluir')"
                         class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded flex items-center gap-1"
                         title="Excluir usuário">
                         <i class="fa-solid fa-trash"></i>
@@ -282,7 +282,7 @@ require_once __DIR__ . '/../../includes/header.php';
   </div>
 </div>
 
-<script src="/participantesici/public_html/assets/js/usuarios.js"></script>
-<script src="/participantesici/public_html/assets/js/modal.js"></script>
+<script src="/assets/js/usuarios.js"></script>
+<script src="/assets/js/modal.js"></script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

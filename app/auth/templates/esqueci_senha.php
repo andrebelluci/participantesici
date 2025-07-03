@@ -27,10 +27,10 @@ $tentativas = CaptchaService::obterTentativas($identificador);
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#000000">
     <title>Recuperar Senha - ICI</title>
-    <link rel="icon" href="/participantesici/public_html/assets/images/favicon.ico" type="image/x-icon" />
+    <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <script src="/participantesici/public_html/assets/js/global-scripts.js?t=<?= time() ?>"></script>
+    <script src="/assets/js/global-scripts.js?t=<?= time() ?>"></script>
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 
@@ -76,14 +76,14 @@ $tentativas = CaptchaService::obterTentativas($identificador);
 <body class="relative h-screen flex items-center justify-center bg-black/70 text-white overflow-hidden">
     <div class="video-bg">
         <video autoplay muted loop>
-            <source src="/participantesici/public_html/assets/videos/fogueira.mp4" type="video/mp4">
+            <source src="/assets/videos/fogueira.mp4" type="video/mp4">
             Seu navegador não suporta vídeos.
         </video>
     </div>
 
     <div class="w-full max-w-md bg-black/50 rounded-lg p-6 shadow-lg mx-4 backdrop-blur-sm">
         <div class="flex flex-col items-center mb-6">
-            <img src="/participantesici/public_html/assets/images/logo.png" alt="Logo"
+            <img src="/assets/images/logo.png" alt="Logo"
                 class="w-40 h-auto object-contain" />
             <h2 class="mt-4 text-xl font-semibold text-center text-white">Recuperar Senha</h2>
         </div>
@@ -102,7 +102,7 @@ $tentativas = CaptchaService::obterTentativas($identificador);
         <?php endif; ?>
 
         <div class="form-container mobile-compact">
-            <form method="POST" action="/participantesici/public_html/enviar-recuperacao" class="space-y-4" novalidate id="recuperacaoForm">
+            <form method="POST" action="/enviar-recuperacao" class="space-y-4" novalidate id="recuperacaoForm">
                 <div>
                     <input type="text" name="usuario" id="usuario" placeholder="Usuário" required autocapitalize="none"
                         class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00bfff] transition" />
@@ -129,7 +129,7 @@ $tentativas = CaptchaService::obterTentativas($identificador);
 
                 <div class="text-center space-y-3 mt-6">
                     <hr class="border-yellow-400">
-                    <a href="/participantesici/public_html/login"
+                    <a href="/login"
                         class="inline-flex items-center text-yellow-400 hover:text-[#00bfff] text-sm transition font-semibold">
                         <i class="fa-solid fa-arrow-left mr-1"></i>
                         Voltar ao Login

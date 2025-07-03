@@ -7,7 +7,7 @@ require_once __DIR__ . '/../../services/EmailService.php';
 require_once __DIR__ . '/../../services/CaptchaService.php';
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: /participantesici/public_html/esqueci-senha');
+    header('Location: /esqueci-senha');
     exit;
 }
 
@@ -23,7 +23,7 @@ CaptchaService::verificarTempoReset($identificador);
 if (empty($usuario)) {
     CaptchaService::incrementarTentativas($identificador);
     $_SESSION['error'] = 'Por favor, informe seu usuário.';
-    header('Location: /participantesici/public_html/esqueci-senha');
+    header('Location: /esqueci-senha');
     exit;
 }
 
@@ -33,7 +33,7 @@ $deveMostrarCaptcha = CaptchaService::deveMostrarCaptcha($identificador);
 if ($deveMostrarCaptcha) {
     if (empty($captcha_token)) {
         $_SESSION['error'] = 'Por favor, complete a verificação de segurança (captcha).';
-        header('Location: /participantesici/public_html/esqueci-senha');
+        header('Location: /esqueci-senha');
         exit;
     }
 
@@ -43,7 +43,7 @@ if ($deveMostrarCaptcha) {
     if (!$resultadoCaptcha['success']) {
         CaptchaService::incrementarTentativas($identificador);
         $_SESSION['error'] = 'Verificação de segurança inválida. Tente novamente.';
-        header('Location: /participantesici/public_html/esqueci-senha');
+        header('Location: /esqueci-senha');
         exit;
     }
 
@@ -61,7 +61,7 @@ try {
         CaptchaService::incrementarTentativas($identificador);
         error_log("[RECUPERACAO_DEBUG] Usuário não encontrado: $usuario");
         $_SESSION['error'] = 'Usuário não encontrado.';
-        header('Location: /participantesici/public_html/esqueci-senha');
+        header('Location: /esqueci-senha');
         exit;
     }
 
@@ -83,7 +83,7 @@ try {
 
     // Monta link de recuperação
     $base_url = 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
-    $link_recuperacao = $base_url . "/participantesici/public_html/redefinir-senha?token=" . $token;
+    $link_recuperacao = $base_url . "/redefinir-senha?token=" . $token;
 
     // Define email de destino
     $email_destino = $user['email'] ?? 'admin@participantesici.com.br';
@@ -114,5 +114,5 @@ try {
     $_SESSION['error'] = 'Erro interno. Tente novamente mais tarde.';
 }
 
-header('Location: /participantesici/public_html/esqueci-senha');
+header('Location: /esqueci-senha');
 exit;

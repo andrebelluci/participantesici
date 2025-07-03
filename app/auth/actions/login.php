@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   if (empty($usuario) || empty($senha)) {
     CaptchaService::incrementarTentativas($identificador);
     $_SESSION['login_error'] = 'Usuário e senha são obrigatórios!';
-    header("Location: /participantesici/public_html/login?t=" . time());
+    header("Location: /login?t=" . time());
     exit;
   }
 
@@ -74,7 +74,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   if ($deveMostrarCaptcha) {
     if (empty($captcha_token)) {
       $_SESSION['login_error'] = 'Por favor, complete a verificação de segurança (captcha).';
-      header("Location: /participantesici/public_html/login?t=" . time());
+      header("Location: /login?t=" . time());
       exit;
     }
 
@@ -84,7 +84,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!$resultadoCaptcha['success']) {
       CaptchaService::incrementarTentativas($identificador);
       $_SESSION['login_error'] = 'Verificação de segurança inválida. Tente novamente.';
-      header("Location: /participantesici/public_html/login?t=" . time());
+      header("Location: /login?t=" . time());
       exit;
     }
 
@@ -120,7 +120,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       error_log("[LOGIN] Login bem-sucedido: {$user['usuario']} (ID: {$user['id']})");
 
       // $_SESSION['login_success'] = 'Login efetuado com sucesso!';
-      header("Location: /participantesici/public_html/login?success=1");
+      header("Location: /login?success=1");
       exit;
 
     } else {
@@ -129,7 +129,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
       error_log("[LOGIN] Tentativa de login inválida para usuário: $usuario (Tentativas: " . CaptchaService::obterTentativas($identificador) . ")");
       $_SESSION['login_error'] = 'Usuário ou senha inválidos!';
-      header("Location: /participantesici/public_html/login?t=" . time());
+      header("Location: /login?t=" . time());
       exit;
     }
 
@@ -137,10 +137,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     CaptchaService::incrementarTentativas($identificador);
     error_log("[LOGIN] Erro no banco de dados: " . $e->getMessage());
     $_SESSION['login_error'] = 'Erro interno. Tente novamente mais tarde.';
-    header("Location: /participantesici/public_html/login?t=" . time());
+    header("Location: /login?t=" . time());
     exit;
   }
 }
 
-header("Location: /participantesici/public_html/login");
+header("Location: /login");
 exit;

@@ -6,7 +6,7 @@ require_once __DIR__ . '/../../config/database.php';
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$id) {
   $_SESSION['error'] = 'ID do ritual inválido.';
-  header('Location: /participantesici/public_html/rituais');
+  header('Location: /rituais');
   exit;
 }
 
@@ -105,7 +105,7 @@ function excluirFotoRitual($nomeRitual)
     )
   );
 
-  $diretorio = __DIR__ . '/../../../storage/uploads/rituais/';
+  $diretorio = __DIR__ . '/../../../public_html/storage/uploads/rituais/';
 
   if (is_dir($diretorio)) {
     // Busca todos os arquivos que contenham o nome do ritual
@@ -128,7 +128,7 @@ try {
 
   if (!$ritual) {
     $_SESSION['error'] = 'Ritual não encontrado.';
-    header('Location: /participantesici/public_html/rituais');
+    header('Location: /rituais');
     exit;
   }
 
@@ -153,5 +153,5 @@ try {
   $_SESSION['error'] = 'Erro ao excluir ritual: ' . $e->getMessage();
 }
 
-header('Location: /participantesici/public_html/rituais');
+header('Location: /rituais');
 exit;

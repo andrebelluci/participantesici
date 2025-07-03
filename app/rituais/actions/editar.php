@@ -5,11 +5,11 @@ require_once __DIR__ . '/../../config/database.php';
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$id) {
   $_SESSION['error'] = 'ID do ritual inválido.';
-  header('Location: /participantesici/public_html/rituais');
+  header('Location: /rituais');
   exit;
 }
 
-$redirect = $_GET['redirect'] ?? '/participantesici/public_html/rituais';
+$redirect = $_GET['redirect'] ?? '/rituais';
 
 // Buscar ritual
 $stmt = $pdo->prepare("SELECT * FROM rituais WHERE id = ?");
@@ -18,7 +18,7 @@ $ritual = $stmt->fetch();
 
 if (!$ritual) {
   $_SESSION['error'] = 'Ritual não encontrado.';
-  header('Location: /participantesici/public_html/rituais');
+  header('Location: /rituais');
   exit;
 }
 
@@ -209,7 +209,7 @@ function excluirFotoAntigaRitual($nomeRitual)
     )
   );
 
-  $diretorio = __DIR__ . '/../../../storage/uploads/rituais/';
+  $diretorio = __DIR__ . '/../../../public_html/storage/uploads/rituais/';
 
   if (is_dir($diretorio)) {
     $arquivos = glob($diretorio . '*_' . substr($nomeRitualLimpo, 0, 20) . '.*');
@@ -236,7 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $extensao = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
     $foto_nome = gerarNomeArquivoRitual($nome, $extensao);
-    $foto_destino = __DIR__ . '/../../../storage/uploads/rituais/' . $foto_nome;
+    $foto_destino = __DIR__ . '/../../../public_html/storage/uploads/rituais/' . $foto_nome;
 
     // Criar diretório se não existir
     if (!is_dir(dirname($foto_destino))) {
@@ -244,7 +244,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     }
 
     if (move_uploaded_file($_FILES['foto']['tmp_name'], $foto_destino)) {
-      $foto = '/participantesici/storage/uploads/rituais/' . $foto_nome;
+      $foto = '/storage/uploads/rituais/' . $foto_nome;
     }
   }
   // ✅ VERIFICAR SE FOI SOLICITADA REMOÇÃO DE FOTO
@@ -256,19 +256,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   // Validações básicas
   if (empty($nome)) {
     $_SESSION['error'] = 'Nome do ritual é obrigatório.';
-    header("Location: /participantesici/public_html/ritual/editar?id=$id");
+    header("Location: /ritual/editar?id=$id");
     exit;
   }
 
   if (empty($data_ritual)) {
     $_SESSION['error'] = 'Data do ritual é obrigatória.';
-    header("Location: /participantesici/public_html/ritual/editar?id=$id");
+    header("Location: /ritual/editar?id=$id");
     exit;
   }
 
   if (empty($padrinho_madrinha)) {
     $_SESSION['error'] = 'Padrinho ou Madrinha é obrigatório.';
-    header("Location: /participantesici/public_html/ritual/editar?id=$id");
+    header("Location: /ritual/editar?id=$id");
     exit;
   }
 
@@ -362,7 +362,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       )
     );
 
-    $diretorio = __DIR__ . '/../../../storage/uploads/rituais/';
+    $diretorio = __DIR__ . '/../../../public_html/storage/uploads/rituais/';
     $arquivosAntigos = glob($diretorio . '*_' . substr($nomeAntigoLimpo, 0, 20) . '.*');
 
     if (!empty($arquivosAntigos)) {
@@ -372,7 +372,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       $novoArquivo = $diretorio . $novoNome;
 
       if (rename($arquivoAntigo, $novoArquivo)) {
-        $foto = '/participantesici/storage/uploads/rituais/' . $novoNome;
+        $foto = '/storage/uploads/rituais/' . $novoNome;
       }
     }
   }

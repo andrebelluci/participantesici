@@ -14,14 +14,14 @@ $user_perfil = $stmt->fetch();
 
 if (!$user_perfil || $user_perfil['perfil_nome'] !== 'Administrador') {
   $_SESSION['error'] = 'Acesso negado. Área restrita para administradores.';
-  header('Location: /participantesici/public_html/home');
+  header('Location: /home');
   exit;
 }
 
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$id) {
   $_SESSION['error'] = 'ID do usuário inválido.';
-  header('Location: /participantesici/public_html/usuarios');
+  header('Location: /usuarios');
   exit;
 }
 
@@ -37,7 +37,7 @@ $usuario = $stmt->fetch();
 
 if (!$usuario) {
   $_SESSION['error'] = 'Usuário não encontrado.';
-  header('Location: /participantesici/public_html/usuarios');
+  header('Location: /usuarios');
   exit;
 }
 
@@ -57,14 +57,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   // Validações
   if (empty($nome) || empty($usuario_nome) || empty($email) || !$perfil_id) {
     $_SESSION['error'] = 'Todos os campos são obrigatórios.';
-    header("Location: /participantesici/public_html/usuario/$id/editar");
+    header("Location: /usuario/$id/editar");
     exit;
   }
 
   // Validar email
   if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
     $_SESSION['error'] = 'E-mail inválido.';
-    header("Location: /participantesici/public_html/usuario/$id/editar");
+    header("Location: /usuario/$id/editar");
     exit;
   }
 
@@ -73,7 +73,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $stmt_check->execute([$usuario_nome, $id]);
   if ($stmt_check->fetch()) {
     $_SESSION['error'] = 'Nome de usuário já existe.';
-    header("Location: /participantesici/public_html/usuario/$id/editar");
+    header("Location: /usuario/$id/editar");
     exit;
   }
 
@@ -82,7 +82,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   $stmt_check->execute([$email, $id]);
   if ($stmt_check->fetch()) {
     $_SESSION['error'] = 'E-mail já está sendo usado por outro usuário.';
-    header("Location: /participantesici/public_html/usuario/$id/editar");
+    header("Location: /usuario/$id/editar");
     exit;
   }
 
@@ -96,7 +96,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
       // Validar nova senha
       if (strlen($nova_senha) < 8) {
         $_SESSION['error'] = 'A nova senha deve ter pelo menos 8 caracteres.';
-        header("Location: /participantesici/public_html/usuario/$id/editar");
+        header("Location: /usuario/$id/editar");
         exit;
       }
       $sql .= ", senha = ?";
@@ -110,12 +110,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $stmt_update->execute($params);
 
     $_SESSION['success'] = 'Usuário atualizado com sucesso!';
-    header('Location: /participantesici/public_html/usuarios');
+    header('Location: /usuarios');
     exit;
 
   } catch (Exception $e) {
     $_SESSION['error'] = 'Erro ao atualizar usuário: ' . $e->getMessage();
-    header("Location: /participantesici/public_html/usuario/$id/editar");
+    header("Location: /usuario/$id/editar");
     exit;
   }
 }

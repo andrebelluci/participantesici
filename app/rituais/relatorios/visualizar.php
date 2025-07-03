@@ -9,14 +9,14 @@ $formato = filter_input(INPUT_GET, 'formato', FILTER_SANITIZE_STRING) ?: 'pdf';
 
 if (!$id) {
     $_SESSION['error'] = 'ID do ritual inválido.';
-    header('Location: /participantesici/public_html/rituais');
+    header('Location: /rituais');
     exit;
 }
 
 // Validar formato
 if (!in_array($formato, ['pdf', 'excel'])) {
     $_SESSION['error'] = 'Formato de exportação inválido.';
-    header('Location: /participantesici/public_html/ritual/' . $id);
+    header('Location: /ritual/' . $id);
     exit;
 }
 

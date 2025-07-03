@@ -137,7 +137,7 @@ function abrirModalDetalhes(participanteId) {
   document.querySelector('select[name="primeira_vez_instituto"]').disabled = false;
   document.querySelector('select[name="primeira_vez_ayahuasca"]').disabled = false;
 
-  fetch(`/participantesici/public_html/api/inscricoes/buscar-id?participante_id=${participanteId}&ritual_id=${ritualId}`)
+  fetch(`/api/inscricoes/buscar-id?participante_id=${participanteId}&ritual_id=${ritualId}`)
     .then(response => response.json())
     .then(data => {
       if (data.error) {
@@ -147,7 +147,7 @@ function abrirModalDetalhes(participanteId) {
       const inscricaoId = data.inscricao_id;
       document.getElementById('id').value = inscricaoId;
 
-      fetch(`/participantesici/public_html/api/inscricoes/detalhes-inscricao?id=${inscricaoId}`)
+      fetch(`/api/inscricoes/detalhes-inscricao?id=${inscricaoId}`)
         .then(response => response.json())
         .then(detalhes => {
           if (detalhes.error) {
@@ -211,7 +211,7 @@ function aplicarAvisosPrimeiraInscricao() {
 
 // Nova função para verificar se os dados vieram de inscrição anterior
 function verificarDadosAnteriores(participanteId, inscricaoAtualId, detalhes) {
-  fetch(`/participantesici/public_html/api/inscricoes/verificar-primeira-inscricao?participante_id=${participanteId}&inscricao_atual_id=${inscricaoAtualId}`)
+  fetch(`/api/inscricoes/verificar-primeira-inscricao?participante_id=${participanteId}&inscricao_atual_id=${inscricaoAtualId}`)
     .then(response => response.json())
     .then(data => {
       if (data.dados_anteriores) {
@@ -269,7 +269,7 @@ function abrirModalDetalhesComDadosAnteriores(participanteId, dadosAPI) {
   currentParticipanteId = participanteId;
 
   // Busca a inscrição recém-criada
-  fetch(`/participantesici/public_html/api/inscricoes/buscar-id?participante_id=${participanteId}&ritual_id=${ritualId}`)
+  fetch(`/api/inscricoes/buscar-id?participante_id=${participanteId}&ritual_id=${ritualId}`)
     .then(response => response.json())
     .then(data => {
       if (data.error) {
@@ -298,7 +298,7 @@ function abrirModalObservacao(participanteId) {
   disableScroll();
   currentParticipanteId = participanteId;
 
-  fetch(`/participantesici/public_html/api/inscricoes/buscar-id?participante_id=${participanteId}&ritual_id=${ritualId}`)
+  fetch(`/api/inscricoes/buscar-id?participante_id=${participanteId}&ritual_id=${ritualId}`)
     .then(response => response.json())
     .then(data => {
       if (data.error) {
@@ -309,7 +309,7 @@ function abrirModalObservacao(participanteId) {
 
       document.getElementById('inscricao_id_observacao').value = inscricaoId;
 
-      fetch(`/participantesici/public_html/api/inscricoes/detalhes-inscricao?id=${inscricaoId}`)
+      fetch(`/api/inscricoes/detalhes-inscricao?id=${inscricaoId}`)
         .then(response => response.json())
         .then(detalhes => {
           if (detalhes.error) {
@@ -521,7 +521,7 @@ function initFormDetalhes() {
       // Prossegue com o AJAX
       const formData = new FormData(formDetalhes);
 
-      fetch('/participantesici/public_html/api/inscricoes/salvar-inscricao', {
+      fetch('/api/inscricoes/salvar-inscricao', {
         method: 'POST',
         body: formData
       })
@@ -571,7 +571,7 @@ function initFormObservacao() {
 
       console.log('Enviando observação:', observacao, 'Participante ID:', currentParticipanteId);
 
-      fetch('/participantesici/public_html/api/inscricoes/salvar-observacao', {
+      fetch('/api/inscricoes/salvar-observacao', {
         method: 'POST',
         body: formData
       })
@@ -608,7 +608,7 @@ function togglePresenca(button) {
   const currentStatus = button.getAttribute('data-current-status');
   const newStatus = currentStatus === 'Sim' ? 'Não' : 'Sim';
 
-  fetch(`/participantesici/public_html/api/inscricoes/buscar-id?participante_id=${participanteId}&ritual_id=${ritualId}`)
+  fetch(`/api/inscricoes/buscar-id?participante_id=${participanteId}&ritual_id=${ritualId}`)
     .then(response => response.json())
     .then(data => {
       if (data.error) {
@@ -617,7 +617,7 @@ function togglePresenca(button) {
       }
       const inscricaoId = data.inscricao_id;
 
-      fetch(`/participantesici/public_html/api/inscricoes/atualizar-presenca`, {
+      fetch(`/api/inscricoes/atualizar-presenca`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -734,12 +734,12 @@ function pesquisarParticipantes() {
   const listaParticipantes = document.getElementById('lista-participantes');
   if (listaParticipantes) listaParticipantes.innerHTML = '';
 
-  const apiUrl = `/participantesici/public_html/api/ritual/buscar-participante?nome=${encodeURIComponent(nomePesquisa)}`;
+  const apiUrl = `/api/ritual/buscar-participante?nome=${encodeURIComponent(nomePesquisa)}`;
   console.log('🌐 URL da API:', apiUrl);
   // Executa pesquisa
   Promise.all([
-    fetch(`/participantesici/public_html/api/ritual/buscar-participante?nome=${encodeURIComponent(nomePesquisa)}`),
-    fetch(`/participantesici/public_html/api/inscricoes/participantes-vinculados?ritual_id=${ritualId}`)
+    fetch(`/api/ritual/buscar-participante?nome=${encodeURIComponent(nomePesquisa)}`),
+    fetch(`/api/inscricoes/participantes-vinculados?ritual_id=${ritualId}`)
   ])
     .then(responses => Promise.all(responses.map(r => r.json())))
     .then(([participantesData, participantesVinculadosData]) => {
@@ -797,8 +797,8 @@ function pesquisarParticipantes() {
         li.innerHTML = `
           <div class="grid grid-cols-[auto_1fr] gap-4">
             <div class="flex-shrink-0">
-              <img src="${participante.foto || '/participantesici/public_html/assets/images/no-image.png'}"
-                   onerror="this.src='/participantesici/public_html/assets/images/no-image.png';"
+              <img src="${participante.foto || '/assets/images/no-image.png'}"
+                   onerror="this.src='/assets/images/no-image.png';"
                    alt="Foto do participante"
                    class="w-16 h-16 rounded-lg object-cover border border-gray-200">
             </div>
@@ -927,7 +927,7 @@ function adicionarNovaPessoa() {
   const ritualIdInput = document.querySelector('#modal-adicionar input[name="ritual_id"]');
   if (ritualIdInput) {
     const ritualIdValue = ritualIdInput.value;
-    window.location.href = `/participantesici/public_html/participante/novo?redirect=/participantesici/public_html/ritual/${ritualIdValue}`;
+    window.location.href = `/participante/novo?redirect=/ritual/${ritualIdValue}`;
   }
 }
 
@@ -940,7 +940,7 @@ function adicionarParticipante(participanteId) {
 
   const ritualIdValue = ritualIdInput.value;
 
-  fetch('/participantesici/public_html/api/ritual/adicionar-participante', {
+  fetch('/api/ritual/adicionar-participante', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({

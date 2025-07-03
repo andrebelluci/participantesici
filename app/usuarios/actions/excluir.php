@@ -14,21 +14,21 @@ $user_perfil = $stmt->fetch();
 
 if (!$user_perfil || $user_perfil['perfil_nome'] !== 'Administrador') {
   $_SESSION['error'] = 'Acesso negado. Área restrita para administradores.';
-  header('Location: /participantesici/public_html/home');
+  header('Location: /home');
   exit;
 }
 
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 if (!$id) {
   $_SESSION['error'] = 'ID do usuário inválido.';
-  header('Location: /participantesici/public_html/usuarios');
+  header('Location: /usuarios');
   exit;
 }
 
 // Não permitir que usuário exclua a si mesmo
 if ($id == $_SESSION['user_id']) {
   $_SESSION['error'] = 'Você não pode excluir seu próprio usuário.';
-  header('Location: /participantesici/public_html/usuarios');
+  header('Location: /usuarios');
   exit;
 }
 
@@ -39,7 +39,7 @@ $usuario = $stmt->fetch();
 
 if (!$usuario) {
   $_SESSION['error'] = 'Usuário não encontrado.';
-  header('Location: /participantesici/public_html/usuarios');
+  header('Location: /usuarios');
   exit;
 }
 
@@ -64,7 +64,7 @@ $usuario_perfil = $stmt_is_admin->fetch();
 
 if ($usuario_perfil && $usuario_perfil['perfil_nome'] === 'Administrador' && $admin_count <= 1) {
   $_SESSION['error'] = 'Não é possível excluir o último administrador do sistema.';
-  header('Location: /participantesici/public_html/usuarios');
+  header('Location: /usuarios');
   exit;
 }
 
@@ -74,11 +74,11 @@ try {
   $stmt_delete->execute([$id]);
 
   $_SESSION['success'] = "Usuário '{$usuario['nome']}' foi excluído com sucesso!";
-  header('Location: /participantesici/public_html/usuarios');
+  header('Location: /usuarios');
   exit;
 
 } catch (Exception $e) {
   $_SESSION['error'] = 'Erro ao excluir usuário: ' . $e->getMessage();
-  header('Location: /participantesici/public_html/usuarios');
+  header('Location: /usuarios');
   exit;
 }

@@ -13,7 +13,7 @@ require_once __DIR__ . '/../../includes/header.php';
     <a href="<?= $redirect ?>" class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
       <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
     </a>
-    <a href="/participantesici/public_html/ritual/novo"
+    <a href="/ritual/novo"
       class="bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
       <i class="fa-solid fa-plus"></i>
       Novo Ritual
@@ -39,7 +39,7 @@ require_once __DIR__ . '/../../includes/header.php';
     class="bg-gray-200 text-gray-700 px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-gray-300">
     <i class="fa-solid fa-search"></i> Filtrar
   </button>
-  <a href="/participantesici/public_html/rituais"
+  <a href="/rituais"
     class="<?= empty($_GET['filtro_nome']) && empty($_GET['data_inicio']) && empty($_GET['data_fim']) ? 'hidden' : '' ?> bg-red-600 text-white px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-red-300">
     <i class="fa-solid fa-broom mr-1"></i> Limpar Filtro
   </a>
@@ -70,7 +70,7 @@ require_once __DIR__ . '/../../includes/header.php';
         class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
         <i class="fa-solid fa-search mr-1"></i> Buscar
       </button>
-      <a href="/participantesici/public_html/rituais"
+      <a href="/rituais"
         class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition font-semibold shadow">
         <i class="fa-solid fa-broom mr-1"></i> Limpar
       </a>
@@ -86,7 +86,7 @@ require_once __DIR__ . '/../../includes/header.php';
         <img src="<?= htmlspecialchars($ritual['foto']) ?>" alt="Foto do Ritual"
           class="w-16 h-16 rounded-lg object-cover border border-gray-300 cursor-pointer"
           onclick="openImageModal(this.src)"
-          onerror="this.src='/participantesici/public_html/assets/images/no-image.png'; this.onclick=null; this.classList.remove('cursor-pointer');">
+          onerror="this.src='/assets/images/no-image.png'; this.onclick=null; this.classList.remove('cursor-pointer');">
         <div class="text-sm text-gray-600 space-y-1">
           <h2 class="text-lg font-bold text-gray-800"><?= htmlspecialchars($ritual['nome']) ?></h2>
           <p><span class="font-semibold">Data:</span> <?= (new DateTime($ritual['data_ritual']))->format('d/m/Y') ?></p>
@@ -98,7 +98,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
       <!-- Ações -->
       <div class="flex justify-center gap-6 md:justify-end md:gap-2 mt-2 text-sm">
-        <a href="/participantesici/public_html/ritual/<?= $ritual['id'] ?>"
+        <a href="/ritual/<?= $ritual['id'] ?>"
           class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
           title="Gerenciar participantes">
           <div class="flex flex-col items-center sm:flex-row sm:gap-1">
@@ -106,7 +106,7 @@ require_once __DIR__ . '/../../includes/header.php';
             <span class="block sm:hidden text-xs mt-1">Participantes</span>
           </div>
         </a>
-        <a href="/participantesici/public_html/ritual/<?= $ritual['id'] ?>/editar"
+        <a href="/ritual/<?= $ritual['id'] ?>/editar"
           class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
           title="Editar ritual">
           <div class="flex flex-col items-center sm:flex-row sm:gap-1">
@@ -115,7 +115,7 @@ require_once __DIR__ . '/../../includes/header.php';
           </div>
         </a>
         <?php if ($is_admin): ?>
-          <button onclick="abrirConfirmacaoExcluir('/participantesici/public_html/ritual/<?= $ritual['id'] ?>/excluir')"
+              <button onclick="abrirConfirmacaoExcluir('/ritual/<?= $ritual['id'] ?>/excluir')"
             class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded flex items-center gap-1"
             title="Excluir ritual">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
@@ -187,7 +187,7 @@ require_once __DIR__ . '/../../includes/header.php';
                 <img src="<?= htmlspecialchars($ritual['foto']) ?>" alt="Foto do Ritual"
                   class="w-12 h-12 rounded-lg object-cover border border-gray-300 cursor-pointer"
                   onclick="openImageModal(this.src)"
-                  onerror="this.src='/participantesici/public_html/assets/images/no-image.png'; this.onclick=null; this.classList.remove('cursor-pointer');">
+                  onerror="this.src='/assets/images/no-image.png'; this.onclick=null; this.classList.remove('cursor-pointer');">
               </td>
               <td class="px-4 py-3 text-sm font-medium text-gray-900">
                 <?= htmlspecialchars($ritual['nome']) ?>
@@ -205,19 +205,19 @@ require_once __DIR__ . '/../../includes/header.php';
               </td>
               <td class="px-4 py-3 text-center">
                 <div class="flex justify-center gap-2">
-                  <a href="/participantesici/public_html/ritual/<?= $ritual['id'] ?>"
+                  <a href="/ritual/<?= $ritual['id'] ?>"
                     class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
                     title="Gerenciar participantes">
                     <i class="fa-solid fa-user-group"></i>
                   </a>
-                  <a href="/participantesici/public_html/ritual/<?= $ritual['id'] ?>/editar"
+                  <a href="/ritual/<?= $ritual['id'] ?>/editar"
                     class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
                     title="Editar ritual">
                     <i class="fa-solid fa-pen-to-square"></i>
                   </a>
                   <?php if ($is_admin): ?>
                   <button
-                    onclick="abrirConfirmacaoExcluir('/participantesici/public_html/ritual/<?= $ritual['id'] ?>/excluir')"
+                    onclick="abrirConfirmacaoExcluir('/ritual/<?= $ritual['id'] ?>/excluir')"
                     class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded flex items-center gap-1"
                     title="Excluir ritual">
                     <i class="fa-solid fa-trash"></i>
@@ -292,7 +292,7 @@ require_once __DIR__ . '/../../includes/header.php';
   </div>
 </div>
 
-<script src="/participantesici/public_html/assets/js/rituais.js"></script>
-<script src="/participantesici/public_html/assets/js/modal.js"></script>
+<script src="/assets/js/rituais.js"></script>
+<script src="/assets/js/modal.js"></script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

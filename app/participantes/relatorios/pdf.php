@@ -14,7 +14,7 @@ $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
 if (!$id) {
   $_SESSION['error'] = 'ID do participante inválido.';
-  header('Location: /participantesici/public_html/participantes');
+  header('Location: /participantes');
   exit;
 }
 
@@ -25,7 +25,7 @@ $participante = $stmt->fetch();
 
 if (!$participante) {
   $_SESSION['error'] = 'Participante não encontrado.';
-  header('Location: /participantesici/public_html/participantes');
+  header('Location: /participantes');
   exit;
 }
 

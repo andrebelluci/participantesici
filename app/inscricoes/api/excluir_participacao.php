@@ -16,7 +16,7 @@ if (!$participante_id || !$ritual_id || !is_numeric($participante_id) || !is_num
     if ($redirect) {
         header("Location: $redirect");
     } else {
-        $referrer = $_SERVER['HTTP_REFERER'] ?? '/participantesici/public_html/';
+        $referrer = $_SERVER['HTTP_REFERER'] ?? '/';
         header("Location: $referrer");
     }
     exit;
@@ -95,17 +95,17 @@ if ($redirect) {
         // Veio da página do participante - volta para lá
         preg_match('/\/participante\/(\d+)/', $referrer, $matches);
         if (isset($matches[1])) {
-            header("Location: /participantesici/public_html/participante/{$matches[1]}");
+            header("Location: /participante/{$matches[1]}");
         } else {
-            header("Location: /participantesici/public_html/participantes");
+            header("Location: /participantes");
         }
     } elseif (strpos($referrer, '/ritual/') !== false) {
         // Veio da página do ritual - volta para lá
         preg_match('/\/ritual\/(\d+)/', $referrer, $matches);
         if (isset($matches[1])) {
-            header("Location: /participantesici/public_html/ritual/{$matches[1]}");
+            header("Location: /ritual/{$matches[1]}");
         } else {
-            header("Location: /participantesici/public_html/rituais");
+            header("Location: /rituais");
         }
     } else {
         // Fallback: volta para a página anterior

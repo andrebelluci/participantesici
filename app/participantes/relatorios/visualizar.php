@@ -9,14 +9,14 @@ $formato = filter_input(INPUT_GET, 'formato', FILTER_SANITIZE_STRING) ?: 'pdf';
 
 if (!$id) {
   $_SESSION['error'] = 'ID do participante inválido.';
-  header('Location: /participantesici/public_html/participantes');
+  header('Location: /participantes');
   exit;
 }
 
 // Validar formato
 if (!in_array($formato, ['pdf', 'excel'])) {
   $_SESSION['error'] = 'Formato de exportação inválido.';
-  header('Location: /participantesici/public_html/participante/' . $id);
+  header('Location: /participante/' . $id);
   exit;
 }
 

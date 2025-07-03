@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
       return;
     }
 
-    fetch(`/participantesici/public_html/api/participante/verifica-cpf?cpf=${cpfValue}`)
+    fetch(`/api/participante/verifica-cpf?cpf=${cpfValue}`)
       .then(response => response.json())
       .then(data => {
         if (data.error) {

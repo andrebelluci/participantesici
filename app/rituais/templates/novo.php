@@ -8,7 +8,7 @@ require_once __DIR__ . '/../../includes/header.php';
     <div class="flex items-center justify-between mb-6">
         <?php
         // Verifica se há um parâmetro 'redirect' na URL
-        $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : '/participantesici/public_html/rituais';
+        $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : '/rituais';
         ?>
         <a href="<?= $redirect ?>" class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
             <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
@@ -154,8 +154,8 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 </div>
 
-<script src="/participantesici/public_html/assets/js/ritual.js"></script>
-<script src="/participantesici/public_html/assets/js/ritual-novo.js"></script>
-<script src="/participantesici/public_html/assets/js/modal.js"></script>
+<script src="/assets/js/ritual.js"></script>
+<script src="/assets/js/ritual-novo.js"></script>
+<script src="/assets/js/modal.js"></script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

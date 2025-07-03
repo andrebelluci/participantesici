@@ -14,7 +14,7 @@ $user_perfil = $stmt->fetch();
 
 if (!$user_perfil || $user_perfil['perfil_nome'] !== 'Administrador') {
   $_SESSION['error'] = 'Acesso negado. Área restrita para administradores.';
-  header('Location: /participantesici/public_html/home');
+  header('Location: /home');
   exit;
 }
 

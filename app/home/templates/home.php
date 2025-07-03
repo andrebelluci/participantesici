@@ -8,12 +8,12 @@ require_once __DIR__ . '/../../includes/header.php';
     <h1 class="text-2xl font-bold text-black mb-6 text-center">Bem-vindo, <?php echo htmlspecialchars($_SESSION['nome']); ?>!</h1>
 
     <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-        <a href="/participantesici/public_html/participantes"
+        <a href="/participantes"
            class="bg-[#00bfff] text-black text-lg font-semibold py-6 rounded-lg text-center shadow hover:bg-yellow-400 transition">
            <i class="fa-solid fa-users"></i>
            Participantes
         </a>
-        <a href="/participantesici/public_html/rituais"
+        <a href="/rituais"
            class="bg-[#00bfff] text-black text-lg font-semibold py-6 rounded-lg text-center shadow hover:bg-yellow-400 transition">
            <i class="fa-solid fa-fire"></i>
             Rituais

@@ -14,7 +14,7 @@ if (!isset($ritual)) {
             <img src="<?= htmlspecialchars($ritual['foto']) ?>" alt="Foto do Ritual"
                 class="w-24 h-24 md:w-32 md:h-32 rounded-lg object-cover border border-gray-300 cursor-pointer"
                 onclick="openImageModal(this.src)"
-                onerror="this.src='/participantesici/public_html/assets/images/no-image.png'; this.onclick=null; this.classList.remove('cursor-pointer');">
+                onerror="this.src='/assets/images/no-image.png'; this.onclick=null; this.classList.remove('cursor-pointer');">
 
             <div class="text-center md:text-left flex-1">
                 <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
@@ -34,7 +34,7 @@ if (!isset($ritual)) {
             </div>
 
             <div class="flex gap-2">
-                <a href="/participantesici/public_html/ritual/<?= $id ?>/editar?redirect=/participantesici/public_html/ritual/<?= $id ?>"
+                <a href="/ritual/<?= $id ?>/editar?redirect=/ritual/<?= $id ?>"
                     class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg flex items-center gap-2 transition">
                     <i class="fa-solid fa-pen-to-square"></i>
                     <span>Editar ritual</span>
@@ -44,7 +44,7 @@ if (!isset($ritual)) {
 
         <!-- Botões de ação -->
         <div class="flex items-center justify-between">
-            <a href="/participantesici/public_html/rituais"
+            <a href="/rituais"
                 class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
                 <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
             </a>
@@ -108,7 +108,7 @@ if (!isset($ritual)) {
             class="bg-gray-200 text-gray-700 px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-gray-300">
             <i class="fa-solid fa-search"></i> Filtrar
         </button>
-        <a href="/participantesici/public_html/ritual/<?= $id ?>"
+        <a href="/ritual/<?= $id ?>"
             class="<?= empty($_GET['filtro_nome']) ? 'hidden' : '' ?> bg-red-600 text-white px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-red-300 transition">
             <i class="fa-solid fa-broom mr-1"></i> Limpar Filtro
         </a>
@@ -132,7 +132,7 @@ if (!isset($ritual)) {
                     class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
                     <i class="fa-solid fa-search mr-1"></i> Buscar
                 </button>
-                <a href="/participantesici/public_html/ritual/<?= $id ?>"
+                <a href="/ritual/<?= $id ?>"
                     class="bg-gray-200 text-gray-700 px-4 py-2 rounded hover:bg-gray-300 transition font-semibold shadow">
                     <i class="fa-solid fa-broom mr-1"></i> Limpar
                 </a>
@@ -149,11 +149,11 @@ if (!isset($ritual)) {
                     <img src="<?= htmlspecialchars($participante['foto']) ?>" alt="Foto do Participante"
                         class="w-16 h-16 rounded-lg object-cover border border-gray-300 cursor-pointer"
                         onclick="openImageModal('<?= htmlspecialchars($participante['foto']) ?>')"
-                        onerror="this.src='/participantesici/public_html/assets/images/no-image.png'; this.onclick=null; this.classList.remove('cursor-pointer');">
+                        onerror="this.src='/assets/images/no-image.png'; this.onclick=null; this.classList.remove('cursor-pointer');">
 
                     <div class="flex-1 min-w-0">
                         <h3 class="font-bold text-gray-800 text-lg mb-1 truncate">
-                            <a href="/participantesici/public_html/participantes?pagina=1&filtro_cpf=<?= urlencode(htmlspecialchars($participante['cpf'])) ?>&redirect=/participantesici/public_html/ritual/<?= $id ?>"
+                            <a href="/participantes?pagina=1&filtro_cpf=<?= urlencode(htmlspecialchars($participante['cpf'])) ?>&redirect=/ritual/<?= $id ?>"
                                 class="hover:text-[#00bfff] transition">
                                 <?= htmlspecialchars($participante['nome_completo']) ?>
                             </a>
@@ -259,7 +259,7 @@ if (!isset($ritual)) {
 
                     <!-- Botão Desvincular -->
                     <button
-                        onclick="abrirConfirmacaoExcluir('/participantesici/public_html/api/inscricoes/excluir-participacao?participante_id=<?= $participante['id'] ?>&ritual_id=<?= $ritual['id'] ?>&redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>')"
+                        onclick="abrirConfirmacaoExcluir('/api/inscricoes/excluir-participacao?participante_id=<?= $participante['id'] ?>&ritual_id=<?= $ritual['id'] ?>&redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>')"
                         class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded flex items-center gap-1"
                         title="Desvincular participante do ritual">
                         <div class="flex flex-col items-center sm:flex-row sm:gap-1">
@@ -293,7 +293,7 @@ if (!isset($ritual)) {
                     <p class="text-gray-500 text-lg mb-2">Nenhum participante encontrado com esse nome.</p>
                     <p class="text-gray-400 text-sm">Pesquise novamente, ou adicione o participante pelo botão abaixo.</p>
                     <div class="mt-4 flex flex-col sm:flex-row gap-3 justify-center">
-                        <a href="/participantesici/public_html/ritual/<?= $id ?>"
+                        <a href="/ritual/<?= $id ?>"
                             class="inline-flex items-center gap-2 bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition font-semibold shadow">
                             <i class="fa-solid fa-list"></i> Ver todos os participantes
                         </a>
@@ -347,13 +347,13 @@ if (!isset($ritual)) {
                                     <img src="<?= htmlspecialchars($participante['foto']) ?>" alt="Foto do Participante"
                                         class="w-12 h-12 rounded-lg object-cover border border-gray-300 cursor-pointer"
                                         onclick="openImageModal('<?= htmlspecialchars($participante['foto']) ?>')"
-                                        onerror="this.src='/participantesici/public_html/assets/images/no-image.png'; this.onclick=null; this.classList.remove('cursor-pointer');">
+                                        onerror="this.src='/assets/images/no-image.png'; this.onclick=null; this.classList.remove('cursor-pointer');">
                                 </td>
 
                                 <!-- Nome do Participante -->
                                 <td class="px-4 py-3">
                                     <div class="font-bold text-gray-800 text-sm">
-                                        <a href="/participantesici/public_html/participantes?pagina=1&filtro_cpf=<?= urlencode(htmlspecialchars($participante['cpf'])) ?>&redirect=/participantesici/public_html/ritual/<?= $id ?>"
+                                        <a href="/participantes?pagina=1&filtro_cpf=<?= urlencode(htmlspecialchars($participante['cpf'])) ?>&redirect=/ritual/<?= $id ?>"
                                             class="hover:text-[#00bfff] transition">
                                             <?= htmlspecialchars($participante['nome_completo']) ?>
                                         </a>
@@ -448,7 +448,7 @@ if (!isset($ritual)) {
 
                                         <!-- Botão Remover -->
                                         <button
-                                            onclick="openConfirmModal('Tem certeza que deseja remover este participante do ritual?', () => { window.location.href = '/participantesici/public_html/api/inscricoes/excluir-participacao?ritual_id=<?= $id ?>&participante_id=<?= $participante['id'] ?>&redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>' })"
+                                            onclick="openConfirmModal('Tem certeza que deseja remover este participante do ritual?', () => { window.location.href = '/api/inscricoes/excluir-participacao?ritual_id=<?= $id ?>&participante_id=<?= $participante['id'] ?>&redirect=<?= urlencode($_SERVER['REQUEST_URI']) ?>' })"
                                             class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded flex items-center gap-1"
                                             title="Remover participante do ritual">
                                             <i class="fa-solid fa-link-slash"></i>
@@ -759,9 +759,9 @@ if (!isset($ritual)) {
     }
 </style>
 
-<script src="/participantesici/public_html/assets/js/ritual-visualizar.js"></script>
-<script src="/participantesici/public_html/assets/js/modal.js"></script>
-<script src="/participantesici/public_html/assets/js/relatorios.js"></script>
+<script src="/assets/js/ritual-visualizar.js"></script>
+<script src="/assets/js/modal.js"></script>
+<script src="/assets/js/relatorios.js"></script>
 
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

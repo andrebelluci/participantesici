@@ -2,8 +2,8 @@
   "name": "Participantes ICI",
   "short_name": "ICI App",
   "description": "Sistema de gestão de participantes do Instituto Céu Interior",
-  "start_url": "/participantesici/public_html/login",
-  "scope": "/participantesici/public_html/",
+  "start_url": "/login",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#1D4ED8",
   "theme_color": "#00bfff",
@@ -14,43 +14,43 @@
   ],
   "icons": [
     {
-      "src": "/participantesici/public_html/assets/images/icon-72.png",
+      "src": "/assets/images/icon-72.png",
       "sizes": "72x72",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/participantesici/public_html/assets/images/icon-96.png",
+      "src": "/assets/images/icon-96.png",
       "sizes": "96x96",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/participantesici/public_html/assets/images/icon-144.png",
+      "src": "/assets/images/icon-144.png",
       "sizes": "144x144",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/participantesici/public_html/assets/images/icon-192.png",
+      "src": "/assets/images/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/participantesici/public_html/assets/images/icon-512.png",
+      "src": "/assets/images/icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/participantesici/public_html/assets/images/icon-maskable-192.png",
+      "src": "/assets/images/icon-maskable-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/participantesici/public_html/assets/images/icon-maskable-512.png",
+      "src": "/assets/images/icon-maskable-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -58,21 +58,21 @@
   ],
   "screenshots": [
     {
-      "src": "/participantesici/public_html/assets/images/pwa-login-mobile.png",
+      "src": "/assets/images/pwa-login-mobile.png",
       "sizes": "375x667",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Tela de Login"
     },
     {
-      "src": "/participantesici/public_html/assets/images/pwa-home-mobile.png",
+      "src": "/assets/images/pwa-home-mobile.png",
       "sizes": "375x667",
       "type": "image/png",
       "form_factor": "narrow",
       "label": "Dashboard Principal"
     },
     {
-      "src": "/participantesici/public_html/assets/images/pwa-login-wide.png",
+      "src": "/assets/images/pwa-login-wide.png",
       "sizes": "1280x720",
       "type": "image/png",
       "form_factor": "wide",

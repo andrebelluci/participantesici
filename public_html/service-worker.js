@@ -4,15 +4,15 @@ const DYNAMIC_CACHE = "ici-dynamic-v2.1";
 
 // URLs estáticas para cache imediato
 const staticUrlsToCache = [
-  "/participantesici/public_html/login",
-  "/participantesici/public_html/home",
-  "/participantesici/public_html/assets/css/tailwind.css",
-  "/participantesici/public_html/assets/js/global-scripts.js",
-  "/participantesici/public_html/assets/images/logo.png",
-  "/participantesici/public_html/assets/images/favicon.ico",
-  "/participantesici/public_html/assets/images/no-image.png",
-  "/participantesici/public_html/manifest.json",
-  "/participantesici/public_html/assets/videos/fogueira.mp4",
+  "/login",
+  "/home",
+  "/assets/css/tailwind.css",
+  "/assets/js/global-scripts.js",
+  "/assets/images/logo.png",
+  "/assets/images/favicon.ico",
+  "/assets/images/no-image.png",
+  "/manifest.json",
+  "/assets/videos/fogueira.mp4",
   // Fontes importantes
   "https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css",
   "https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css"
@@ -20,9 +20,9 @@ const staticUrlsToCache = [
 
 // URLs que devem ser sempre buscadas da rede (dados dinâmicos)
 const networkFirst = [
-  "/participantesici/public_html/api/",
-  "/participantesici/public_html/participantes",
-  "/participantesici/public_html/rituais"
+  "/api/",
+  "/participantes",
+  "/rituais"
 ];
 
 // Instalar Service Worker
@@ -117,7 +117,7 @@ self.addEventListener("fetch", event => {
           .catch(() => {
             // Se falhar completamente, retorna página offline (opcional)
             if (request.destination === 'document') {
-              return caches.match('/participantesici/public_html/login');
+              return caches.match('/login');
             }
           });
       })

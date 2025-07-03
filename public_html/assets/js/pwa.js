@@ -86,8 +86,8 @@ if ('serviceWorker' in navigator) {
 
       // Registra novo service worker
       const registration = await navigator.serviceWorker.register(
-        '/participantesici/public_html/service-worker.js?v=' + Date.now(),
-        { scope: '/participantesici/public_html/' }
+        '/service-worker.js?v=' + Date.now(),
+        { scope: '/' }
       );
 
       console.log('Service Worker registrado:', registration.scope);

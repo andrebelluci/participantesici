@@ -14,7 +14,7 @@ function gerarNomeArquivoParticipante($cpf, $extensao)
 function excluirFotoAntigaParticipante($cpf)
 {
   $cpfLimpo = preg_replace('/\D/', '', $cpf);
-  $diretorio = __DIR__ . '/../../../storage/uploads/participantes/';
+  $diretorio = __DIR__ . '/../../../public_html/storage/uploads/participantes/';
 
   if (is_dir($diretorio)) {
     $arquivos = glob($diretorio . '*_' . $cpfLimpo . '.*');
@@ -60,14 +60,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       $imageData = base64_decode($imageData);
 
       $foto_nome = gerarNomeArquivoParticipante($cpf, $imageType);
-      $foto_destino = __DIR__ . '/../../../storage/uploads/participantes/' . $foto_nome;
+      $foto_destino = __DIR__ . '/../../../public_html/storage/uploads/participantes/' . $foto_nome;
 
       if (!is_dir(dirname($foto_destino))) {
         mkdir(dirname($foto_destino), 0755, true);
       }
 
       if (file_put_contents($foto_destino, $imageData)) {
-        $foto = '/participantesici/storage/uploads/participantes/' . $foto_nome;
+        $foto = '/storage/uploads/participantes/' . $foto_nome;
       }
     }
   }
@@ -78,21 +78,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $extensao = pathinfo($_FILES['foto']['name'], PATHINFO_EXTENSION);
     $foto_nome = gerarNomeArquivoParticipante($cpf, $extensao);
-    $foto_destino = __DIR__ . '/../../../storage/uploads/participantes/' . $foto_nome;
+    $foto_destino = __DIR__ . '/../../../public_html/storage/uploads/participantes/' . $foto_nome;
 
     if (!is_dir(dirname($foto_destino))) {
       mkdir(dirname($foto_destino), 0755, true);
     }
 
     if (move_uploaded_file($_FILES['foto']['tmp_name'], $foto_destino)) {
-      $foto = '/participantesici/storage/uploads/participantes/' . $foto_nome;
+      $foto = '/storage/uploads/participantes/' . $foto_nome;
     }
   }
 
   // Verifica se o e-mail é válido
   if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !preg_match('/^[a-zA-Z0-9._%+-]{3,}@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/', $email)) {
     $_SESSION['error'] = 'Erro: Por favor, digite um e-mail válido.';
-    header('Location: /participantesici/public_html/participante/novo');
+    header('Location: /participante/novo');
     exit;
   }
 
@@ -101,7 +101,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $stmt_check_cpf->execute([$cpf]);
   if ($stmt_check_cpf->rowCount() > 0) {
     $_SESSION['error'] = 'Erro: Este CPF já está cadastrado.';
-    header('Location: /participantesici/public_html/participante/novo');
+    header('Location: /participante/novo');
     exit;
   }
 
@@ -150,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     exit;
   } else {
     $_SESSION['success'] = 'Pessoa cadastrada com sucesso!';
-    header('Location: /participantesici/public_html/participantes');
+    header('Location: /participantes');
     exit;
   }
 }

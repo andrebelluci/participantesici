@@ -14,7 +14,7 @@ $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
 
 if (!$id) {
     $_SESSION['error'] = 'ID do ritual inválido.';
-    header('Location: /participantesici/public_html/rituais');
+    header('Location: /rituais');
     exit;
 }
 
@@ -25,7 +25,7 @@ $ritual = $stmt->fetch();
 
 if (!$ritual) {
     $_SESSION['error'] = 'Ritual não encontrado.';
-    header('Location: /participantesici/public_html/rituais');
+    header('Location: /rituais');
     exit;
 }
 

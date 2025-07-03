@@ -10,7 +10,7 @@ if (!isset($ritual)) {
 <div class="max-w-screen-lg mx-auto px-4 py-8">
     <!-- Ações -->
     <div class="flex items-center justify-between mb-6">
-        <a href="<?= isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : '/participantesici/public_html/rituais' ?>"
+        <a href="<?= isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : '/rituais' ?>"
             class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
             <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
         </a>
@@ -147,8 +147,8 @@ if (!isset($ritual)) {
   </div>
 </div>
 
-<script src="/participantesici/public_html/assets/js/ritual.js"></script>
-<script src="/participantesici/public_html/assets/js/ritual-editar.js"></script>
-<script src="/participantesici/public_html/assets/js/modal.js"></script>
+<script src="/assets/js/ritual.js"></script>
+<script src="/assets/js/ritual-editar.js"></script>
+<script src="/assets/js/modal.js"></script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
