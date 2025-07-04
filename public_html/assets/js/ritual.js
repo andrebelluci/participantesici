@@ -1,4 +1,4 @@
-// ritual.js - Funcionalidades comuns para novo e editar ritual
+// ritual.js - Funcionalidades para novo e editar ritual COM COMPRESSÃO
 
 // Função para mostrar toast
 function showToast(message, type = 'error') {
@@ -14,7 +14,7 @@ function showToast(message, type = 'error') {
   }).showToast();
 }
 
-// ============= UPLOAD DE IMAGEM (SEM CROP) =============
+// ============= UPLOAD DE IMAGEM COM COMPRESSÃO =============
 const fileInput = document.getElementById('foto-input');
 const uploadArea = document.getElementById('upload-area');
 const previewContainer = document.getElementById('preview-container');
@@ -22,31 +22,106 @@ const previewImage = document.getElementById('preview-image');
 const substituirBtn = document.getElementById('substituir-imagem-btn');
 const excluirBtn = document.getElementById('excluir-imagem-btn');
 
+// ✅ NOVA: Variável para armazenar imagem processada
+let processedImageData = null;
+
 function openFileSelector() {
   fileInput?.click();
 }
 
-function showPreview(file) {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const imageSrc = e.target.result;
+// ✅ NOVA FUNÇÃO: Comprime imagem automaticamente
+function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.8) {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
 
-    previewImage.src = imageSrc;
+    img.onload = function () {
+      // Calcula novas dimensões mantendo proporção
+      let { width, height } = img;
 
-    // Compatível com Tailwind classes E CSS inline
+      if (width > height) {
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = (width * maxHeight) / height;
+          height = maxHeight;
+        }
+      }
+
+      // Configura canvas
+      canvas.width = width;
+      canvas.height = height;
+
+      // Desenha imagem redimensionada
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Converte para blob comprimido
+      canvas.toBlob((blob) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          resolve({
+            dataUrl: e.target.result,
+            blob: blob,
+            width: width,
+            height: height,
+            originalSize: file.size,
+            compressedSize: blob.size
+          });
+        };
+        reader.readAsDataURL(blob);
+      }, 'image/jpeg', quality);
+    };
+
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+// ✅ ATUALIZADA: Processa e comprime imagem
+async function showPreview(file) {
+  try {
+    // Mostra indicador de carregamento
+    showToast('Processando imagem...', 'info');
+
+    // Comprime a imagem
+    const compressed = await compressImage(file, 800, 800, 0.8);
+
+    // Armazena dados processados
+    processedImageData = compressed.dataUrl;
+
+    // Mostra preview
+    previewImage.src = compressed.dataUrl;
+
+    // Atualiza interface
     uploadArea?.classList.add('hidden');
     uploadArea.style.display = 'none';
 
     previewContainer?.classList.remove('hidden');
     previewContainer.style.display = 'block';
 
-    showToast('Imagem carregada com sucesso!', 'success');
-  };
-  reader.readAsDataURL(file);
+    // Feedback para o usuário
+    const reducao = Math.round((1 - compressed.compressedSize / compressed.originalSize) * 100);
+    showToast(`Imagem otimizada! Redução: ${reducao}%`, 'success');
+
+    console.log('Compressão:', {
+      original: `${(compressed.originalSize / 1024 / 1024).toFixed(2)}MB`,
+      comprimida: `${(compressed.compressedSize / 1024 / 1024).toFixed(2)}MB`,
+      reducao: `${reducao}%`,
+      dimensoes: `${compressed.width}x${compressed.height}`
+    });
+
+  } catch (error) {
+    console.error('Erro ao processar imagem:', error);
+    showToast('Erro ao processar imagem. Tente novamente.', 'error');
+  }
 }
 
 function hidePreview() {
   previewImage.src = '#';
+  processedImageData = null; // ✅ Limpa dados processados
 
   // Compatível com Tailwind classes E CSS inline
   uploadArea?.classList.remove('hidden');
@@ -74,9 +149,9 @@ function validateFile(file) {
     return false;
   }
 
-  const maxSize = 5 * 1024 * 1024; // 5MB
+  const maxSize = 10 * 1024 * 1024; // ✅ AUMENTADO para 10MB (será comprimido)
   if (file.size > maxSize) {
-    showToast('A imagem deve ter no máximo 5MB.');
+    showToast('A imagem deve ter no máximo 10MB.');
     return false;
   }
 
@@ -109,8 +184,7 @@ function loadExistingImage() {
     };
   }
 
-  // ✅ VERIFICAÇÃO ADICIONAL - compatível com código antigo
-  // Se há imagem no src mas não há data-foto-path (código antigo)
+  // Verificação adicional - compatível com código antigo
   if (previewImage?.src &&
     !previewImage.src.includes('#') &&
     !previewImage.src.includes(window.location.href) &&
@@ -122,6 +196,32 @@ function loadExistingImage() {
     uploadArea.style.display = 'none';
     uploadArea.classList.add('hidden');
   }
+}
+
+// ✅ NOVA FUNÇÃO: Envia imagem comprimida no formulário
+function setupFormSubmission() {
+  const form = document.getElementById('formulario-ritual');
+  if (!form) return;
+
+  form.addEventListener('submit', function (event) {
+    // Se há imagem processada, adiciona ao formulário
+    if (processedImageData) {
+      // Remove input anterior se existir
+      const existingInput = document.querySelector('input[name="foto_comprimida"]');
+      if (existingInput) {
+        existingInput.remove();
+      }
+
+      // Adiciona nova imagem comprimida
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'foto_comprimida';
+      input.value = processedImageData;
+      form.appendChild(input);
+
+      console.log('Enviando imagem comprimida no formulário');
+    }
+  });
 }
 
 // ============= VALIDAÇÕES =============
@@ -159,32 +259,35 @@ function setupFormValidation() {
       padrinhoInput.focus();
       hasError = true;
     }
-
-    // Se chegou até aqui sem erros, formulário será enviado
   });
 }
 
-// ============= EVENT LISTENERS GERAIS =============
+// ============= EVENT LISTENERS =============
 document.addEventListener('DOMContentLoaded', function () {
-  // Carregar imagem existente (se houver)
   loadExistingImage();
-
-  // Inicializar validação do formulário
   setupFormValidation();
+  setupFormSubmission(); // ✅ NOVA: Configura envio com compressão
 });
 
 // Event listeners para upload
 uploadArea?.addEventListener('click', openFileSelector);
 substituirBtn?.addEventListener('click', openFileSelector);
 
-fileInput?.addEventListener('change', (e) => {
+fileInput?.addEventListener('change', async (e) => {
   const file = e.target.files[0];
   if (file && validateFile(file)) {
-    showPreview(file);
+    await showPreview(file); // ✅ ATUALIZADO: async para compressão
   }
 });
 
 excluirBtn?.addEventListener('click', () => {
   hidePreview();
-  showToast('Imagem removida.', 'success');
+  showToast('Imagem removida.', 'info');
 });
+
+// Event listeners para preview modal (se existir)
+function openImageModal(src) {
+  if (src && src !== '#') {
+    window.open(src, '_blank');
+  }
+}

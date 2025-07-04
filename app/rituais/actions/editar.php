@@ -2,30 +2,35 @@
 require_once __DIR__ . '/../../functions/check_auth.php';
 require_once __DIR__ . '/../../config/database.php';
 
-$id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
+// Obtém ID do ritual
+$id = $_GET['id'] ?? null;
+
 if (!$id) {
-  $_SESSION['error'] = 'ID do ritual inválido.';
-  header('Location: /rituais');
-  exit;
-}
-
-$redirect = $_GET['redirect'] ?? '/rituais';
-
-// Buscar ritual
-$stmt = $pdo->prepare("SELECT * FROM rituais WHERE id = ?");
-$stmt->execute([$id]);
-$ritual = $stmt->fetch();
-
-if (!$ritual) {
   $_SESSION['error'] = 'Ritual não encontrado.';
   header('Location: /rituais');
   exit;
 }
 
-// ✅ FUNÇÃO PARA GERAR NOME DE ARQUIVO INTELIGENTE
+// Busca dados do ritual
+try {
+  $stmt = $pdo->prepare("SELECT * FROM rituais WHERE id = ?");
+  $stmt->execute([$id]);
+  $ritual = $stmt->fetch();
+
+  if (!$ritual) {
+    $_SESSION['error'] = 'Ritual não encontrado.';
+    header('Location: /rituais');
+    exit;
+  }
+} catch (PDOException $e) {
+  $_SESSION['error'] = 'Erro ao buscar ritual.';
+  header('Location: /rituais');
+  exit;
+}
+
+// ✅ FUNÇÃO PARA GERAR NOME DE ARQUIVO ÚNICO
 function gerarNomeArquivoRitual($nomeRitual, $extensao)
 {
-  // Limpa o nome do ritual (remove acentos, espaços, caracteres especiais)
   $nomeRitualLimpo = preg_replace(
     '/[^a-zA-Z0-9]/',
     '',
@@ -114,8 +119,7 @@ function gerarNomeArquivoRitual($nomeRitual, $extensao)
     )
   );
 
-  $numeroAleatorio = uniqid();
-  return $numeroAleatorio . '_' . substr($nomeRitualLimpo, 0, 20) . '.' . $extensao;
+  return date('Y-m-d_H-i-s') . '_' . substr($nomeRitualLimpo, 0, 20) . '.' . $extensao;
 }
 
 // ✅ FUNÇÃO PARA EXCLUIR FOTO ANTIGA
@@ -229,8 +233,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   // ✅ GERENCIAMENTO DE IMAGENS MELHORADO
   $foto = $ritual['foto']; // Mantém a foto atual por padrão
 
-  // Verifica se há upload de nova foto
-  if (!empty($_FILES['foto']['name'])) {
+  // ✅ NOVO: PROCESSAR IMAGEM COMPRIMIDA PRIMEIRO
+  if (!empty($_POST['foto_comprimida'])) {
+    // Imagem foi comprimida no frontend
+    $foto_comprimida = $_POST['foto_comprimida'];
+
+    // Remove prefixo data:image/jpeg;base64,
+    $image_data = base64_decode(preg_replace('#^data:image/\w+;base64,#i', '', $foto_comprimida));
+
+    if ($image_data !== false) {
+      // Exclui fotos antigas baseadas no nome do ritual
+      excluirFotoAntigaRitual($nome);
+
+      $foto_nome = gerarNomeArquivoRitual($nome, 'jpg'); // Sempre JPG para comprimidas
+      $foto_destino = __DIR__ . '/../../../public_html/storage/uploads/rituais/' . $foto_nome;
+
+      // Criar diretório se não existir
+      if (!is_dir(dirname($foto_destino))) {
+        mkdir(dirname($foto_destino), 0755, true);
+      }
+
+      if (file_put_contents($foto_destino, $image_data)) {
+        $foto = '/storage/uploads/rituais/' . $foto_nome;
+        error_log("✅ Imagem comprimida atualizada: $foto");
+      } else {
+        error_log("❌ Erro ao salvar imagem comprimida");
+      }
+    }
+  }
+  // ✅ FALLBACK: PROCESSAR UPLOAD NORMAL (caso JS falhe)
+  elseif (!empty($_FILES['foto']['name'])) {
     // Exclui fotos antigas baseadas no nome do ritual
     excluirFotoAntigaRitual($nome);
 
@@ -245,12 +277,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if (move_uploaded_file($_FILES['foto']['tmp_name'], $foto_destino)) {
       $foto = '/storage/uploads/rituais/' . $foto_nome;
+      error_log("✅ Imagem original atualizada (fallback): $foto");
     }
   }
   // ✅ VERIFICAR SE FOI SOLICITADA REMOÇÃO DE FOTO
   elseif (isset($_POST['remover_foto'])) {
     excluirFotoAntigaRitual($ritual['nome']); // Usa nome antigo para excluir
     $foto = null;
+    error_log("🗑️ Foto removida do ritual: {$ritual['nome']}");
   }
 
   // Validações básicas
@@ -272,132 +306,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     exit;
   }
 
-  // ✅ SE O NOME MUDOU, PRECISAMOS RENOMEAR A FOTO
-  if ($nome !== $ritual['nome'] && $foto) {
-    $nomeAntigoLimpo = preg_replace(
-      '/[^a-zA-Z0-9]/',
-      '',
-      str_replace(
-        [
-          'á',
-          'à',
-          'ã',
-          'â',
-          'é',
-          'è',
-          'ê',
-          'í',
-          'ì',
-          'î',
-          'ó',
-          'ò',
-          'õ',
-          'ô',
-          'ú',
-          'ù',
-          'û',
-          'ç',
-          'ñ',
-          'Á',
-          'À',
-          'Ã',
-          'Â',
-          'É',
-          'È',
-          'Ê',
-          'Í',
-          'Ì',
-          'Î',
-          'Ó',
-          'Ò',
-          'Õ',
-          'Ô',
-          'Ú',
-          'Ù',
-          'Û',
-          'Ç',
-          'Ñ'
-        ],
-        [
-          'a',
-          'a',
-          'a',
-          'a',
-          'e',
-          'e',
-          'e',
-          'i',
-          'i',
-          'i',
-          'o',
-          'o',
-          'o',
-          'o',
-          'u',
-          'u',
-          'u',
-          'c',
-          'n',
-          'A',
-          'A',
-          'A',
-          'A',
-          'E',
-          'E',
-          'E',
-          'I',
-          'I',
-          'I',
-          'O',
-          'O',
-          'O',
-          'O',
-          'U',
-          'U',
-          'U',
-          'C',
-          'N'
-        ],
-        $ritual['nome']
-      )
-    );
+  // ✅ ATUALIZAR RITUAL NO BANCO
+  try {
+    $stmt = $pdo->prepare("
+      UPDATE rituais
+      SET nome = ?, data_ritual = ?, padrinho_madrinha = ?, foto = ?
+      WHERE id = ?
+    ");
 
-    $diretorio = __DIR__ . '/../../../public_html/storage/uploads/rituais/';
-    $arquivosAntigos = glob($diretorio . '*_' . substr($nomeAntigoLimpo, 0, 20) . '.*');
+    $stmt->execute([$nome, $data_ritual, $padrinho_madrinha, $foto, $id]);
 
-    if (!empty($arquivosAntigos)) {
-      $arquivoAntigo = $arquivosAntigos[0];
-      $extensao = pathinfo($arquivoAntigo, PATHINFO_EXTENSION);
-      $novoNome = gerarNomeArquivoRitual($nome, $extensao);
-      $novoArquivo = $diretorio . $novoNome;
+    // Verificar se há redirecionamento
+    $redirect = $_POST['redirect'] ?? '/rituais';
 
-      if (rename($arquivoAntigo, $novoArquivo)) {
-        $foto = '/storage/uploads/rituais/' . $novoNome;
-      }
-    }
+    $_SESSION['success'] = 'Ritual atualizado com sucesso!';
+    header("Location: $redirect");
+    exit;
+
+  } catch (PDOException $e) {
+    error_log("Erro ao atualizar ritual: " . $e->getMessage());
+    $_SESSION['error'] = 'Erro ao atualizar ritual. Tente novamente.';
+    header("Location: /ritual/editar?id=$id");
+    exit;
   }
-
-  // Atualizar no banco
-  $stmt_update = $pdo->prepare("
-    UPDATE rituais SET
-        nome = ?,
-        data_ritual = ?,
-        foto = ?,
-        padrinho_madrinha = ?
-    WHERE id = ?
-  ");
-
-  $stmt_update->execute([
-    $nome,
-    $data_ritual,
-    $foto,
-    $padrinho_madrinha,
-    $id
-  ]);
-
-  $_SESSION['success'] = 'Ritual atualizado com sucesso!';
-  header("Location: $redirect?id=$id");
-  exit;
 }
 
 // Se não for POST, mostrar formulário
