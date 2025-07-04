@@ -1,5 +1,4 @@
 .senha
-/public_html/storage/uploads/*
 /app/test/*
 .env
 .env_production
