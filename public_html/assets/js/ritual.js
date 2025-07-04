@@ -83,8 +83,6 @@ function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.8) {
 // ✅ ATUALIZADA: Processa e comprime imagem
 async function showPreview(file) {
   try {
-    // Mostra indicador de carregamento
-    showToast('Processando imagem...', 'info');
 
     // Comprime a imagem
     const compressed = await compressImage(file, 800, 800, 0.8);
@@ -104,7 +102,7 @@ async function showPreview(file) {
 
     // Feedback para o usuário
     const reducao = Math.round((1 - compressed.compressedSize / compressed.originalSize) * 100);
-    showToast(`Imagem otimizada! Redução: ${reducao}%`, 'success');
+    showToast('Imagem carregada!', 'success');
 
     console.log('Compressão:', {
       original: `${(compressed.originalSize / 1024 / 1024).toFixed(2)}MB`,
