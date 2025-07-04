@@ -1,8 +1,15 @@
 <?php
-// app/services/EmailService.php - VERSÃO CORRIGIDA PARA RESPOSTAS MULTILINHAS
+// app/services/EmailService.php - VERSÃO COMPATÍVEL COM PHP 7.x
 require_once __DIR__ . '/../config/config.php';
 
 class EmailService {
+
+    /**
+     * Função de compatibilidade para str_starts_with (PHP < 8.0)
+     */
+    private static function str_starts_with($haystack, $needle) {
+        return strncmp($haystack, $needle, strlen($needle)) === 0;
+    }
 
     /**
      * Envia e-mail com configurações otimizadas para seu provedor
@@ -99,7 +106,7 @@ class EmailService {
 
             // 🔧 CORREÇÃO: Lê resposta inicial COMPLETA (multilinhas)
             $response = self::lerRespostaCompleta($connection);
-            if (!$response || !str_starts_with($response, '220')) {
+            if (!$response || !self::str_starts_with($response, '220')) {
                 error_log("❌ Resposta inicial inválida: $response");
                 fclose($connection);
                 return false;
@@ -113,12 +120,12 @@ class EmailService {
             $response = self::lerRespostaCompleta($connection);
 
             // Se EHLO falhou, tenta HELO
-            if (!str_starts_with($response, '250')) {
+            if (!self::str_starts_with($response, '250')) {
                 error_log("📝 EHLO falhou, tentando HELO...");
                 self::enviarComando($connection, "HELO $domain");
                 $response = self::lerRespostaCompleta($connection);
 
-                if (!str_starts_with($response, '250')) {
+                if (!self::str_starts_with($response, '250')) {
                     error_log("❌ HELO/EHLO falhou: $response");
                     fclose($connection);
                     return false;
@@ -132,7 +139,7 @@ class EmailService {
                 self::enviarComando($connection, "STARTTLS");
                 $response = self::lerRespostaCompleta($connection);
 
-                if (str_starts_with($response, '220')) {
+                if (self::str_starts_with($response, '220')) {
                     // ✅ MELHORIA: Configurações TLS mais flexíveis
                     $cryptoMethod = STREAM_CRYPTO_METHOD_TLS_CLIENT;
 
@@ -151,7 +158,7 @@ class EmailService {
                     self::enviarComando($connection, "EHLO $domain");
                     $response = self::lerRespostaCompleta($connection);
 
-                    if (!str_starts_with($response, '250')) {
+                    if (!self::str_starts_with($response, '250')) {
                         error_log("❌ EHLO pós-TLS falhou: $response");
                         fclose($connection);
                         return false;
@@ -176,7 +183,7 @@ class EmailService {
             // MAIL FROM
             self::enviarComando($connection, "MAIL FROM: <$fromEmail>");
             $response = self::lerRespostaCompleta($connection);
-            if (!str_starts_with($response, '250')) {
+            if (!self::str_starts_with($response, '250')) {
                 error_log("❌ MAIL FROM rejeitado: $response");
                 fclose($connection);
                 return false;
@@ -185,7 +192,7 @@ class EmailService {
             // RCPT TO
             self::enviarComando($connection, "RCPT TO: <$para>");
             $response = self::lerRespostaCompleta($connection);
-            if (!str_starts_with($response, '250')) {
+            if (!self::str_starts_with($response, '250')) {
                 error_log("❌ RCPT TO rejeitado: $response");
                 fclose($connection);
                 return false;
@@ -194,7 +201,7 @@ class EmailService {
             // DATA
             self::enviarComando($connection, "DATA");
             $response = self::lerRespostaCompleta($connection);
-            if (!str_starts_with($response, '354')) {
+            if (!self::str_starts_with($response, '354')) {
                 error_log("❌ DATA rejeitado: $response");
                 fclose($connection);
                 return false;
@@ -207,7 +214,7 @@ class EmailService {
 
             self::enviarComando($connection, $headers . $corpo . "\r\n.");
             $response = self::lerRespostaCompleta($connection);
-            if (!str_starts_with($response, '250')) {
+            if (!self::str_starts_with($response, '250')) {
                 error_log("❌ Envio rejeitado: $response");
                 fclose($connection);
                 return false;
@@ -264,7 +271,7 @@ class EmailService {
 
         } while (!feof($connection));
 
-        return $finalResponse ?: trim($response);
+        return $finalResponse ? $finalResponse : trim($response);
     }
 
     /**
@@ -297,17 +304,17 @@ class EmailService {
         self::enviarComando($connection, "AUTH LOGIN");
         $response = self::lerRespostaCompleta($connection);
 
-        if (str_starts_with($response, '334')) {
+        if (self::str_starts_with($response, '334')) {
             // Username
             self::enviarComando($connection, base64_encode($username));
             $response = self::lerRespostaCompleta($connection);
 
-            if (str_starts_with($response, '334')) {
+            if (self::str_starts_with($response, '334')) {
                 // Password
                 self::enviarComando($connection, base64_encode($password));
                 $response = self::lerRespostaCompleta($connection);
 
-                if (str_starts_with($response, '235')) {
+                if (self::str_starts_with($response, '235')) {
                     error_log("✅ Autenticação LOGIN bem-sucedida");
                     return true;
                 } else {
@@ -325,7 +332,7 @@ class EmailService {
         self::enviarComando($connection, "AUTH PLAIN $authString");
         $response = self::lerRespostaCompleta($connection);
 
-        if (str_starts_with($response, '235')) {
+        if (self::str_starts_with($response, '235')) {
             error_log("✅ Autenticação PLAIN bem-sucedida");
             return true;
         } else {
@@ -392,7 +399,7 @@ class EmailService {
     }
 
     /**
-     * Template HTML
+     * Template HTML para recuperação de senha
      */
     private static function templateRecuperacaoSenha($nome, $link) {
         $sistemaUrl = 'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost');
@@ -409,50 +416,34 @@ class EmailService {
                 </div>
                 <div style='padding: 30px;'>
                     <p>Olá, <strong>" . htmlspecialchars($nome) . "</strong>!</p>
-                    <p>Você solicitou a recuperação de senha para sua conta no sistema de gestão de participantes.</p>
+                    <p>Recebemos uma solicitação para recuperar sua senha. Se você não fez esta solicitação, pode ignorar este email.</p>
+
                     <div style='text-align: center; margin: 30px 0;'>
-                        <a href='$link' style='display: inline-block; background: #00bfff; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: 600;'>🔑 Redefinir Senha</a>
+                        <a href='" . htmlspecialchars($link) . "' style='display: inline-block; background: linear-gradient(135deg, #00bfff, #1D4ED8); color: white; padding: 15px 30px; text-decoration: none; border-radius: 6px; font-weight: bold; font-size: 16px;'>
+                            🔐 Redefinir Senha
+                        </a>
                     </div>
-                    <div style='background: #fff8e1; border-left: 4px solid #ffb74d; padding: 15px; margin: 20px 0;'>
-                        <strong>⚠️ Importante:</strong><br>
-                        • Este link expira em 1 hora<br>
-                        • Se não foi você, ignore este email
+
+                    <p style='color: #666; font-size: 14px;'>
+                        <strong>⚠️ Importante:</strong> Este link expira em 1 hora por motivos de segurança.
+                    </p>
+
+                    <p style='color: #666; font-size: 14px;'>
+                        Se o botão não funcionar, copie e cole este link no seu navegador:<br>
+                        <a href='" . htmlspecialchars($link) . "' style='color: #1D4ED8; word-break: break-all;'>" . htmlspecialchars($link) . "</a>
+                    </p>
+
+                    <hr style='border: none; border-top: 1px solid #eee; margin: 30px 0;'>
+
+                    <div style='text-align: center; color: #666; font-size: 12px;'>
+                        <p>Esta mensagem foi enviada automaticamente. Não responda a este email.</p>
+                        <p>© " . date('Y') . " Instituto Céu Interior - Todos os direitos reservados</p>
+                        <p><a href='" . htmlspecialchars($sistemaUrl) . "' style='color: #1D4ED8;'>Acessar Sistema</a></p>
                     </div>
-                    <p><strong>Se o botão não funcionar:</strong></p>
-                    <div style='background: #f5f5f5; padding: 10px; border-radius: 4px; word-break: break-all; font-family: monospace; font-size: 12px;'>$link</div>
-                </div>
-                <div style='background: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; border-radius: 0 0 8px 8px;'>
-                    <p>Email automático do sistema de gestão de participantes</p>
-                    <p>Instituto Céu Interior © " . date('Y') . "</p>
                 </div>
             </div>
         </body>
         </html>";
     }
-
-    /**
-     * Testa configuração
-     */
-    public static function testarConfiguracao() {
-        $host = env('MAIL_HOST');
-
-        // Testa porta 465 (SSL)
-        $connection = @fsockopen("ssl://$host", 465, $errno, $errstr, 10);
-        if ($connection) {
-            fclose($connection);
-            error_log("✅ Porta 465 (SSL) acessível");
-            return true;
-        }
-
-        // Testa porta 587 (TLS)
-        $connection = @fsockopen($host, 587, $errno, $errstr, 10);
-        if ($connection) {
-            fclose($connection);
-            error_log("✅ Porta 587 (TLS) acessível");
-            return true;
-        }
-
-        error_log("❌ Nenhuma porta SMTP acessível");
-        return false;
-    }
 }
+?>

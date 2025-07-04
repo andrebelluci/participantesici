@@ -1,4 +1,5 @@
-// ============= DETECTOR DE MUDANÇAS NÃO SALVAS - CORRIGIDO =============
+// ============= DETECTOR DE MUDANÇAS NÃO SALVAS - VERSÃO FINAL =============
+// Tenta interceptar o máximo possível, aceita limitações do navegador
 
 class UnsavedChangesDetector {
   constructor() {
@@ -6,8 +7,10 @@ class UnsavedChangesDetector {
     this.originalFormData = new Map();
     this.trackedForms = [];
     this.trackedModals = [];
+    this.modalChangesMap = new Map();
     this.isSubmitting = false;
-    this.isConfirmedLeaving = false; // ✅ NOVA FLAG para controlar saída confirmada
+    this.isConfirmedLeaving = false;
+    this.isNavigatingHistory = false;
 
     this.init();
   }
@@ -23,19 +26,115 @@ class UnsavedChangesDetector {
   setup() {
     this.trackForms();
     this.trackModals();
-    this.setupBeforeUnload();
-    this.setupNavigationBlocking();
+    this.setupAdvancedInterception(); // Tenta interceptação avançada
+    this.setupBeforeUnload(); // Fallback confiável
+    this.setupLinkInterception(); // Links sempre funcionam
   }
 
-  // ✅ CORRIGIDO: beforeunload agora respeita a confirmação
+  // ✅ TENTATIVA AVANÇADA: Intercepta o que conseguir
+  setupAdvancedInterception() {
+    try {
+      // 1. Adiciona estado inicial para detecção
+      if (!history.state || !history.state.unsavedDetector) {
+        history.replaceState({ unsavedDetector: true, page: 'current' }, '', window.location.href);
+      }
+
+      // 2. Intercepta popstate (funciona em alguns casos)
+      window.addEventListener('popstate', (e) => {
+        if (this.hasAnyUnsavedChanges() && !this.isConfirmedLeaving && !this.isNavigatingHistory) {
+          // Tenta cancelar navegação
+          this.isNavigatingHistory = true;
+
+          // Re-adiciona estado para "cancelar" navegação
+          history.pushState({ unsavedDetector: true, page: 'current' }, '', window.location.href);
+
+          // Mostra modal personalizada
+          this.showUnsavedChangesModal(() => {
+            // Confirmou saída
+            this.isConfirmedLeaving = true;
+            this.hasUnsavedChanges = false;
+            this.clearAllModalChanges();
+            this.isNavigatingHistory = false;
+
+            // Executa navegação original
+            setTimeout(() => {
+              history.back();
+            }, 10);
+          }, () => {
+            // Cancelou saída
+            this.isNavigatingHistory = false;
+          });
+
+          return; // Tenta prevenir navegação
+        }
+
+        this.isNavigatingHistory = false;
+      });
+
+      // 3. Sobrescreve métodos de história (quando possível)
+      const originalBack = history.back;
+      const originalForward = history.forward;
+      const originalGo = history.go;
+
+      history.back = (...args) => {
+        if (this.hasAnyUnsavedChanges() && !this.isConfirmedLeaving) {
+          this.showUnsavedChangesModal(() => {
+            this.isConfirmedLeaving = true;
+            this.hasUnsavedChanges = false;
+            this.clearAllModalChanges();
+            originalBack.apply(history, args);
+          });
+        } else {
+          originalBack.apply(history, args);
+        }
+      };
+
+      history.forward = (...args) => {
+        if (this.hasAnyUnsavedChanges() && !this.isConfirmedLeaving) {
+          this.showUnsavedChangesModal(() => {
+            this.isConfirmedLeaving = true;
+            this.hasUnsavedChanges = false;
+            this.clearAllModalChanges();
+            originalForward.apply(history, args);
+          });
+        } else {
+          originalForward.apply(history, args);
+        }
+      };
+
+      history.go = (...args) => {
+        if (this.hasAnyUnsavedChanges() && !this.isConfirmedLeaving) {
+          this.showUnsavedChangesModal(() => {
+            this.isConfirmedLeaving = true;
+            this.hasUnsavedChanges = false;
+            this.clearAllModalChanges();
+            originalGo.apply(history, args);
+          });
+        } else {
+          originalGo.apply(history, args);
+        }
+      };
+
+    } catch (error) {
+      // Se a interceptação avançada falhar, apenas continua
+      console.warn('Interceptação avançada não suportada:', error);
+    }
+  }
+
+  // ✅ FALLBACK CONFIÁVEL: beforeunload sempre funciona
   setupBeforeUnload() {
     window.addEventListener('beforeunload', (e) => {
-      // Se já foi confirmado que pode sair, não bloqueia
+      // Não interfere se estamos navegando via modal personalizada
+      if (this.isNavigatingHistory) {
+        return;
+      }
+
       if (this.isConfirmedLeaving || this.isSubmitting) {
         return;
       }
 
-      if (this.hasUnsavedChanges) {
+      if (this.hasAnyUnsavedChanges()) {
+        // Esta é a única confirmação 100% confiável para botão voltar/fechar aba
         e.preventDefault();
         e.returnValue = 'Você tem alterações não salvas. Deseja realmente sair?';
         return e.returnValue;
@@ -43,21 +142,22 @@ class UnsavedChangesDetector {
     });
   }
 
-  setupNavigationBlocking() {
+  // ✅ SEMPRE FUNCIONA: Intercepta links clicados
+  setupLinkInterception() {
     document.addEventListener('click', (e) => {
       const target = e.target.closest('a[href]');
 
-      if (target && this.hasUnsavedChanges && !this.isSubmitting && !this.isConfirmedLeaving) {
+      if (target && this.hasAnyUnsavedChanges() && !this.isSubmitting && !this.isConfirmedLeaving) {
         const href = target.getAttribute('href');
 
         if (href && !href.startsWith('#') && !href.startsWith('javascript:')) {
           e.preventDefault();
 
           this.showUnsavedChangesModal(() => {
-            // ✅ MARCA QUE A SAÍDA FOI CONFIRMADA
             this.isConfirmedLeaving = true;
+            this.hasUnsavedChanges = false;
+            this.clearAllModalChanges();
 
-            // ✅ PEQUENO DELAY para garantir que a flag seja setada
             setTimeout(() => {
               window.location.href = href;
             }, 10);
@@ -67,8 +167,34 @@ class UnsavedChangesDetector {
     });
   }
 
-  // ✅ CORRIGIDO: Modal de confirmação com melhor controle
-  showUnsavedChangesModal(onConfirm) {
+  hasAnyUnsavedChanges() {
+    // Mudanças em formulários principais
+    if (this.hasUnsavedChanges) {
+      return true;
+    }
+
+    // Mudanças em modais abertas
+    for (let [modalId, hasChanges] of this.modalChangesMap) {
+      const modal = document.getElementById(modalId);
+      const isModalVisible = modal && (
+        modal.style.display === 'flex' ||
+        !modal.classList.contains('hidden')
+      );
+
+      if (isModalVisible && hasChanges) {
+        return true;
+      }
+    }
+
+    return false;
+  }
+
+  clearAllModalChanges() {
+    this.modalChangesMap.clear();
+  }
+
+  // ✅ MODAL PERSONALIZADA (para quando conseguimos interceptar)
+  showUnsavedChangesModal(onConfirm, onCancel = null) {
     let confirmModal = document.getElementById('unsaved-changes-modal');
 
     if (!confirmModal) {
@@ -79,32 +205,32 @@ class UnsavedChangesDetector {
     const confirmBtn = confirmModal.querySelector('#confirm-discard');
     const cancelBtn = confirmModal.querySelector('#cancel-discard');
 
-    // Remove listeners antigos
+    // Remove listeners antigos para evitar duplicação
     confirmBtn.replaceWith(confirmBtn.cloneNode(true));
     cancelBtn.replaceWith(cancelBtn.cloneNode(true));
 
-    // Novos listeners
+    // Handler de confirmação
     confirmModal.querySelector('#confirm-discard').addEventListener('click', () => {
       confirmModal.style.display = 'none';
-
-      // ✅ RESETA estado antes de executar callback
       this.hasUnsavedChanges = false;
       this.isConfirmedLeaving = true;
-
+      this.clearAllModalChanges();
       onConfirm();
     });
 
-    confirmModal.querySelector('#cancel-discard').addEventListener('click', () => {
+    // Handler de cancelamento
+    const handleCancel = () => {
       confirmModal.style.display = 'none';
-      // ✅ RESETA flag de confirmação ao cancelar
       this.isConfirmedLeaving = false;
-    });
+      if (onCancel) onCancel();
+    };
 
-    // ✅ FECHA com ESC na modal de confirmação
+    confirmModal.querySelector('#cancel-discard').addEventListener('click', handleCancel);
+
+    // ESC para cancelar
     const handleEscape = (e) => {
       if (e.key === 'Escape') {
-        confirmModal.style.display = 'none';
-        this.isConfirmedLeaving = false;
+        handleCancel();
         document.removeEventListener('keydown', handleEscape);
       }
     };
@@ -113,11 +239,43 @@ class UnsavedChangesDetector {
     confirmModal.style.display = 'flex';
   }
 
-  // ✅ MÉTODOS PÚBLICOS ATUALIZADOS
+  createUnsavedChangesModal() {
+    const modal = document.createElement('div');
+    modal.id = 'unsaved-changes-modal';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[9999]';
+
+    modal.innerHTML = `
+      <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
+        <h2 class="text-xl font-bold mb-4 text-red-600">
+          <i class="fa-solid fa-exclamation-triangle mr-2"></i>
+          Alterações não salvas
+        </h2>
+        <p class="text-gray-700 mb-6">
+          Você fez alterações que não foram salvas. Deseja realmente sair sem salvar?
+        </p>
+        <div class="flex justify-end gap-3">
+          <button id="confirm-discard"
+                  class="px-4 py-2 bg-[#00bfff] text-black rounded hover:bg-yellow-400 transition font-semibold">
+            Sair sem salvar
+          </button>
+          <button id="cancel-discard"
+                  class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-900 transition font-semibold">
+            Cancelar
+          </button>
+        </div>
+      </div>
+    `;
+
+    return modal;
+  }
+
+  // ============= MÉTODOS PÚBLICOS =============
   markAsSaved() {
     this.hasUnsavedChanges = false;
     this.isSubmitting = false;
-    this.isConfirmedLeaving = false; // ✅ RESETA flag
+    this.isConfirmedLeaving = false;
+    this.isNavigatingHistory = false;
+    this.clearAllModalChanges();
 
     this.trackedForms.forEach(form => {
       this.saveOriginalFormData(form);
@@ -127,21 +285,23 @@ class UnsavedChangesDetector {
   reset() {
     this.hasUnsavedChanges = false;
     this.isSubmitting = false;
-    this.isConfirmedLeaving = false; // ✅ RESETA flag
+    this.isConfirmedLeaving = false;
+    this.isNavigatingHistory = false;
     this.originalFormData.clear();
+    this.clearAllModalChanges();
   }
 
-  // ✅ NOVO: Método para forçar saída sem confirmação
   forceLeave(url) {
     this.isConfirmedLeaving = true;
     this.hasUnsavedChanges = false;
+    this.clearAllModalChanges();
 
     setTimeout(() => {
       window.location.href = url;
     }, 10);
   }
 
-  // ============= RESTO DO CÓDIGO PERMANECE IGUAL =============
+  // ============= RASTREAMENTO DE FORMULÁRIOS =============
   trackForms() {
     const mainForms = document.querySelectorAll('#formulario-participante, #formulario-ritual, #formulario-usuario');
 
@@ -215,48 +375,16 @@ class UnsavedChangesDetector {
     return true;
   }
 
-  createUnsavedChangesModal() {
-    const modal = document.createElement('div');
-    modal.id = 'unsaved-changes-modal';
-    modal.className = 'fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[9999]';
-
-    modal.innerHTML = `
-      <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
-        <h2 class="text-xl font-bold mb-4 text-red-600">
-          <i class="fa-solid fa-exclamation-triangle mr-2"></i>
-          Alterações não salvas
-        </h2>
-        <p class="text-gray-700 mb-6">
-          Você fez alterações que não foram salvas. Deseja realmente sair sem salvar?
-        </p>
-        <div class="flex justify-end gap-3">
-          <button id="confirm-discard"
-                  class="px-4 py-2 bg-[#00bfff] text-black rounded hover:bg-yellow-400 transition font-semibold">
-            Sair sem salvar
-          </button>
-          <button id="cancel-discard"
-                  class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-900 transition font-semibold">
-            Cancelar
-          </button>
-        </div>
-      </div>
-    `;
-
-    return modal;
-  }
-
-  // ✅ MÉTODOS DE MODAL (mantidos iguais, só para completude)
+  // ============= RASTREAMENTO DE MODAIS =============
   trackModals() {
     const modals = [
       {
         id: 'modal-detalhes-inscricao',
-        formId: 'form-detalhes-inscricao',
-        closeButtons: ['fecharModalDetalhes()']
+        formId: 'form-detalhes-inscricao'
       },
       {
         id: 'modal-observacao',
-        formId: 'form-observacao',
-        closeButtons: ['fecharModalObservacao()']
+        formId: 'form-observacao'
       }
     ];
 
@@ -273,7 +401,9 @@ class UnsavedChangesDetector {
 
   setupModalTracking(modal, form) {
     let modalOriginalData = {};
-    let modalHasChanges = false;
+    const modalId = modal.id;
+
+    this.modalChangesMap.set(modalId, false);
 
     const observer = new MutationObserver((mutations) => {
       mutations.forEach(mutation => {
@@ -283,11 +413,11 @@ class UnsavedChangesDetector {
           if (isVisible && Object.keys(modalOriginalData).length === 0) {
             setTimeout(() => {
               modalOriginalData = this.getCurrentFormData(form);
-              modalHasChanges = false;
+              this.modalChangesMap.set(modalId, false);
             }, 100);
           } else if (!isVisible) {
             modalOriginalData = {};
-            modalHasChanges = false;
+            this.modalChangesMap.set(modalId, false);
           }
         }
       });
@@ -295,53 +425,59 @@ class UnsavedChangesDetector {
 
     observer.observe(modal, { attributes: true, attributeFilter: ['style', 'class'] });
 
-    form.addEventListener('input', () => {
+    const checkModalChanges = () => {
       if (Object.keys(modalOriginalData).length > 0) {
         const currentData = this.getCurrentFormData(form);
-        modalHasChanges = !this.isFormDataEqual(currentData, modalOriginalData);
+        const hasChanges = !this.isFormDataEqual(currentData, modalOriginalData);
+        this.modalChangesMap.set(modalId, hasChanges);
       }
-    });
+    };
 
-    form.addEventListener('change', () => {
-      if (Object.keys(modalOriginalData).length > 0) {
-        const currentData = this.getCurrentFormData(form);
-        modalHasChanges = !this.isFormDataEqual(currentData, modalOriginalData);
-      }
-    });
+    form.addEventListener('input', checkModalChanges);
+    form.addEventListener('change', checkModalChanges);
 
-    this.interceptModalClose(modal, () => modalHasChanges);
+    this.interceptModalClose(modal, modalId);
   }
 
-  interceptModalClose(modal, hasChangesCallback) {
+  // ✅ SEMPRE FUNCIONA: Intercepta fechamento de modais
+  interceptModalClose(modal, modalId) {
+    const hasChanges = () => this.modalChangesMap.get(modalId) || false;
+
+    // Clique fora da modal
     modal.addEventListener('click', (e) => {
-      if (e.target === modal && hasChangesCallback()) {
+      if (e.target === modal && hasChanges()) {
         e.preventDefault();
         e.stopPropagation();
         this.showUnsavedChangesModal(() => {
           modal.style.display = 'none';
+          this.modalChangesMap.set(modalId, false);
           this.enableScroll();
         });
       }
     });
 
+    // ESC na modal
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && modal.style.display === 'flex' && hasChangesCallback()) {
+      if (e.key === 'Escape' && modal.style.display === 'flex' && hasChanges()) {
         e.preventDefault();
         this.showUnsavedChangesModal(() => {
           modal.style.display = 'none';
+          this.modalChangesMap.set(modalId, false);
           this.enableScroll();
         });
       }
     });
 
+    // Botões de fechar
     const closeButtons = modal.querySelectorAll('[onclick*="fechar"], .fa-window-close, .fa-times, .fa-x');
     closeButtons.forEach(button => {
       button.addEventListener('click', (e) => {
-        if (hasChangesCallback()) {
+        if (hasChanges()) {
           e.preventDefault();
           e.stopPropagation();
           this.showUnsavedChangesModal(() => {
             modal.style.display = 'none';
+            this.modalChangesMap.set(modalId, false);
             this.enableScroll();
           });
         }

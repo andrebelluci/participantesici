@@ -3,3 +3,8 @@ storage/uploads/*
 /app/test/*
 .env
 .env_production
+node_modules
+package-lock.json
+package.json
+postcss.config.js
+tailwind.config.js
