@@ -242,7 +242,7 @@ class UnsavedChangesDetector {
   createUnsavedChangesModal() {
     const modal = document.createElement('div');
     modal.id = 'unsaved-changes-modal';
-    modal.className = 'fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[9999]';
+    modal.className = 'fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]';
 
     modal.innerHTML = `
       <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">

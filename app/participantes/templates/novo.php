@@ -274,7 +274,7 @@ require_once __DIR__ . '/../../includes/header.php';
 </button>
 
 <!-- Modal de Ampliação de Imagem -->
-<div id="modal-image" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+<div id="modal-image" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
     <div class="bg-white rounded-lg overflow-hidden shadow-lg relative max-w-sm w-full mx-4">
         <button onclick="closeImageModal()" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg">
             <i class="fa-solid fa-window-close"></i>
@@ -284,7 +284,7 @@ require_once __DIR__ . '/../../includes/header.php';
 </div>
 
 <!-- Modal de Crop -->
-<div id="crop-modal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden flex items-center justify-center p-4">
+<div id="crop-modal" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
     <div class="bg-white rounded-lg max-w-lg w-full p-6 max-h-[90vh]">
         <div class="flex justify-between items-center mb-4">
             <h3 class="text-lg font-semibold">Ajustar Foto</h3>

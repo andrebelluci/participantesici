@@ -1,9 +1,119 @@
-.senha
-/app/test/*
-.env
-.env_production
-node_modules
-package-lock.json
+# ============================================
+# .gitignore - Sistema Participantes ICI
+# ============================================
+
+# ============================================
+# NODE.JS / NPM (Tailwind CSS)
+# ============================================
+node_modules/
 package.json
-postcss.config.js
-tailwind.config.js
+package-lock.json
+src/input.css
+src/
+
+# ============================================
+# AMBIENTE E CONFIGURAÇÕES SENSÍVEIS
+# ============================================
+.senha
+.env
+.env_*
+.senha
+*.log
+debug.log
+error.log
+
+# ============================================
+# UPLOADS E ARQUIVOS GERADOS PELO USUÁRIO
+# ============================================
+storage/uploads/*
+public_html/storage/uploads/*
+
+# Exceção: manter estrutura de pastas
+!storage/uploads/.gitkeep
+!public_html/storage/uploads/.gitkeep
+
+# ============================================
+# DEPENDÊNCIAS PHP (se usar Composer)
+# ============================================
+vendor/
+composer.lock
+
+# ============================================
+# ARQUIVOS DE SISTEMA E EDITOR
+# ============================================
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Linux
+*~
+
+# VSCode
+.vscode/
+.history/
+
+# PhpStorm
+.idea/
+
+# Sublime Text
+*.sublime-*
+
+# ============================================
+# ARQUIVOS TEMPORÁRIOS
+# ============================================
+temp/
+tmp/
+cache/
+*.tmp
+*.temp
+*.swp
+*.swo
+
+# ============================================
+# BACKUP E ARQUIVOS ANTIGOS
+# ============================================
+*.bak
+*.backup
+*.old
+*_backup
+*_old
+
+# ============================================
+# LOGS E DEBUG
+# ============================================
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ============================================
+# CERTIFICADOS E CHAVES
+# ============================================
+*.pem
+*.key
+*.crt
+*.csr
+
+# ============================================
+# ARQUIVOS ESPECÍFICOS DO PROJETO
+# ============================================
+
+# Arquivos de teste
+/app/test/
+test.php
+debug.php
+
+# Documentação de desenvolvimento (se existir)
+docs/desenvolvimento/
+TODO.md
+NOTES.md

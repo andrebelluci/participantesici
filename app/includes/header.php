@@ -120,7 +120,7 @@ if (isset($_SESSION['user_id'])) {
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/tailwind.css?v=1.0">
     <link rel="stylesheet" href="/assets/css/mobile-fixes.css?v=1.0">
     <script src="/assets/js/global-scripts.js?t=<?= time() ?>"></script>
     <script src="/assets/js/unsaved-changes-detector.js"></script>

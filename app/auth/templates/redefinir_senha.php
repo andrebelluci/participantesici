@@ -43,8 +43,8 @@ if (!$user) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="/assets/js/global-scripts.js?t=<?= time() ?>"></script>
+    <link rel="stylesheet" href="/assets/css/tailwind.css?v=1.0">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
         .video-bg video {
@@ -59,7 +59,7 @@ if (!$user) {
     </style>
 </head>
 
-<body class="relative h-screen flex items-center justify-center bg-black/70 text-white overflow-hidden">
+<body class="relative h-screen flex items-center justify-center bg-black/50 text-white overflow-hidden">
     <div class="video-bg">
         <video autoplay muted loop>
             <source src="/assets/videos/fogueira.mp4" type="video/mp4">
@@ -81,7 +81,7 @@ if (!$user) {
 
                 <div class="relative group">
                     <input type="password" name="nova_senha" id="nova_senha" placeholder="Nova Senha" required
-                        class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00bfff] transition" />
+                        class="bg-white w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00bfff] transition" />
 
                     <!-- Indicadores de validação da senha -->
                     <div id="senha-validacao" class="mt-2 space-y-1 text-xs">

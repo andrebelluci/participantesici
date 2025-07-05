@@ -47,10 +47,10 @@ $tentativas = CaptchaService::obterTentativas($identificador);
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
   <link rel="stylesheet" href="/assets/css/mobile-fixes.css?v=1.0">
+  <link rel="stylesheet" href="/assets/css/tailwind.css?v=1.0">
   <script src="/assets/js/global-scripts.js?t=<?= time() ?>"></script>
   <script src="/assets/js/pwa.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
 
   <?php if ($mostrarCaptcha): ?>
     <?= CaptchaService::gerarScriptCaptcha() ?>
@@ -91,7 +91,7 @@ $tentativas = CaptchaService::obterTentativas($identificador);
   </style>
 </head>
 
-<body class="relative h-screen flex items-center justify-center bg-black/70 text-white">
+<body class="relative h-screen flex items-center justify-center bg-black/50 text-white">
   <div class="video-bg">
     <video autoplay muted loop>
       <source src="/assets/videos/fogueira.mp4" type="video/mp4">
@@ -122,14 +122,14 @@ $tentativas = CaptchaService::obterTentativas($identificador);
       <form method="POST" action="/entrar" class="space-y-4" novalidate>
         <div>
           <input type="text" name="usuario" id="usuario" placeholder="Usuário" required autocapitalize="none"
-            class="w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00bfff] transition" />
+            class="bg-white w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00bfff] transition" />
           <p class="text-sm text-red-500 mt-1 hidden" id="erro-usuario">Campo obrigatório.</p>
         </div>
 
         <div class="flex flex-col">
           <div class="relative">
             <input type="password" name="senha" id="senha" placeholder="Senha" required autocapitalize="none"
-              class="w-full p-3 pr-12 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00bfff] transition" />
+              class="bg-white w-full p-3 pr-12 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00bfff] transition" />
             <button type="button" onclick="toggleSenha()"
               class="absolute right-3 top-1/2 -translate-y-1/2 text-black hover:text-blue-300" title="Mostrar senha"
               id="toggleSenhaBtn">

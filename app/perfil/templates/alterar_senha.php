@@ -79,7 +79,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
                 <!-- Botão global para ver/ocultar todas -->
                 <button type="button" onclick="toggleTodasSenhas(this, this.querySelector('i'))"
-                    class="text-gray-600 text-sm hover:text-[#00bfff] flex items-center gap-2 transition self-start">
+                    class="text-gray-600 text-sm hover:text-[#00bfff] flex items-center gap-2 transition self-start cursor-pointer">
                     <i class="fa-solid fa-eye"></i> Mostrar Senhas
                 </button>
             </div>

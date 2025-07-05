@@ -110,7 +110,7 @@ try {
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="/assets/js/global-scripts.js?t=<?= time() ?>"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/assets/css/tailwind.css?v=1.0">
 
     <style>
       .video-bg video {
@@ -125,7 +125,7 @@ try {
     </style>
   </head>
 
-  <body class="relative h-screen flex items-center justify-center bg-black/70 text-white overflow-hidden">
+  <body class="relative h-screen flex items-center justify-center bg-black/50 text-white overflow-hidden">
     <div class="video-bg">
       <video autoplay muted loop>
         <source src="/assets/videos/fogueira.mp4" type="video/mp4">

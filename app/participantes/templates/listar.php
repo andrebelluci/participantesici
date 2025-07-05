@@ -252,7 +252,7 @@ require_once __DIR__ . '/../../includes/header.php';
 </button>
 
 <!-- Modal de Ampliação de Imagem -->
-<div id="modal-image" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+<div id="modal-image" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-lg overflow-hidden shadow-lg relative max-w-sm w-full mx-4">
     <button onclick="closeImageModal()" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg">
       <i class="fa-solid fa-window-close"></i>
@@ -262,7 +262,7 @@ require_once __DIR__ . '/../../includes/header.php';
 </div>
 
 <!-- Modal de Confirmação Genérico -->
-<div id="confirmModal" class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 hidden">
+<div id="confirmModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
     <h2 class="text-xl font-bold mb-4 text-red-600" id="confirmModalTitle"><i
         class="fa-solid fa-exclamation-triangle mr-2"></i>ATENÇÃO!</h2>

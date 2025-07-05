@@ -70,7 +70,7 @@ require_once __DIR__ . '/../../includes/header.php';
             </div>
 
             <!-- Nova Senha com validação -->
-            <div class="border-t pt-4">
+            <div class="border-t border-gray-200 pt-4">
                 <h3 class="text-lg font-semibold text-gray-700 mb-4"><i class="fa-solid fa-lock text-yellow-600"></i> Alterar Senha (Opcional)</h3>
                 <div>
                     <label for="nova_senha" class="block text-sm font-medium text-gray-700 mb-1">Nova Senha:</label>
