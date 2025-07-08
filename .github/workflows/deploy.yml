@@ -1,4 +1,4 @@
-name: 🚀 Deploy via FTP para cPanel
+name: 🚀 Deploy Seguro para cPanel
 
 on:
   push:
@@ -6,18 +6,38 @@ on:
       - main
 
 jobs:
-  ftp-deploy:
-    name: 📂 Deploy para cPanel via FTP
+  safe-deploy:
+    name: 📂 Deploy Seguro - App e Public
     runs-on: ubuntu-latest
 
     steps:
     - name: 🔄 Clonar repositório
       uses: actions/checkout@v3
 
-    - name: 📤 Enviar via FTP
+    - name: 📤 Deploy pasta app/
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_HOST }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: ${{ secrets.FTP_TARGET_DIR }}/
+        server-dir: ${{ secrets.FTP_TARGET_DIR }}/teste/app/
+        local-dir: ./app/
+        dangerous-clean-slate: false
+        # MINIMALISTA - só o essencial:
+        exclude: |
+          **/storage/uploads/**
+          **/storage/logs/**
+
+    - name: 📤 Deploy pasta public_html/
+      uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+      with:
+        server: ${{ secrets.FTP_HOST }}
+        username: ${{ secrets.FTP_USERNAME }}
+        password: ${{ secrets.FTP_PASSWORD }}
+        server-dir: ${{ secrets.FTP_TARGET_DIR }}/teste/public_html/
+        local-dir: ./public_html/
+        dangerous-clean-slate: false
+        # ESPECÍFICO - só o que realmente existe:
+        exclude: |
+          storage/uploads/**
+          storage/logs/**
