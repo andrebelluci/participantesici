@@ -20,7 +20,7 @@ jobs:
         server: ${{ secrets.FTP_HOST }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: ${{ secrets.FTP_TARGET_DIR }}/teste/app/
+        server-dir: /teste/app/
         local-dir: ./app/
         exclude: |
           **/storage/uploads/**
@@ -33,7 +33,7 @@ jobs:
         server: ${{ secrets.FTP_HOST }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: ${{ secrets.FTP_TARGET_DIR }}/teste/public_html/
+        server-dir: /teste/public_html/
         local-dir: ./public_html/
         exclude: |
           storage/uploads/**
