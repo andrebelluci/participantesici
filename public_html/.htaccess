@@ -1,0 +1,123 @@
+RewriteEngine On
+
+# ============= REDIRECIONAMENTO PARA FAVICON =============
+RewriteRule ^favicon\.ico$ /assets/images/favicon.ico [L]
+
+# ============= REDIRECIONAMENTOS PRINCIPAIS =============
+# Página inicial → login
+RewriteRule ^$ /app/auth/templates/login.php [L]
+
+# URL amigável para login
+RewriteRule ^login/?$ /app/auth/templates/login.php [L]
+RewriteRule ^entrar/?$ /app/auth/actions/login.php [L]
+
+# URLs de recuperação de senha
+RewriteRule ^esqueci-senha/?$ /app/auth/templates/esqueci_senha.php [L]
+RewriteRule ^enviar-recuperacao/?$ /app/auth/actions/enviar_recuperacao.php [L]
+RewriteRule ^redefinir-senha/?$ /app/auth/templates/redefinir_senha.php [L]
+RewriteRule ^salvar-nova-senha/?$ /app/auth/actions/salvar_nova_senha.php [L]
+
+# URL amigável para logout
+RewriteRule ^logout/?$ /app/auth/actions/logout.php [L]
+
+# URL amigável para home
+RewriteRule ^home/?$ /app/home/templates/home.php [L]
+
+# URL amigável para alterar_senha
+RewriteRule ^alterar_senha/?$ /app/perfil/templates/alterar_senha.php [L]
+
+# ============= URL AMIGÁVEL PARA RITUAIS =============
+RewriteRule ^rituais/?$ /app/rituais/actions/listar.php [L,QSA]
+RewriteRule ^ritual/([0-9]+)/?$ /app/rituais/actions/visualizar.php?id=$1 [L,QSA]
+RewriteRule ^ritual/novo/?$ /app/rituais/actions/novo.php [L,QSA]
+RewriteRule ^ritual/([0-9]+)/editar/?$ /app/rituais/actions/editar.php?id=$1 [L,QSA]
+RewriteRule ^ritual/([0-9]+)/excluir/?$ /app/rituais/actions/excluir.php?id=$1 [L,QSA]
+RewriteRule ^api/ritual/adicionar-participante/?$ /app/rituais/api/adicionar_participante.php [L]
+RewriteRule ^api/ritual/buscar-participante/?$ /app/rituais/api/buscar_participante.php [L]
+
+# ============= URL AMIGÁVEL PARA PARTICIPANTES =============
+RewriteRule ^participantes/?$ /app/participantes/actions/listar.php [L,QSA]
+RewriteRule ^participante/([0-9]+)/?$ /app/participantes/actions/visualizar.php?id=$1 [L,QSA]
+RewriteRule ^participante/novo/?$ /app/participantes/actions/novo.php [L,QSA]
+RewriteRule ^participante/([0-9]+)/editar/?$ /app/participantes/actions/editar.php?id=$1 [L,QSA]
+RewriteRule ^participante/([0-9]+)/excluir/?$ /app/participantes/actions/excluir.php?id=$1 [L,QSA]
+RewriteRule ^api/participante/verifica-cpf/?$ /app/participantes/api/verifica_cpf.php [L]
+RewriteRule ^api/participante/adicionar-ritual/?$ /app/participantes/api/adicionar_ritual.php [L]
+RewriteRule ^api/participante/buscar-ritual/?$ /app/participantes/api/buscar_ritual.php [L]
+
+# ============= URL AMIGÁVEL PARA USUÁRIOS =============
+RewriteRule ^usuarios/?$ /app/usuarios/actions/listar.php [L,QSA]
+RewriteRule ^usuario/novo/?$ /app/usuarios/actions/novo.php [L,QSA]
+RewriteRule ^usuario/([0-9]+)/editar/?$ /app/usuarios/actions/editar.php?id=$1 [L,QSA]
+RewriteRule ^usuario/([0-9]+)/excluir/?$ /app/usuarios/actions/excluir.php?id=$1 [L,QSA]
+
+# ============= URL AMIGÁVEL PARA INSCRIÇÕES =============
+RewriteRule ^api/inscricoes/atualizar-presenca/?$ /app/inscricoes/api/atualizar_presenca.php [L]
+RewriteRule ^api/inscricoes/buscar-id/?$ /app/inscricoes/api/buscar_id.php [L]
+RewriteRule ^api/inscricoes/detalhes-inscricao/?$ /app/inscricoes/api/detalhes_inscricao.php [L]
+RewriteRule ^api/inscricoes/excluir-participacao/?$ /app/inscricoes/api/excluir_participacao.php [L]
+RewriteRule ^api/inscricoes/rituais-vinculados/?$ /app/inscricoes/api/rituais_vinculados.php [L]
+RewriteRule ^api/inscricoes/participantes-vinculados/?$ /app/inscricoes/api/participantes_vinculados.php [L]
+RewriteRule ^api/inscricoes/salvar-inscricao/?$ /app/inscricoes/api/salvar_inscricao.php [L]
+RewriteRule ^api/inscricoes/salvar-observacao/?$ /app/inscricoes/api/salvar_observacao.php [L]
+RewriteRule ^api/inscricoes/verificar-primeira-inscricao/?$ /app/inscricoes/api/verificar_primeira_inscricao.php [L]
+
+# ============= RELATÓRIOS =============
+RewriteRule ^participante/([0-9]+)/relatorio/pdf/?$ /app/participantes/relatorios/visualizar.php?id=$1&formato=pdf [L]
+RewriteRule ^participante/([0-9]+)/relatorio/excel/?$ /app/participantes/relatorios/visualizar.php?id=$1&formato=excel [L]
+RewriteRule ^ritual/([0-9]+)/relatorio/pdf/?$ /app/rituais/relatorios/visualizar.php?id=$1&formato=pdf [L]
+RewriteRule ^ritual/([0-9]+)/relatorio/excel/?$ /app/rituais/relatorios/visualizar.php?id=$1&formato=excel [L]
+RewriteRule ^api/relatorio/participante/?$ /app/participantes/relatorios/visualizar.php [L,QSA]
+RewriteRule ^api/relatorio/ritual/?$ /app/rituais/relatorios/visualizar.php [L,QSA]
+
+# ============= LIMPEZA DE URLs =============
+# Remove barra final (exceto para diretórios físicos)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)/$ /$1 [L,R=301]
+
+# ============= SEGURANÇA =============
+# Bloqueia acesso direto a arquivos .php na pasta templates
+RewriteCond %{THE_REQUEST} /app/(home|auth)/templates/([^\s?]+)\.php [NC]
+RewriteRule ^ - [R=404,L]
+
+# Bloqueia acesso a qualquer arquivo .php (exceto via regras de rewrite)
+RewriteCond %{THE_REQUEST} \.php[\s?] [NC]
+RewriteRule ^ - [F,L]
+
+# ============= ARQUIVOS EM PUBLIC_HTML =============
+# Esconde .php para arquivos dentro de public_html
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.php -f
+RewriteRule ^([^/]+)$ $1.php [L]
+
+# ============= PROTEÇÃO DE ARQUIVOS =============
+<Files ".htaccess">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "database.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files ".env">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "*.ini">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "composer.*">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "robots.txt">
+    Order allow,deny
+    Allow from all
+    ForceType text/plain
+</Files>
