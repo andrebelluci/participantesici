@@ -1,12 +1,44 @@
 <?php
 // app/services/CaptchaService.php
+
+if (!function_exists('env')) {
+  require_once __DIR__ . '/../config/config.php';
+}
+
 class CaptchaService
 {
-
-  private const SITE_KEY = '6Lfi-HMrAAAAAEkx8_QU758ogmV7v_l0KAjKrFrS';
-  private const SECRET_KEY = '6Lfi-HMrAAAAAOPjGrFWvnHvY3X6rejrgFTW3EsY';
   private const MAX_TENTATIVAS = 5;
   private const TEMPO_RESET = 1800; // 30 minutos em segundos
+
+  /**
+   * Obtém a chave do site do .env
+   * @return string
+   */
+  private static function getSiteKeyFromEnv()
+  {
+    return env('RECAPTCHA_SITE_KEY');
+  }
+
+  /**
+   * Obtém a chave secreta do .env
+   * @return string
+   */
+  private static function getSecretKeyFromEnv()
+  {
+    return env('RECAPTCHA_SECRET_KEY');
+  }
+
+  /**
+   * Verifica se o reCAPTCHA está configurado
+   * @return bool
+   */
+  public static function isCaptchaConfigurado()
+  {
+    $siteKey = self::getSiteKeyFromEnv();
+    $secretKey = self::getSecretKeyFromEnv();
+
+    return !empty($siteKey) && !empty($secretKey);
+  }
 
   /**
    * Verifica se deve mostrar o captcha baseado no número de tentativas
@@ -15,6 +47,11 @@ class CaptchaService
    */
   public static function deveMostrarCaptcha($identificador)
   {
+    // Se não está configurado, não mostra captcha
+    if (!self::isCaptchaConfigurado()) {
+      return false;
+    }
+
     if (session_status() === PHP_SESSION_NONE) {
       session_start();
     }
@@ -32,8 +69,8 @@ class CaptchaService
   public static function incrementarTentativas($identificador)
   {
     if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+      session_start();
+    }
 
     $chave = 'tentativas_' . md5($identificador);
     $chaveTime = 'primeiro_erro_' . md5($identificador);
@@ -56,8 +93,8 @@ class CaptchaService
   public static function resetarTentativas($identificador)
   {
     if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+      session_start();
+    }
 
     $chave = 'tentativas_' . md5($identificador);
     $chaveTime = 'primeiro_erro_' . md5($identificador);
@@ -75,8 +112,8 @@ class CaptchaService
   public static function verificarTempoReset($identificador)
   {
     if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+      session_start();
+    }
 
     $chave = 'tentativas_' . md5($identificador);
     $chaveTime = 'primeiro_erro_' . md5($identificador);
@@ -104,6 +141,15 @@ class CaptchaService
    */
   public static function verificarCaptcha($token, $ip = null)
   {
+    // Se não está configurado, considera válido (modo de desenvolvimento)
+    if (!self::isCaptchaConfigurado()) {
+      error_log("[CAPTCHA] reCAPTCHA não configurado - permitindo acesso");
+      return [
+        'success' => true,
+        'message' => 'Captcha não configurado'
+      ];
+    }
+
     if (empty($token)) {
       return [
         'success' => false,
@@ -112,9 +158,10 @@ class CaptchaService
     }
 
     $ip = $ip ?: $_SERVER['REMOTE_ADDR'] ?? '';
+    $secretKey = self::getSecretKeyFromEnv();
 
     $dados = [
-      'secret' => self::SECRET_KEY,
+      'secret' => $secretKey,
       'response' => $token,
       'remoteip' => $ip
     ];
@@ -168,11 +215,11 @@ class CaptchaService
 
   /**
    * Retorna a chave pública do site para uso no frontend
-   * @return string
+   * @return string|null
    */
   public static function getSiteKey()
   {
-    return self::SITE_KEY;
+    return self::getSiteKeyFromEnv();
   }
 
   /**
@@ -181,7 +228,13 @@ class CaptchaService
    */
   public static function gerarHtmlCaptcha()
   {
-    return '<div class="g-recaptcha" data-sitekey="' . self::SITE_KEY . '"></div>';
+    $siteKey = self::getSiteKeyFromEnv();
+
+    if (empty($siteKey)) {
+      return '<!-- reCAPTCHA não configurado no .env -->';
+    }
+
+    return '<div class="g-recaptcha" data-sitekey="' . htmlspecialchars($siteKey) . '"></div>';
   }
 
   /**
@@ -190,6 +243,10 @@ class CaptchaService
    */
   public static function gerarScriptCaptcha()
   {
+    if (!self::isCaptchaConfigurado()) {
+      return '<!-- reCAPTCHA não configurado no .env -->';
+    }
+
     return '<script src="https://www.google.com/recaptcha/api.js" async defer></script>';
   }
 
@@ -201,9 +258,26 @@ class CaptchaService
   public static function obterTentativas($identificador)
   {
     if (session_status() === PHP_SESSION_NONE) {
-            session_start();
-        }
+      session_start();
+    }
     $chave = 'tentativas_' . md5($identificador);
     return $_SESSION[$chave] ?? 0;
+  }
+
+  /**
+   * Método para debug - mostra status da configuração
+   * @return array
+   */
+  public static function getConfigStatus()
+  {
+    $siteKey = self::getSiteKeyFromEnv();
+    $secretKey = self::getSecretKeyFromEnv();
+
+    return [
+      'configured' => self::isCaptchaConfigurado(),
+      'site_key_set' => !empty($siteKey),
+      'secret_key_set' => !empty($secretKey),
+      'site_key_preview' => $siteKey ? substr($siteKey, 0, 10) . '...' : 'não definida',
+    ];
   }
 }
