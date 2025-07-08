@@ -1,4 +1,4 @@
-name: 🚀 Deploy Seguro para cPanel
+name: 🧪 Deploy Teste - Pasta Segura
 
 on:
   push:
@@ -6,15 +6,15 @@ on:
       - main
 
 jobs:
-  safe-deploy:
-    name: 📂 Deploy Seguro - App e Public
+  test-deploy:
+    name: 📂 Deploy para /teste/ (SEGURO)
     runs-on: ubuntu-latest
 
     steps:
     - name: 🔄 Clonar repositório
       uses: actions/checkout@v3
 
-    - name: 📤 Deploy pasta app/
+    - name: 📤 Deploy pasta app/ para TESTE
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_HOST }}
@@ -22,13 +22,12 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         server-dir: ${{ secrets.FTP_TARGET_DIR }}/teste/app/
         local-dir: ./app/
-        dangerous-clean-slate: false
-        # MINIMALISTA - só o essencial:
         exclude: |
           **/storage/uploads/**
           **/storage/logs/**
+          **/*.log
 
-    - name: 📤 Deploy pasta public_html/
+    - name: 📤 Deploy pasta public_html/ para TESTE
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_HOST }}
@@ -36,8 +35,7 @@ jobs:
         password: ${{ secrets.FTP_PASSWORD }}
         server-dir: ${{ secrets.FTP_TARGET_DIR }}/teste/public_html/
         local-dir: ./public_html/
-        dangerous-clean-slate: false
-        # ESPECÍFICO - só o que realmente existe:
         exclude: |
           storage/uploads/**
           storage/logs/**
+          **/*.log
