@@ -176,9 +176,8 @@ if (!isset($pessoa)) {
                     <div class="lg:col-span-1">
                         <label for="cep" class="block text-sm font-medium text-gray-700 mb-1">CEP:</label>
                         <input type="text" inputmode="numeric" pattern="[0-9]\s\-]*" name="cep" id="cep"
-                            placeholder="_____-___" required value="<?= htmlspecialchars($pessoa['cep']) ?>"
+                            placeholder="_____-___" value="<?= htmlspecialchars($pessoa['cep']) ?>"
                             oninput="mascaraCEP(this)" class="w-full border border-gray-300 rounded px-3 py-2">
-                        <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
                     </div>
                     <div class="flex items-end md:col-span-1 flex-row gap-2">
                         <button type="button" id="buscar-cep-btn"
@@ -277,10 +276,9 @@ if (!isset($pessoa)) {
                         <label for="como_soube" class="block text-sm font-medium text-gray-700 mb-1">Como soube do
                             Instituto
                             Céu Interior:</label>
-                        <input type="text" name="como_soube" id="como_soube" required
+                        <input type="text" name="como_soube" id="como_soube" 
                             value="<?= htmlspecialchars($pessoa['como_soube']) ?>"
                             class="w-full border border-gray-300 rounded px-3 py-2">
-                        <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
                     </div>
                     <div>
                         <label for="sobre_participante" class="block text-sm font-medium text-gray-700 mb-1">Sobre o

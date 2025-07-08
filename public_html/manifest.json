@@ -1,12 +1,12 @@
 {
-  "name": "Participantes ICI",
-  "short_name": "ICI App",
+  "name": "ICI Participantes",
+  "short_name": "ICI Participantes",
   "description": "Sistema de gestão de participantes do Instituto Céu Interior",
   "start_url": "/login",
   "scope": "/",
   "display": "standalone",
-  "background_color": "#1D4ED8",
-  "theme_color": "#00bfff",
+  "background_color": "#00bfff",
+  "theme_color": "#d4ff00",
   "orientation": "portrait-primary",
   "categories": [
     "productivity",

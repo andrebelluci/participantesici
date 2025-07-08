@@ -158,10 +158,8 @@ require_once __DIR__ . '/../../includes/header.php';
                     <div class="lg:col-span-1 relative">
                         <label for="cep" class="block text-sm font-medium text-gray-700 mb-1">CEP:</label>
                         <input type="text" inputmode="numeric" pattern="[0-9]\s\-]*" name="cep" id="cep"
-                            placeholder="_____-___" required oninput="mascaraCEP(this)"
+                            placeholder="_____-___" oninput="mascaraCEP(this)"
                             class="w-full border border-gray-300 rounded px-3 py-2">
-                        <!-- ✅ Posicionamento absoluto - não afeta layout -->
-                        <p class="text-red-500 text-sm mt-1 hidden absolute">Campo obrigatório</p>
                     </div>
                     <div class="flex items-end items-top md:col-span-1 flex-row gap-2">
                         <button type="button" id="buscar-cep-btn"
@@ -253,7 +251,6 @@ require_once __DIR__ . '/../../includes/header.php';
                             Céu Interior:</label>
                         <input type="text" name="como_soube" id="como_soube"
                             class="w-full border border-gray-300 rounded px-3 py-2">
-                        <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
                     </div>
                     <div>
                         <label for="sobre_participante" class="block text-sm font-medium text-gray-700 mb-1">Sobre o
