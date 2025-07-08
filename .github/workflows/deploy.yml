@@ -7,33 +7,33 @@ on:
 
 jobs:
   test-deploy:
-    name: 📂 Deploy para /teste/ (SEGURO)
+    name: 📂 Deploy
     runs-on: ubuntu-latest
 
     steps:
     - name: 🔄 Clonar repositório
       uses: actions/checkout@v3
 
-    - name: 📤 Deploy pasta app/ para TESTE
+    - name: 📤 Deploy pasta app/
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_HOST }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: /teste/app/
+        server-dir: /app/
         local-dir: ./app/
         exclude: |
           **/storage/uploads/**
           **/storage/logs/**
           **/*.log
 
-    - name: 📤 Deploy pasta public_html/ para TESTE
+    - name: 📤 Deploy pasta public_html/
       uses: SamKirkland/FTP-Deploy-Action@v4.3.4
       with:
         server: ${{ secrets.FTP_HOST }}
         username: ${{ secrets.FTP_USERNAME }}
         password: ${{ secrets.FTP_PASSWORD }}
-        server-dir: /teste/public_html/
+        server-dir: /public_html/
         local-dir: ./public_html/
         exclude: |
           storage/uploads/**
