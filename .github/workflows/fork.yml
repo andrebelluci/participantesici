@@ -1,0 +1,12 @@
+name: 🔍 Monitor de Forks
+on:
+  fork:
+
+jobs:
+  notify-fork:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Notificar Fork
+      run: |
+        echo "Novo fork criado por: ${{ github.event.forkee.owner.login }}"
+        # Opcional: enviar email de notificação

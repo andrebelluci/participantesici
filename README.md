@@ -6,7 +6,39 @@ Sistema web para gerenciamento de participantes e rituais do Instituto Céu Inte
 ![Status](https://img.shields.io/badge/Status-Ativo-green)
 ![PHP](https://img.shields.io/badge/PHP-7.4%2B-blue)
 ![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v4-06B6D4)
-![Licença](https://img.shields.io/badge/Licença-Privada-red)
+![Licença](https://img.shields.io/badge/Licença-Proprietária-red)
+![Uso Comercial](https://img.shields.io/badge/Uso_Comercial-Proibido-red)
+![Contato](https://img.shields.io/badge/Licenciamento-andrebelluci@gmail.com-blue)
+
+---
+
+## ⚠️ AVISO LEGAL E PROPRIEDADE INTELECTUAL
+
+### 🔒 **Propriedade Exclusiva**
+Este sistema é **propriedade exclusiva** do **Instituto Céu Interior** e foi desenvolvido por **André Belluci**. O código está disponível publicamente apenas para fins de **demonstração profissional**, **portfólio** e **educacionais**.
+
+### 📋 **Termos de Uso**
+✅ **PERMITIDO**:
+- Visualização e estudo do código fonte
+- Uso como referência para aprendizado
+- Fork para análise técnica pessoal
+- Citação em trabalhos acadêmicos
+
+❌ **ESTRITAMENTE PROIBIDO**:
+- Uso comercial sem autorização expressa por escrito
+- Modificação e redistribuição do código
+- Criação de trabalhos derivados para fins comerciais
+- Remoção de créditos ou marca do desenvolvedor
+- Uso das marcas "Instituto Céu Interior" ou logotipos
+- Implementação para outros clientes sem licenciamento
+
+### ⚖️ **Consequências Legais**
+O uso não autorizado deste software está sujeito a **medidas legais** incluindo, mas não limitado a, ações por violação de direitos autorais e propriedade intelectual.
+
+### 💼 **Licenciamento Comercial Disponível**
+Interessado em um sistema similar ou licenciamento? **Entre em contato!**
+
+---
 
 ## 📋 Sobre o Projeto
 
@@ -94,10 +126,13 @@ O Sistema de Participantes ICI é uma aplicação web completa para gestão de p
 │   └── 📂 workflows/                # Deploy automatizado
 ├── 📄 .gitignore                    # Arquivos ignorados
 ├── 📄 .htaccess                     # Configurações Apache
+├── 📄 LICENSE.md                    # Licença de software
 └── 📄 README.md                     # Este arquivo
 ```
 
 ## 🚀 Instalação e Configuração
+
+> **⚠️ ATENÇÃO**: Esta seção é apenas para fins educacionais. Para implementação comercial, entre em contato para licenciamento.
 
 ### Pré-requisitos
 - PHP 7.4 ou superior
@@ -194,7 +229,7 @@ npm run build-dev
 O projeto utiliza GitHub Actions para deploy automático:
 
 1. **Push para `main`** - Deploy automático via FTP
-2. **Estrutura no servidor**: `/home/participantes/`
+2. **Estrutura no servidor**: `/home/participantesici/`
 3. **Pastas atualizadas**: `app/` e `public_html/`
 4. **Arquivos protegidos**: uploads, logs, configurações
 
@@ -203,7 +238,6 @@ O projeto utiliza GitHub Actions para deploy automático:
 FTP_HOST = seu-servidor.com
 FTP_USERNAME = usuario-ftp
 FTP_PASSWORD = senha-ftp
-FTP_TARGET_DIR = /home/participantes
 ```
 
 ## 📱 Recursos Mobile
@@ -236,38 +270,60 @@ FTP_TARGET_DIR = /home/participantes
 
 ## 🤝 Contribuição
 
-Este é um projeto privado do Instituto Céu Interior. Para contribuições:
+Este é um projeto privado do Instituto Céu Interior. Para contribuições ou melhorias:
 
-1. Faça um fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/nova-funcionalidade`)
-3. Commit suas mudanças (`git commit -m 'Adiciona nova funcionalidade'`)
-4. Push para a branch (`git push origin feature/nova-funcionalidade`)
-5. Abra um Pull Request
+1. Abra uma **Issue** descrevendo a sugestão
+2. **Aguarde aprovação** antes de fazer alterações
+3. Para implementações comerciais, **entre em contato** para licenciamento
+
+**Nota**: Pull requests não autorizados podem ser rejeitados para proteger a propriedade intelectual.
+
+## 📞 Contato para Licenciamento
+
+### 👨‍💻 **André Belluci** - Desenvolvedor Principal
+- 📧 **Email**: [andrebelluci@gmail.com](mailto:andrebelluci@gmail.com?subject=Licenciamento%20-%20Sistema%20Participantes%20ICI)
+- 📱 **WhatsApp**: [+55 17 99144-6829](https://wa.me/5517991446829?text=Olá!%20Tenho%20interesse%20no%20licenciamento%20do%20Sistema%20Participantes%20ICI)
+- 💼 **GitHub**: [github.com/andrebelluci](https://github.com/andrebelluci)
+- 🔗 **LinkedIn**: [linkedin.com/in/andrebelluci](https://linkedin.com/in/andrebelluci)
+
+### 🏛️ **Instituto Céu Interior**
+- 🌐 **Site Oficial**: [www.institutoceuinterior.com.br](https://www.institutoceuinterior.com.br)
+
+
+---
+
+## 💡 Interessado em um Sistema Similar?
+
+**Desenvolvemos soluções personalizadas!** Entre em contato para:
+- 🏗️ Sistemas de gestão sob medida
+- 🔧 Consultoria em desenvolvimento PHP
+- 📱 Aplicações web responsivas
+- 🚀 Implementação e deploy automatizado
+
+> **Transforme sua ideia em realidade** com código limpo, seguro e escalável!
+
+---
 
 ## 📄 Licença
 
-Este projeto é propriedade privada do **Instituto Céu Interior**.
-Todos os direitos reservados. O uso não autorizado é proibido.
+Este projeto é **propriedade privada** do **Instituto Céu Interior**.
+**Todos os direitos reservados**. O uso não autorizado é **estritamente proibido**.
 
-## 👨‍💻 Desenvolvedor
+Para uso comercial ou licenciamento, consulte os contatos acima.
 
-**André Belluci**
-- 💼 GitHub: [github.com/andrebelluci](https://github.com/andrebelluci)
-- 📧 Email: [andrebelluci@gmail.com](mailto:andrebelluci@gmail.com)
-- 📱 WhatsApp: [+55 17 99144-6829](https://wa.me/5517991446829)
+## 🏛️ Instituto Céu Interior
 
----
-## Instituto Céu Interior
-
-**Instituto Céu Interior**
-- 🌐 [www.institutoceuinterior.com.br]()
-<div align="center">
+<div align="center" >
 
 **Desenvolvido com ❤️ para o Instituto Céu Interior**
 
 <div style="width: 100px;">
 
 ![ICI Logo](public_html/assets/images/logo.png)
-
 </div>
+
+---
+
+**© 2025 Instituto Céu Interior & André Belluci - Todos os direitos reservados**
+
 </div>
