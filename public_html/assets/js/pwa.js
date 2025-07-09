@@ -11,17 +11,13 @@ window.addEventListener('appinstalled', () => {
 // Captura o evento de instalação
 window.addEventListener('beforeinstallprompt', (e) => {
   console.log('PWA pode ser instalado');
-  // Previne o prompt automático
   e.preventDefault();
-  // Salva o evento para usar depois
   deferredPrompt = e;
-  // Mostra botão de instalação customizado
   showInstallButton();
 });
 
 // Função para mostrar botão de instalação
 function showInstallButton() {
-  // Cria botão de instalação se não existir
   if (!document.getElementById('install-button')) {
     const installButton = document.createElement('button');
     installButton.id = 'install-button';
@@ -34,7 +30,6 @@ function showInstallButton() {
     installButton.addEventListener('click', installPWA);
     document.body.appendChild(installButton);
 
-    // Animação de entrada
     setTimeout(() => {
       installButton.style.transform = 'translateY(0)';
     }, 100);
@@ -48,10 +43,7 @@ async function installPWA() {
     return;
   }
 
-  // Mostra o prompt de instalação
   deferredPrompt.prompt();
-
-  // Aguarda a escolha do usuário
   const { outcome } = await deferredPrompt.userChoice;
   console.log(`Usuário ${outcome} a instalação`);
 
@@ -59,7 +51,6 @@ async function installPWA() {
     hideInstallButton();
   }
 
-  // Limpa a referência
   deferredPrompt = null;
 }
 
@@ -74,34 +65,46 @@ function hideInstallButton() {
   }
 }
 
-// Service Worker Registration
+// ✅ VERSÃO CONTROLADA DO SERVICE WORKER
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', async () => {
     try {
-      // Remove service workers antigos
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      for (let registration of registrations) {
-        await registration.unregister();
-      }
+      // ✅ VERSÃO FIXA - só muda quando você realmente quiser
+      const SW_VERSION = '2.1'; // 👈 ALTERE ESTE NÚMERO APENAS QUANDO QUISER FORÇAR UPDATE
 
-      // Registra novo service worker
-      const registration = await navigator.serviceWorker.register(
-        '/service-worker.js?v=' + Date.now(),
-        { scope: '/' }
-      );
+      // Verifica se já existe um SW registrado
+      const existingRegistration = await navigator.serviceWorker.getRegistration('/');
 
-      console.log('Service Worker registrado:', registration.scope);
+      if (existingRegistration) {
+        console.log('Service Worker já registrado, verificando updates...');
 
-      // Verifica se há atualizações
-      registration.addEventListener('updatefound', () => {
-        const newWorker = registration.installing;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // Nova versão disponível
-            showUpdateAvailable();
-          }
+        // Força verificação de update
+        existingRegistration.update();
+
+        // Só mostra notificação se realmente houver mudança
+        existingRegistration.addEventListener('updatefound', () => {
+          const newWorker = existingRegistration.installing;
+
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // ✅ SÓ AQUI que mostra a notificação real
+              console.log('Nova versão do Service Worker detectada!');
+              showUpdateAvailable();
+            }
+          });
         });
-      });
+
+      } else {
+        // Primeiro registro do Service Worker
+        console.log('Registrando Service Worker pela primeira vez...');
+
+        const registration = await navigator.serviceWorker.register(
+          `/service-worker.js?v=${SW_VERSION}`, // ✅ Versão controlada
+          { scope: '/' }
+        );
+
+        console.log('Service Worker registrado:', registration.scope);
+      }
 
     } catch (error) {
       console.error('Erro ao registrar Service Worker:', error);
@@ -109,25 +112,75 @@ if ('serviceWorker' in navigator) {
   });
 }
 
-// Função para mostrar notificação de atualização
+// ✅ FUNÇÃO MELHORADA PARA MOSTRAR ATUALIZAÇÃO
 function showUpdateAvailable() {
+  // Evita mostrar múltiplas notificações
+  if (document.getElementById('update-banner')) {
+    return;
+  }
+
   const updateBanner = document.createElement('div');
   updateBanner.id = 'update-banner';
   updateBanner.innerHTML = `
-    <div class="bg-blue-600 text-white p-3 text-center">
-      <span>Nova versão disponível!</span>
-      <button onclick="reloadApp()" class="ml-3 bg-white text-blue-600 px-3 py-1 rounded text-sm font-semibold">
-        Atualizar
-      </button>
+    <div class="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 text-center shadow-lg">
+      <div class="flex items-center justify-center gap-3">
+        <i class="fa-solid fa-download text-lg"></i>
+        <span class="font-medium">Nova versão disponível!</span>
+        <div class="flex gap-2">
+          <button onclick="reloadApp()" class="bg-white text-blue-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-gray-100 transition-colors">
+            Atualizar Agora
+          </button>
+          <button onclick="dismissUpdate()" class="text-blue-100 hover:text-white px-3 py-2 text-sm">
+            Depois
+          </button>
+        </div>
+      </div>
     </div>
   `;
-  updateBanner.className = 'fixed top-0 left-0 right-0 z-50';
+  updateBanner.className = 'fixed top-0 left-0 right-0 z-[9999] animate-fade-in';
+
+  // Adiciona animação CSS
+  updateBanner.style.cssText = `
+    animation: slideDown 0.3s ease-out;
+    transform: translateY(0);
+  `;
+
   document.body.insertBefore(updateBanner, document.body.firstChild);
+
+  // Auto-dismiss após 30 segundos
+  setTimeout(() => {
+    dismissUpdate();
+  }, 30000);
+}
+
+// ✅ FUNÇÃO PARA DISPENSAR UPDATE
+function dismissUpdate() {
+  const updateBanner = document.getElementById('update-banner');
+  if (updateBanner) {
+    updateBanner.style.transform = 'translateY(-100%)';
+    updateBanner.style.opacity = '0';
+    setTimeout(() => {
+      updateBanner.remove();
+    }, 300);
+  }
 }
 
 // Função para recarregar app com nova versão
 function reloadApp() {
-  window.location.reload();
+  // Limpa caches antes de recarregar
+  if ('caches' in window) {
+    caches.keys().then(keyList => {
+      keyList.forEach(key => {
+        if (key.includes('dynamic')) {
+          caches.delete(key);
+        }
+      });
+    }).finally(() => {
+      window.location.reload();
+    });
+  } else {
+    window.location.reload();
+  }
 }
 
 // Detecta se está rodando como PWA
@@ -141,3 +194,23 @@ if (isPWA()) {
   document.documentElement.classList.add('pwa-mode');
   console.log('Rodando como PWA instalado');
 }
+
+// ✅ ADICIONA CSS PARA ANIMAÇÕES
+const style = document.createElement('style');
+style.textContent = `
+  @keyframes slideDown {
+    from {
+      transform: translateY(-100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  .animate-fade-in {
+    animation: slideDown 0.3s ease-out;
+  }
+`;
+document.head.appendChild(style);
