@@ -120,23 +120,28 @@ $tentativas = CaptchaService::obterTentativas($identificador);
 
     <div class="form-container mobile-compact">
       <form method="POST" action="/entrar" class="space-y-4" novalidate>
-        <div>
-          <input type="text" name="usuario" id="usuario" placeholder="Usuário" required autocapitalize="none"
-            class="bg-white w-full p-3 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00bfff] transition" />
-          <p class="text-sm text-red-500 mt-1 hidden" id="erro-usuario">Campo obrigatório.</p>
+        <!-- Campo Usuário -->
+        <div class="mb-4">
+          <label for="usuario" class="block text-sm font-medium text-white mb-2">
+            <i class="fa-solid fa-user mr-1"></i> Usuário
+          </label>
+          <input type="text" id="usuario" name="usuario" autocomplete="username" spellcheck="false" required
+            class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00bfff] focus:border-transparent text-black text-base">
         </div>
 
-        <div class="flex flex-col">
+        <!-- Campo Senha -->
+        <div class="mb-4">
+          <label for="senha" class="block text-sm font-medium text-white mb-2">
+            <i class="fa-solid fa-lock mr-1"></i> Senha
+          </label>
           <div class="relative">
-            <input type="password" name="senha" id="senha" placeholder="Senha" required autocapitalize="none"
-              class="bg-white w-full p-3 pr-12 rounded border border-gray-300 text-black placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-[#00bfff] transition" />
-            <button type="button" onclick="toggleSenha()"
-              class="absolute right-3 top-1/2 -translate-y-1/2 text-black hover:text-blue-300" title="Mostrar senha"
-              id="toggleSenhaBtn">
-              <i class="fa-solid fa-eye" id="iconOlho"></i>
+            <input type="password" id="senha" name="senha" autocomplete="current-password" spellcheck="false" required
+              class="w-full px-4 py-3 bg-white border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#00bfff] focus:border-transparent text-black text-base pr-12">
+            <button type="button" id="toggleSenhaBtn" onclick="toggleSenha()" title="Mostrar senha"
+              class="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none">
+              <i id="iconOlho" class="fa-solid fa-eye"></i>
             </button>
           </div>
-          <p class="text-sm text-red-500 mt-1 hidden" id="erro-senha">Campo obrigatório.</p>
         </div>
 
         <!-- Captcha (só aparece após 5 tentativas) -->
@@ -167,8 +172,9 @@ $tentativas = CaptchaService::obterTentativas($identificador);
         </div>
 
         <button type="submit"
-          class="w-full bg-[#00bfff] font-bold text-black py-3 rounded hover:bg-yellow-400 transition">
-          <i class="fa-solid fa-sign-in-alt mr-2"></i>Entrar
+          class="w-full bg-[#00bfff] text-black py-3 px-4 rounded-lg hover:bg-yellow-400 transition-all duration-300 font-bold flex items-center justify-center focus:ring-4 focus:ring-[#00bfff]/50">
+          <i class="fa-solid fa-sign-in-alt mr-2"></i>
+          <span>Entrar</span>
         </button>
 
         <!-- ✅ SEÇÃO: LINK ESQUECI MINHA SENHA -->
@@ -263,6 +269,105 @@ $tentativas = CaptchaService::obterTentativas($identificador);
       });
     </script>
   <?php endif; ?>
+  <script>
+    // ===== ADICIONE NO FINAL DO login.php, dentro da tag <script> =====
+
+    // ✅ CORREÇÃO: Previne submit automático no mobile
+    document.addEventListener('DOMContentLoaded', function () {
+      const form = document.querySelector('form');
+      const senhaInput = document.getElementById('senha');
+      const usuarioInput = document.getElementById('usuario');
+      const submitBtn = form.querySelector('button[type="submit"]');
+
+      let submitIntencional = false; // Flag para controlar submit intencional
+
+      // ✅ Previne submit automático por autocomplete
+      form.addEventListener('submit', function (e) {
+        // Se não foi um clique intencional no botão, previne
+        if (!submitIntencional) {
+          e.preventDefault();
+          console.log('🚫 Submit automático bloqueado');
+          return false;
+        }
+
+        // Reset da flag
+        submitIntencional = false;
+
+        // Validações normais
+        const usuario = usuarioInput.value.trim();
+        const senha = senhaInput.value.trim();
+
+        if (!usuario || !senha) {
+          e.preventDefault();
+          showToast('Usuário e senha são obrigatórios', 'error');
+          return;
+        }
+
+        <?php if ($mostrarCaptcha): ?>
+          const captchaResponse = grecaptcha.getResponse();
+          if (!captchaResponse) {
+            e.preventDefault();
+            showToast('Por favor, complete a verificação de segurança', 'error');
+            return;
+          }
+        <?php endif; ?>
+
+        console.log('✅ Submit permitido');
+      });
+
+      // ✅ Marca como intencional quando clica no botão
+      submitBtn.addEventListener('click', function (e) {
+        console.log('👆 Clique intencional no botão de login');
+        submitIntencional = true;
+      });
+
+      // ✅ Previne submit por Enter nos campos de input
+      [usuarioInput, senhaInput].forEach(input => {
+        if (input) {
+          input.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') {
+              e.preventDefault();
+              console.log('⏸️ Enter bloqueado no campo:', input.id);
+
+              // Move foco para o próximo campo ou para o botão
+              if (input === usuarioInput && senhaInput) {
+                senhaInput.focus();
+              } else if (input === senhaInput && submitBtn) {
+                submitBtn.focus();
+              }
+            }
+          });
+        }
+      });
+
+      // ✅ Adiciona indicador visual quando campos estão preenchidos
+      function verificarCamposPreenchidos() {
+        const usuarioPreenchido = usuarioInput.value.trim().length > 0;
+        const senhaPreenchida = senhaInput.value.trim().length > 0;
+
+        if (usuarioPreenchido && senhaPreenchida) {
+          submitBtn.classList.add('ring-2', 'ring-yellow-400');
+          submitBtn.innerHTML = '<i class="fa-solid fa-sign-in-alt mr-2"></i>Pronto para Entrar';
+        } else {
+          submitBtn.classList.remove('ring-2', 'ring-yellow-400');
+          submitBtn.innerHTML = '<i class="fa-solid fa-sign-in-alt mr-2"></i>Entrar';
+        }
+      }
+
+      // ✅ Monitora mudanças nos campos
+      [usuarioInput, senhaInput].forEach(input => {
+        if (input) {
+          input.addEventListener('input', verificarCamposPreenchidos);
+          input.addEventListener('change', verificarCamposPreenchidos);
+        }
+      });
+    });
+
+    // ✅ ADICIONE TAMBÉM: Previne autocomplete agressivo
+    document.querySelector('form').setAttribute('autocomplete', 'off');
+    document.getElementById('usuario').setAttribute('autocomplete', 'username');
+    document.getElementById('senha').setAttribute('autocomplete', 'current-password');
+  </script>
 
 </body>
 

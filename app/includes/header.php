@@ -1,11 +1,28 @@
 <?php
+// ✅ Configura sessão para 30 dias APENAS se não estiver ativa
 if (session_status() === PHP_SESSION_NONE) {
+    // Configura parâmetros ANTES de iniciar a sessão
+    ini_set('session.gc_maxlifetime', 30 * 24 * 60 * 60); // 30 dias
+    ini_set('session.cookie_lifetime', 30 * 24 * 60 * 60); // 30 dias
+
+    session_set_cookie_params([
+        'lifetime' => 30 * 24 * 60 * 60, // 30 dias para PWA
+        'path' => '/',
+        'domain' => '',
+        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+        'httponly' => true,
+        'samesite' => 'Lax'
+    ]);
     session_start();
+} else {
+    // ✅ Se sessão já está ativa, só faz log
+    error_log("[HEADER] Sessão já ativa - configurações aplicadas anteriormente");
 }
+
 require_once __DIR__ . '/../functions/check_auth.php';
 require_once __DIR__ . '/../config/database.php';
 
-// ✅ FUNÇÃO PARA VERIFICAR TOKEN DE LEMBRAR-ME
+// ✅ FUNÇÃO MELHORADA PARA VERIFICAR TOKEN DE LEMBRAR-ME
 function verificarTokenLembrarMe($pdo)
 {
     if (!isset($_COOKIE['remember_token'])) {
@@ -26,12 +43,58 @@ function verificarTokenLembrarMe($pdo)
         $result = $stmt->fetch();
 
         if ($result) {
-            // Token válido - restaura sessão
+            // Token válido - restaura/renova sessão
             $_SESSION['user_id'] = $result['id'];
             $_SESSION['nome'] = $result['nome'];
             $_SESSION['last_activity'] = time();
+            $_SESSION['login_method'] = 'remember_me'; // Marca como login via token
 
-            error_log("[REMEMBER_ME] Sessão restaurada para usuário: {$result['usuario']} (ID: {$result['id']})");
+            // ✅ RENOVAR TOKEN para mais 30 dias (automático)
+            $novo_token = bin2hex(random_bytes(32));
+            $nova_expiracao = date('Y-m-d H:i:s', time() + (30 * 24 * 60 * 60));
+
+            // Atualiza token no banco
+            $stmt_update = $pdo->prepare("
+                UPDATE remember_tokens
+                SET token = ?, expires_at = ?
+                WHERE user_id = ?
+            ");
+            $stmt_update->execute([$novo_token, $nova_expiracao, $result['id']]);
+
+            // ✅ Atualiza cookie com configuração para ambiente
+            $cookie_expiry = time() + (30 * 24 * 60 * 60);
+
+            if (
+                $_SERVER['HTTP_HOST'] === 'localhost' ||
+                strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false ||
+                strpos($_SERVER['HTTP_HOST'], '.local') !== false
+            ) {
+
+                setcookie(
+                    'remember_token',
+                    $novo_token,
+                    $cookie_expiry,
+                    '/',
+                    '',
+                    false, // HTTP local
+                    true
+                );
+            } else {
+                setcookie(
+                    'remember_token',
+                    $novo_token,
+                    [
+                        'expires' => $cookie_expiry,
+                        'path' => '/',
+                        'domain' => '',
+                        'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
+                        'httponly' => true,
+                        'samesite' => 'Lax'
+                    ]
+                );
+            }
+
+            error_log("[REMEMBER_ME] Sessão restaurada e token renovado para usuário: {$result['usuario']} (ID: {$result['id']}) por mais 30 dias");
             return true;
         } else {
             // Token inválido/expirado - remove cookie
@@ -56,24 +119,64 @@ if (!isset($_SESSION['user_id'])) {
     }
 }
 
-// ✅ VERIFICAÇÃO DE TIMEOUT DE SESSÃO MELHORADA
-$timeout = 3600; // 1 hora
+// ✅ VERIFICAÇÃO DE TIMEOUT MELHORADA PARA PWA
+$timeout_remember = 30 * 24 * 60 * 60; // 30 dias para remember_me
+$timeout_normal = 8 * 60 * 60; // 8 horas para login normal
 
-// Se tem cookie de lembrar-me, não aplica timeout
+// Verifica se tem cookie de lembrar-me ativo ou se logou via remember_me
 $tem_cookie_lembrar = isset($_COOKIE['remember_token']);
+$login_via_remember = isset($_SESSION['login_method']) && $_SESSION['login_method'] === 'remember_me';
 
-if (!$tem_cookie_lembrar && isset($_SESSION['last_activity'])) {
-    if ((time() - $_SESSION['last_activity']) > $timeout) {
-        // Timeout apenas se não tem cookie de lembrar-me
-        session_unset();
-        session_destroy();
-        header("Location: /login?timeout=1");
-        exit;
+if (isset($_SESSION['last_activity'])) {
+    // ✅ Define timeout baseado no método de login
+    $timeout_atual = ($tem_cookie_lembrar || $login_via_remember) ? $timeout_remember : $timeout_normal;
+
+    if ((time() - $_SESSION['last_activity']) > $timeout_atual) {
+        if ($tem_cookie_lembrar) {
+            // Se tem cookie, tenta renovar sessão ao invés de logout
+            error_log("[SESSION] Tentando renovar sessão via remember token...");
+
+            if (verificarTokenLembrarMe($pdo)) {
+                error_log("[SESSION] Sessão renovada com sucesso");
+                $_SESSION['last_activity'] = time();
+            } else {
+                error_log("[SESSION] Falha ao renovar - fazendo logout");
+                session_unset();
+                session_destroy();
+                header("Location: /login?timeout=1");
+                exit;
+            }
+        } else {
+            // Sem cookie de lembrar-me - timeout normal
+            error_log("[SESSION] Timeout de sessão - fazendo logout");
+            session_unset();
+            session_destroy();
+            header("Location: /login?timeout=1");
+            exit;
+        }
     }
 }
 
 // Atualiza última atividade (sempre)
 $_SESSION['last_activity'] = time();
+
+// ✅ Debug para PWA (remover em produção se desejar)
+if (isset($_GET['debug_pwa'])) {
+    error_log("=== DEBUG PWA SESSION ===");
+    error_log("session.gc_maxlifetime: " . ini_get('session.gc_maxlifetime') . " (" . (ini_get('session.gc_maxlifetime') / 86400) . " dias)");
+    error_log("session.cookie_lifetime: " . ini_get('session.cookie_lifetime') . " (" . (ini_get('session.cookie_lifetime') / 86400) . " dias)");
+    error_log("Cookie remember_token: " . (isset($_COOKIE['remember_token']) ? 'EXISTE' : 'NÃO EXISTE'));
+    error_log("Sessão user_id: " . ($_SESSION['user_id'] ?? 'NÃO DEFINIDO'));
+    error_log("Login method: " . ($_SESSION['login_method'] ?? 'NÃO DEFINIDO'));
+    error_log("Última atividade: " . ($_SESSION['last_activity'] ?? 'NÃO DEFINIDO'));
+
+    if (isset($_SESSION['last_activity'])) {
+        $tempo_inativo = time() - $_SESSION['last_activity'];
+        error_log("Tempo inativo: " . $tempo_inativo . " segundos (" . round($tempo_inativo / 3600, 2) . " horas)");
+        error_log("Timeout configurado: " . (($tem_cookie_lembrar || $login_via_remember) ? $timeout_remember : $timeout_normal) . " segundos");
+    }
+    error_log("=== FIM DEBUG PWA ===");
+}
 
 // ✅ FUNÇÃO PARA VERIFICAR PÁGINA ATIVA
 function is_active($pagina_url)
@@ -83,7 +186,6 @@ function is_active($pagina_url)
     $current_relative = str_replace($base_path, '', $current_url);
     return trim($current_relative, '/') === trim($pagina_url, '/') ? 'text-yellow-400' : '';
 }
-
 
 // Verifica se usuário é administrador
 $is_admin = false;
@@ -100,7 +202,6 @@ if (isset($_SESSION['user_id'])) {
     $is_admin = $user_perfil && $user_perfil['perfil_nome'] === 'Administrador';
 }
 ?>
-
 <!DOCTYPE html>
 <html lang="pt-br">
 
@@ -124,23 +225,19 @@ if (isset($_SESSION['user_id'])) {
     <link rel="stylesheet" href="/assets/css/mobile-fixes.css?v=1.0">
     <script src="/assets/js/global-scripts.js?t=<?= time() ?>"></script>
     <script src="/assets/js/unsaved-changes-detector.js"></script>
-
 </head>
 
 <body class="bg-black min-h-screen flex flex-col mobile-viewport">
     <header class="fixed top-0 left-0 right-0 z-50 bg-black text-white shadow-lg">
         <div class="flex items-center justify-between px-4 py-1 max-w-6xl mx-auto">
             <a href="/home">
-                <img src="/assets/images/logo.png" alt="Logo Instituto Céu Interior"
-                    class="h-10">
+                <img src="/assets/images/logo.png" alt="Logo Instituto Céu Interior" class="h-10">
             </a>
-
             <!-- Botão Hamburguer -->
             <div class="sm:hidden relative">
                 <button id="menu-toggle" class="text-white">
                     <i class="fa-solid fa-bars text-xl"></i>
                 </button>
-
                 <!-- Menu Mobile -->
                 <nav id="mobile-nav"
                     class="hidden absolute right-0 mt-2 w-48 bg-black text-white shadow-md rounded-md z-50 flex flex-col"
@@ -149,11 +246,9 @@ if (isset($_SESSION['user_id'])) {
                         class="px-4 py-2 hover:bg-gray-800 <?= basename($_SERVER['PHP_SELF']) === 'home.php' ? 'text-yellow-400' : '' ?>">Home</a>
                     <a href="/participantes"
                         class="px-4 py-2 hover:bg-gray-800 <?= is_active('participantes') ?>">Participantes</a>
-                    <a href="/rituais"
-                        class="px-4 py-2 hover:bg-gray-800 <?= is_active('rituais') ?>">Rituais</a>
+                    <a href="/rituais" class="px-4 py-2 hover:bg-gray-800 <?= is_active('rituais') ?>">Rituais</a>
                     <?php if ($is_admin): ?>
-                        <a href="/usuarios"
-                            class="px-4 py-2 hover:bg-gray-800 <?= is_active('usuarios') ?>">Usuários</a>
+                        <a href="/usuarios" class="px-4 py-2 hover:bg-gray-800 <?= is_active('usuarios') ?>">Usuários</a>
                     <?php endif; ?>
                     <a href="/alterar_senha"
                         class="px-4 py-2 hover:bg-gray-800 <?= basename($_SERVER['PHP_SELF']) === 'alterar_senha.php' ? 'text-yellow-400' : '' ?>">Alterar
@@ -161,16 +256,14 @@ if (isset($_SESSION['user_id'])) {
                     <a href="/logout" class="px-4 py-2 hover:bg-gray-800">Sair</a>
                 </nav>
             </div>
-
             <nav id="main-nav" class="hidden sm:flex space-x-8 items-center">
                 <a href="/home"
                     class="hover:text-[#00bfff] <?= basename($_SERVER['PHP_SELF']) === 'home.php' ? 'text-yellow-400' : '' ?>">Home</a>
                 <a href="/participantes"
                     class="hover:text-[#00bfff] <?= is_active('participantes') ?>">Participantes</a>
-                <a href="/rituais"
-                    class="hover:text-[#00bfff] <?= is_active('rituais') ?>">Rituais</a>
+                <a href="/rituais" class="hover:text-[#00bfff] <?= is_active('rituais') ?>">Rituais</a>
                 <?php if ($is_admin): ?>
-                        <a href="/usuarios" class="hover:text-[#00bfff] <?= is_active('usuarios') ?>">Usuários</a>
+                    <a href="/usuarios" class="hover:text-[#00bfff] <?= is_active('usuarios') ?>">Usuários</a>
                 <?php endif; ?>
                 <a href="/alterar_senha"
                     class="hover:text-[#00bfff] <?= basename($_SERVER['PHP_SELF']) === 'alterar_senha.php' ? 'text-yellow-400' : '' ?>">
@@ -180,5 +273,4 @@ if (isset($_SESSION['user_id'])) {
             </nav>
         </div>
     </header>
-
     <main class="flex-grow bg-gray-300 pt-[50px] pb-[40px]">
