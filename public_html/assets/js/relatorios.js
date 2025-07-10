@@ -23,7 +23,7 @@ function exportarParticipante(id, formato) {
   showExportLoading();
 
   // Construir URL de exportação
-  const url = `/participantesici/app/participantes/relatorios/visualizar.php?id=${id}&formato=${formato}`;
+  const url = `/participante/${id}/relatorio/${formato}`;
 
   // Criar link temporário para download
   const link = document.createElement('a');
@@ -49,7 +49,7 @@ function exportarRitual(id, formato) {
   showExportLoading();
 
   // Construir URL de exportação
-  const url = `/participantesici/app/rituais/relatorios/visualizar.php?id=${id}&formato=${formato}`;
+  const url = `/ritual/${id}/relatorio/${formato}`;
 
   // Criar link temporário para download
   const link = document.createElement('a');

@@ -682,31 +682,48 @@ function togglePresenca(button) {
 function atualizarContadores(novoStatus) {
   try {
     // Método 1: Busca por classe específica
-    let contadorParticipados = document.querySelector('span.bg-\\[\\#00bfff\\]');
+    let contadorPresentes = document.querySelector('span.text-green-700');
+    let contadorAusentes = document.querySelector('span.text-red-700');
 
     // Método 2: Se não encontrar, busca por contexto
-    if (!contadorParticipados) {
+    if (!contadorPresentes) {
       const spans = document.querySelectorAll('span');
       spans.forEach(span => {
         const parent = span.parentElement;
-        if (parent && parent.textContent.includes('Rituais participados') &&
-          (span.classList.contains('bg-[#00bfff]') || span.style.backgroundColor)) {
-          contadorParticipados = span;
+        if (parent && parent.textContent.includes('Participados') &&
+          (span.classList.contains('text-green-700') || span.style.backgroundColor)) {
+          contadorPresentes = span;
         }
       });
     }
 
-    if (contadorParticipados) {
-      let participados = parseInt(contadorParticipados.textContent.trim()) || 0;
+    if (!contadorAusentes) {
+      const spans = document.querySelectorAll('span');
+      spans.forEach(span => {
+        const parent = span.parentElement;
+        if (parent && parent.textContent.includes('Não participados') &&
+          (span.classList.contains('text-red-700') || span.style.backgroundColor)) {
+          contadorAusentes = span;
+        }
+      });
+    }
+
+    if (contadorPresentes) {
+      let presente = parseInt(contadorPresentes.textContent.trim()) || 0;
+      let ausente = parseInt(contadorAusentes.textContent.trim()) || 0;
 
       if (novoStatus === 'Sim') {
-        participados++;
+        presente++;
+        ausente--;
       } else {
-        participados = Math.max(0, participados - 1);
+        presente--;
+        ausente++;
       }
 
-      contadorParticipados.textContent = participados;
-      console.log(`Contador atualizado: ${participados} (Status: ${novoStatus})`);
+      contadorPresentes.textContent = presente;
+      contadorAusentes.textContent = ausente;
+      console.log(`Contador atualizado: ${presente} (Status: ${novoStatus})`);
+      console.log(`Contador atualizado: ${ausente} (Status: ${novoStatus})`);
     } else {
       console.warn('Contador não encontrado');
     }

@@ -199,7 +199,7 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
   <!-- Cabeçalho -->
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
     <tr>
-      <td colspan="5" class="header-section">PARTICIPANTES ICI - INSTITUTO CÉU INTERIOR</td>
+      <td colspan="5" class="header-section">ICI PARTICIPANTES - INSTITUTO CÉU INTERIOR</td>
     </tr>
     <tr>
       <td colspan="5" class="title-main">RELATÓRIO DO PARTICIPANTE</td>

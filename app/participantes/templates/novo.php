@@ -6,7 +6,11 @@ require_once __DIR__ . '/../../includes/header.php';
 <div class="max-w-screen-lg mx-auto px-4 py-8">
     <!-- Ações -->
     <div class="flex items-center justify-between mb-6">
-        <a href="/participantes"
+        <?php
+        // Verifica se há um parâmetro 'redirect' na URL
+        $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : '/participantes';
+        ?>
+        <a href="<?= $redirect ?>"
             class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
             <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
         </a>
@@ -18,6 +22,20 @@ require_once __DIR__ . '/../../includes/header.php';
         </button>
     </div>
 
+    <?php if (isset($_GET['redirect']) && strpos($_GET['redirect'], '/ritual/') !== false): ?>
+        <div class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-info-circle text-blue-600"></i>
+                <div>
+                    <h4 class="font-medium text-blue-800">Vinculação Automática</h4>
+                    <p class="text-sm text-blue-700">Este participante será automaticamente vinculado ao ritual após a
+                        criação.
+                    </p>
+                </div>
+            </div>
+        </div>
+    <?php endif; ?>
+
     <!-- Título -->
     <h1 class="text-2xl font-bold text-gray-800 mb-4 flex items-center gap-2">
         <i class="fa-solid fa-user-plus text-blue-500"></i> Novo Participante
@@ -26,6 +44,10 @@ require_once __DIR__ . '/../../includes/header.php';
     <div class="form-container mobile-compact">
         <form method="POST" enctype="multipart/form-data" id="formulario-participante"
             class="bg-white p-6 rounded-lg shadow space-y-6 border border-gray-200" novalidate>
+
+            <?php if (isset($_GET['redirect'])): ?>
+                <input type="hidden" name="redirect" value="<?= htmlspecialchars($_GET['redirect']) ?>">
+            <?php endif; ?>
 
             <!-- Dados Pessoais -->
             <div>
