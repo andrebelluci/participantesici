@@ -1076,12 +1076,25 @@ function atualizarPaginaFundo() {
       }
 
       // Atualiza contador no cabeçalho
-      const novoContador = novoDoc.querySelector('span.bg-\\[\\#00bfff\\]');
-      const contadorAtual = document.querySelector('span.bg-\\[\\#00bfff\\]');
+      const novoContador = novoDoc.querySelector('span.text-blue-500');
+      const contadorAtual = document.querySelector('span.text-blue-500');
 
       if (novoContador && contadorAtual) {
         contadorAtual.textContent = novoContador.textContent;
       }
+
+      const novoContadorPresenca = novoDoc.querySelector('span.text-green-700');
+      const contadorPresencaAtual = document.querySelector('span.text-green-700');
+      if (novoContadorPresenca && contadorPresencaAtual) {
+        contadorPresencaAtual.textContent = novoContadorPresenca.textContent;
+      }
+
+      const novoContadorAusente = novoDoc.querySelector('span.text-red-700');
+      const contadorAusenteAtual = document.querySelector('span.text-red-700');
+      if (novoContadorAusente && contadorAusenteAtual) {
+        contadorAusenteAtual.textContent = novoContadorAusente.textContent;
+      }
+      
     })
     .catch(error => {
       console.error('Erro ao atualizar página de fundo:', error);
