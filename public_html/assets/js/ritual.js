@@ -1,4 +1,5 @@
 // ritual.js - Funcionalidades para novo e editar ritual COM COMPRESSÃO
+let imageManuallyRemoved = false;
 
 // Função para mostrar toast
 function showToast(message, type = 'error') {
@@ -118,10 +119,17 @@ async function showPreview(file) {
 }
 
 function hidePreview() {
-  previewImage.src = '#';
-  processedImageData = null; // ✅ Limpa dados processados
+  // ✅ Marca que foi remoção manual
+  imageManuallyRemoved = true;
 
-  // Compatível com Tailwind classes E CSS inline
+  // ✅ Remove o handler de erro temporariamente
+  previewImage.onerror = null;
+
+  // Limpa a imagem
+  previewImage.src = '#';
+  processedImageData = null;
+
+  // Atualiza interface
   uploadArea?.classList.remove('hidden');
   uploadArea.style.display = 'block';
 
@@ -138,6 +146,44 @@ function hidePreview() {
     input.name = 'remover_foto';
     input.value = '1';
     document.getElementById('formulario-ritual')?.appendChild(input);
+  }
+}
+
+async function showPreview(file) {
+  try {
+    // ✅ CORREÇÃO: Reset do estado ao carregar nova imagem
+    imageManuallyRemoved = false;
+
+    // Comprime a imagem
+    const compressed = await compressImage(file, 800, 800, 0.8);
+
+    // Armazena dados processados
+    processedImageData = compressed.dataUrl;
+
+    // Mostra preview
+    previewImage.src = compressed.dataUrl;
+
+    // Atualiza interface
+    uploadArea?.classList.add('hidden');
+    uploadArea.style.display = 'none';
+
+    previewContainer?.classList.remove('hidden');
+    previewContainer.style.display = 'block';
+
+    // Feedback para o usuário
+    const reducao = Math.round((1 - compressed.compressedSize / compressed.originalSize) * 100);
+    showToast('Imagem carregada!', 'success');
+
+    console.log('Compressão:', {
+      original: `${(compressed.originalSize / 1024 / 1024).toFixed(2)}MB`,
+      comprimida: `${(compressed.compressedSize / 1024 / 1024).toFixed(2)}MB`,
+      reducao: `${reducao}%`,
+      dimensoes: `${compressed.width}x${compressed.height}`
+    });
+
+  } catch (error) {
+    console.error('Erro ao processar imagem:', error);
+    showToast('Erro ao processar imagem. Tente novamente.', 'error');
   }
 }
 
@@ -160,6 +206,9 @@ function validateFile(file) {
 function loadExistingImage() {
   const fotoPath = document.querySelector('[data-foto-path]')?.dataset.fotoPath;
 
+  // ✅ Não executa se a imagem foi removida manualmente
+  if (imageManuallyRemoved) return;
+
   if (fotoPath && previewImage && previewContainer && uploadArea) {
     previewImage.src = fotoPath;
 
@@ -170,29 +219,19 @@ function loadExistingImage() {
     uploadArea.classList.add('hidden');
     uploadArea.style.display = 'none';
 
-    // Se a imagem falhar ao carregar, volta para o upload
+    // ✅ CORREÇÃO: Só configura onerror se não foi removida manualmente
     previewImage.onerror = function () {
-      previewContainer.classList.add('hidden');
-      previewContainer.style.display = 'none';
+      // ✅ Só executa se não foi remoção manual
+      if (!imageManuallyRemoved) {
+        previewContainer.classList.add('hidden');
+        previewContainer.style.display = 'none';
 
-      uploadArea.classList.remove('hidden');
-      uploadArea.style.display = 'block';
+        uploadArea.classList.remove('hidden');
+        uploadArea.style.display = 'block';
 
-      previewImage.src = '#';
+        previewImage.src = '#';
+      }
     };
-  }
-
-  // Verificação adicional - compatível com código antigo
-  if (previewImage?.src &&
-    !previewImage.src.includes('#') &&
-    !previewImage.src.includes(window.location.href) &&
-    previewContainer && uploadArea) {
-
-    previewContainer.style.display = 'block';
-    previewContainer.classList.remove('hidden');
-
-    uploadArea.style.display = 'none';
-    uploadArea.classList.add('hidden');
   }
 }
 
@@ -280,7 +319,7 @@ fileInput?.addEventListener('change', async (e) => {
 
 excluirBtn?.addEventListener('click', () => {
   hidePreview();
-  showToast('Imagem removida.', 'info');
+  showToast('Imagem removida.', 'success');
 });
 
 // Event listeners para preview modal (se existir)

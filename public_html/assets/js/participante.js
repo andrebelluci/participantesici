@@ -1,4 +1,5 @@
 // participante.js - Funcionalidades comuns para novo e editar
+let imageManuallyRemoved = false;
 
 // Função para mostrar toast
 function showToast(message, type = 'error') {
@@ -64,6 +65,9 @@ function openFileSelector() {
 }
 
 function showPreview(file) {
+  // ✅ CORREÇÃO: Reset do estado ao carregar nova imagem
+  imageManuallyRemoved = false;
+
   const reader = new FileReader();
   reader.onload = (e) => {
     const imageSrc = e.target.result;
@@ -84,6 +88,13 @@ function showPreview(file) {
 }
 
 function hidePreview() {
+  // ✅ Marca que foi remoção manual
+  imageManuallyRemoved = true;
+
+  // ✅ Remove o handler de erro temporariamente
+  previewImage.onerror = null;
+
+  // Limpa dados
   previewImage.src = '#';
   uploadArea?.classList.remove('hidden');
   previewContainer?.classList.add('hidden');
@@ -97,6 +108,7 @@ function hidePreview() {
   removerFotoInput.value = '1';
   document.getElementById('formulario-participante').appendChild(removerFotoInput);
 }
+
 
 function validateFile(file) {
   if (!file.type.startsWith('image/')) {
@@ -234,11 +246,12 @@ function setupFormValidation() {
 
 // ✅ NOVA FUNÇÃO PARA CARREGAR IMAGEM EXISTENTE
 function loadExistingImage() {
-  // Pega o caminho da foto do debug ou de um campo hidden
   const fotoPath = document.querySelector('[data-foto-path]')?.dataset.fotoPath;
 
+  // ✅ Não executa se a imagem foi removida manualmente
+  if (imageManuallyRemoved) return;
+
   if (fotoPath && previewImage && previewContainer && uploadArea) {
-    // Define o src da imagem com o caminho correto
     previewImage.src = fotoPath;
     originalImageSrc = previewImage.src;
 
@@ -246,12 +259,15 @@ function loadExistingImage() {
     previewContainer.classList.remove('hidden');
     uploadArea.classList.add('hidden');
 
-    // Se a imagem falhar ao carregar, volta para o upload
+    // ✅ CORREÇÃO: Só configura onerror se não foi removida manualmente
     previewImage.onerror = function () {
-      previewContainer.classList.add('hidden');
-      uploadArea.classList.remove('hidden');
-      previewImage.src = '#';
-      originalImageSrc = null;
+      // ✅ Só executa se não foi remoção manual
+      if (!imageManuallyRemoved) {
+        previewContainer.classList.add('hidden');
+        uploadArea.classList.remove('hidden');
+        previewImage.src = '#';
+        originalImageSrc = null;
+      }
     };
   }
 }

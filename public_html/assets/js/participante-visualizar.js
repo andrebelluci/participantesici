@@ -662,7 +662,6 @@ function togglePresenca(button) {
             }
 
             button.setAttribute('data-current-status', newStatus);
-            atualizarContadores(newStatus);
             setTimeout(() => {
               atualizarContadores(newStatus);
             }, 200);
