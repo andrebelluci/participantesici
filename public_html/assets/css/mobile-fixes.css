@@ -398,6 +398,40 @@ select:focus {
   }
 }
 
+@media (max-width: 640px) {
+
+  /* Destaque maior para o checkbox */
+  #lembrar_me {
+    transform: scale(1.2);
+  }
+
+  /* Botão mais chamativo quando pronto */
+  button[type="submit"].ring-yellow-400 {
+    animation: pulse-ready 2s infinite;
+    background: linear-gradient(45deg, #00bfff, #facc15);
+  }
+
+  @keyframes pulse-ready {
+
+    0%,
+    100% {
+      transform: scale(1);
+    }
+
+    50% {
+      transform: scale(1.02);
+    }
+  }
+
+  /* Inputs maiores para facilitar toque */
+  input[type="text"],
+  input[type="password"] {
+    min-height: 48px;
+    font-size: 16px !important;
+    /* Previne zoom iOS */
+  }
+}
+
 /* ============================================= */
 /* PWA ESPECÍFICOS */
 /* ============================================= */
@@ -421,4 +455,8 @@ select:focus {
   .hide-on-pwa {
     display: none !important;
   }
+}
+
+form[autocomplete="off"] input {
+  -webkit-text-security: none;
 }
