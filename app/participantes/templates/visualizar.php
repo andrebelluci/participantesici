@@ -28,21 +28,21 @@ if (!isset($pessoa)) {
             echo $nascimento->format('d/m/Y');
             ?>
           </p>
-          <!-- <p><span class="font-semibold">Inscrições:</span>
-            <span class="bg-yellow-300 text-blue-900 px-2 py-1 rounded md:text-lg font-medium">
-              <?= $total_rituais_participados + $total_rituais_nao_participados ?>
-                      </span>
-                    </p> -->
-          <p><span class="font-semibold">Rituais participados:</span>
-            <span class="bg-[#00bfff] text-black px-2 py-1 rounded md:text-lg font-medium">
-              <?= $total_rituais_participados ?>
+          <p><span class="font-semibold">Inscrito:</span>
+            <span class="text-blue-500 px-2 py-1 rounded font-bold">
+              <?= $total_inscritos ?>
             </span>
           </p>
-          <!-- <p><span class="font-semibold">Rituais não participados:</span>
-                      <span class="bg-red-300 text-black px-2 py-1 rounded md:text-lg font-medium">
-                        <?= $total_rituais_nao_participados ?>
-                      </span>
-                    </p> -->
+          <p><span class="font-semibold">Participados:</span>
+            <span class="text-green-700 px-2 py-1 rounded font-bold">
+              <?= $total_presentes ?>
+            </span>
+          </p>
+          <p><span class="font-semibold">Não participados:</span>
+            <span class="text-red-700 px-2 py-1 rounded font-bold">
+              <?= $total_inscritos - $total_presentes ?>
+            </span>
+          </p>
         </div>
       </div>
 
@@ -55,8 +55,7 @@ if (!isset($pessoa)) {
 
     <!-- Botões de ação -->
     <div class="flex items-center justify-between mb-1">
-      <a href="/participantes"
-        class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
+      <a href="/participantes" class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
         <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
       </a>
 
@@ -522,7 +521,7 @@ if (!isset($pessoa)) {
 </button>
 
 <!-- Modal Adicionar Ritual - Com Filtro Colapsável -->
-<div id="modal-adicionar" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
+<div id="modal-adicionar" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4 max-h-[90vh] overflow-y-auto">
     <button onclick="fecharModalAdicionar()"
       class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg z-10">
@@ -595,8 +594,7 @@ if (!isset($pessoa)) {
 </div>
 
 <!-- Modal Detalhes da Inscrição - Tailwind -->
-<div id="modal-detalhes-inscricao"
-  class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
+<div id="modal-detalhes-inscricao" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative mx-4 max-h-[90vh] overflow-y-auto">
     <button onclick="fecharModalDetalhes()" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg z-10">
       <i class="fa-solid fa-window-close"></i>
@@ -696,7 +694,7 @@ if (!isset($pessoa)) {
 </div>
 
 <!-- ✅ MODAL OBSERVAÇÃO MELHORADA -->
-<div id="modal-observacao" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
+<div id="modal-observacao" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
     <button onclick="fecharModalObservacao()" class="absolute top-4 right-4 text-gray-500 hover:text-gray-700">
       <i class="fas fa-times text-xl"></i>
@@ -736,7 +734,7 @@ if (!isset($pessoa)) {
 </div>
 
 <!-- Modal de Visualização de Imagem - Tailwind -->
-<div id="modal-image" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
+<div id="modal-image" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-lg overflow-hidden shadow-lg relative max-w-sm w-full mx-4">
     <button onclick="closeImageModal()" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg z-10">
       <i class="fa-solid fa-window-close"></i>
@@ -746,7 +744,7 @@ if (!isset($pessoa)) {
 </div>
 
 <!-- Modal Ver Cadastro - Tailwind -->
-<div id="modal-cadastro" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
+<div id="modal-cadastro" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative mx-4 max-h-[90vh] overflow-y-auto">
     <button onclick="fecharModalCadastro()" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg z-10">
       <i class="fa-solid fa-window-close"></i>
@@ -820,7 +818,7 @@ if (!isset($pessoa)) {
 </div>
 
 <!-- Modal de Confirmação Genérico -->
-<div id="confirmModal" class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 hidden">
+<div id="confirmModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
   <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
     <h2 class="text-xl font-bold mb-4 text-red-600" id="confirmModalTitle"><i
         class="fa-solid fa-exclamation-triangle mr-2"></i>ATENÇÃO!</h2>

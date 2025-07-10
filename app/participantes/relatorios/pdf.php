@@ -65,7 +65,7 @@ function formatarTelefone($telefone)
 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 // Configurações do documento
-$pdf->SetCreator('Participantes ICI');
+$pdf->SetCreator('ICI Participantes');
 $pdf->SetAuthor('Instituto Céu Interior');
 $pdf->SetTitle('Relatório do Participante - ' . $participante['nome_completo']);
 $pdf->SetSubject('Relatório do Participante');

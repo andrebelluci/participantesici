@@ -46,6 +46,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $bairro = $_POST['bairro'];
   $sobre_participante = $_POST['sobre_participante'];
 
+  $redirect = $_POST['redirect'] ?? $_GET['redirect'] ?? '/participantes';
+
+  // Extrair ritual_id do redirect
+  $ritual_id_from_redirect = null;
+  if ($redirect && strpos($redirect, '/ritual/') !== false) {
+    preg_match('/\/ritual\/(\d+)/', $redirect, $matches);
+    if (isset($matches[1])) {
+      $ritual_id_from_redirect = (int) $matches[1];
+    }
+  }
+
   $foto = null; // Inicialmente sem foto
 
   // ✅ PROCESSAR IMAGEM CROPADA (PRIORIDADE)
@@ -105,52 +116,58 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     exit;
   }
 
-  // Insere no banco de dados
-  $stmt = $pdo->prepare("
+  // Insere participante no banco
+  try {
+    $stmt = $pdo->prepare("
     INSERT INTO participantes (
       foto, nome_completo, nascimento, sexo, cpf, rg, passaporte, celular, email, como_soube,
       cep, endereco_rua, endereco_numero, endereco_complemento, cidade, estado, bairro, sobre_participante
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   ");
 
-  $stmt->execute([
-    $foto,
-    $nome_completo,
-    $nascimento,
-    $sexo,
-    $cpf,
-    $rg,
-    $passaporte,
-    $celular,
-    $email,
-    $como_soube,
-    $cep,
-    $endereco_rua,
-    $endereco_numero,
-    $endereco_complemento,
-    $cidade,
-    $estado,
-    $bairro,
-    $sobre_participante
-  ]);
+    $stmt->execute([
+      $foto,
+      $nome_completo,
+      $nascimento,
+      $sexo,
+      $cpf,
+      $rg,
+      $passaporte,
+      $celular,
+      $email,
+      $como_soube,
+      $cep,
+      $endereco_rua,
+      $endereco_numero,
+      $endereco_complemento,
+      $cidade,
+      $estado,
+      $bairro,
+      $sobre_participante
+    ]);
 
-  $novoParticipanteId = $pdo->lastInsertId();
+    $novoParticipanteId = $pdo->lastInsertId();
 
-  // Verificar se há redirecionamento para vincular a ritual
-  if (isset($_GET['redirect']) && isset($_GET['id'])) {
-    $redirectUrl = $_GET['redirect'];
-    $ritualId = $_GET['id'];
+    if ($ritual_id_from_redirect) {
+      $stmt_inscricao = $pdo->prepare("
+        INSERT INTO inscricoes (ritual_id, participante_id)
+        VALUES (?, ?)
+      ");
+      $stmt_inscricao->execute([$ritual_id_from_redirect, $novoParticipanteId]);
 
-    // Insere o novo participante no ritual
-    $stmt = $pdo->prepare("INSERT INTO inscricoes (ritual_id, participante_id) VALUES (?, ?)");
-    $stmt->execute([$ritualId, $novoParticipanteId]);
+      $_SESSION['success'] = 'Participante criado e vinculado ao ritual com sucesso!';
+      header("Location: $redirect");
+      exit;
+    } else {
+      $_SESSION['success'] = 'Pessoa cadastrada com sucessoo!';
+      header('Location: /participantes');
+      exit;
+    }
 
-    $_SESSION['success'] = 'Pessoa cadastrada e vinculada ao ritual com sucesso!';
-    header("Location: $redirectUrl?id=$ritualId");
-    exit;
-  } else {
-    $_SESSION['success'] = 'Pessoa cadastrada com sucesso!';
-    header('Location: /participantes');
+  } catch (PDOException $e) {
+    error_log("Erro ao criar participante: " . $e->getMessage());
+    $_SESSION['error'] = 'Erro ao criar participante. Tente novamente.';
+    header('Location: /participante/novo');
     exit;
   }
 }

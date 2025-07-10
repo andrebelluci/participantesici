@@ -646,7 +646,7 @@ function togglePresenca(button) {
             }
 
             button.setAttribute('data-current-status', newStatus);
-            atualizarContadorParticipantes();
+            atualizarContadorParticipantes(newStatus);
             showToast(`Presença atualizada para: ${newStatus}`, 'success');
           } else {
             showToast('Erro ao atualizar presença: ' + data.error, 'error');
@@ -663,17 +663,53 @@ function togglePresenca(button) {
     });
 }
 
-function atualizarContadorParticipantes() {
+function atualizarContadorParticipantes(novoStatus) {
   try {
-    // Conta participantes presentes nos cards
-    const botoesPresenca = document.querySelectorAll('[data-current-status="Sim"]');
-    const totalParticipantes = botoesPresenca.length;
+    // Método 1: Busca por classe específica
+    let contadorPresentes = document.querySelector('span.text-green-700');
+    let contadorAusentes = document.querySelector('span.text-red-700');
 
-    // Atualiza contador no cabeçalho
-    const contadorSpan = document.querySelector('span.bg-\\[\\#00bfff\\]');
-    if (contadorSpan && contadorSpan.parentElement.textContent.includes('Total de participantes')) {
-      contadorSpan.textContent = totalParticipantes;
-      console.log(`Contador atualizado: ${totalParticipantes} participantes`);
+    // Método 2: Se não encontrar, busca por contexto
+    if (!contadorPresentes) {
+      const spans = document.querySelectorAll('span');
+      spans.forEach(span => {
+        const parent = span.parentElement;
+        if (parent && parent.textContent.includes('Presentes') &&
+          (span.classList.contains('text-green-700') || span.style.backgroundColor)) {
+          contadorPresentes = span;
+        }
+      });
+    }
+
+    if (!contadorAusentes) {
+      const spans = document.querySelectorAll('span');
+      spans.forEach(span => {
+        const parent = span.parentElement;
+        if (parent && parent.textContent.includes('Ausentes') &&
+          (span.classList.contains('text-red-700') || span.style.backgroundColor)) {
+          contadorAusentes = span;
+        }
+      });
+    }
+
+    if (contadorPresentes) {
+      let presente = parseInt(contadorPresentes.textContent.trim()) || 0;
+      let ausente = parseInt(contadorAusentes.textContent.trim()) || 0;
+
+      if (novoStatus === 'Sim') {
+        presente++;
+        ausente--;
+      } else {
+        presente--;
+        ausente++;
+      }
+
+      contadorPresentes.textContent = presente;
+      contadorAusentes.textContent = ausente;
+      console.log(`Contador atualizado: ${presente} (Status: ${novoStatus})`);
+      console.log(`Contador atualizado: ${ausente} (Status: ${novoStatus})`);
+    } else {
+      console.warn('Contador não encontrado');
     }
   } catch (error) {
     console.error('Erro ao atualizar contador:', error);

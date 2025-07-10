@@ -150,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       ");
       $stmt_inscricao->execute([$novoRitualId, $participante_id_from_redirect]);
 
-      $_SESSION['success'] = 'Ritual criado e participante vinculado com sucesso!';
+      $_SESSION['success'] = 'Ritual criado e vinculado ao participante com sucesso!';
       header("Location: $redirect");
       exit;
     } else {

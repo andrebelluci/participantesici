@@ -70,8 +70,8 @@ $total_ausentes = count($ausentes);
 $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8', false);
 
 // Configurações do documento
-$pdf->SetCreator('Sistema ICI');
-$pdf->SetAuthor('Instituto de Consciência Integral');
+$pdf->SetCreator('Participantes ICI');
+$pdf->SetAuthor('Instituto Céu Interior');
 $pdf->SetTitle('Relatório do Ritual - ' . $ritual['nome']);
 $pdf->SetSubject('Relatório do Ritual');
 

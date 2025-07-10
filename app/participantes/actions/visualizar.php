@@ -78,8 +78,8 @@ if (!$pessoa) {
 }
 
 // ✅ ADICIONAR CONTAGEM TOTAL DE RITUAIS
-$total_rituais_participados = contarRituaisParticipados($pdo, $id);
-$total_rituais_nao_participados = contarRituaisParticipados($pdo, $id);
+// $total_rituais_participados = contarRituaisParticipados($pdo, $id);
+// $total_rituais_nao_participados = contarRituaisParticipados($pdo, $id);
 
 // Paginação
 $pagina = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
@@ -140,6 +140,28 @@ $sql_total_rituais = "
 $stmt_total = $pdo->prepare($sql_total_rituais);
 $stmt_total->execute([$id]);
 $total_rituais_participante = $stmt_total->fetch()['total'];
+
+// Buscar total de participantes (independente da paginação)
+$sql_total_inscritos = "
+    SELECT COUNT(*) AS total_inscritos
+    FROM inscricoes i
+    JOIN rituais r ON i.ritual_id = r.id
+    WHERE i.participante_id = ?
+";
+$stmt_total_inscritos = $pdo->prepare($sql_total_inscritos);
+$stmt_total_inscritos->execute([$id]);
+$total_inscritos = $stmt_total_inscritos->fetch()['total_inscritos'];
+
+// Buscar contagem de participantes presentes (independente da paginação)
+$sql_presentes = "
+    SELECT COUNT(*) AS total_presentes
+    FROM inscricoes i
+    JOIN rituais r ON i.ritual_id = r.id
+    WHERE i.participante_id = ? AND i.presente = 'Sim'
+";
+$stmt_presentes = $pdo->prepare($sql_presentes);
+$stmt_presentes->execute([$id]);
+$total_presentes = $stmt_presentes->fetch()['total_presentes'];
 
 // Determinar o tipo e ID baseado na URL atual
 $current_path = $_SERVER['REQUEST_URI'];

@@ -22,7 +22,7 @@ if (!$ritual) {
 
 // ✅ PAGINAÇÃO - Adicionar estas variáveis
 $pagina = isset($_GET['pagina']) ? (int) $_GET['pagina'] : 1;
-$itens_por_pagina = 10;
+$itens_por_pagina = 9;
 $offset = ($pagina - 1) * $itens_por_pagina;
 
 // Buscar participantes com filtro e dados completos de inscrição
@@ -75,6 +75,26 @@ $sql_participantes .= " ORDER BY $order_by $order_dir LIMIT $itens_por_pagina OF
 $stmt_participantes = $pdo->prepare($sql_participantes);
 $stmt_participantes->execute($params);
 $participantes = $stmt_participantes->fetchAll();
+
+// Buscar contagem de participantes presentes (independente da paginação)
+$sql_presentes = "
+    SELECT COUNT(*) AS total_presentes
+    FROM inscricoes i
+    WHERE i.ritual_id = ? AND i.presente = 'Sim'
+";
+$stmt_presentes = $pdo->prepare($sql_presentes);
+$stmt_presentes->execute([$id]);
+$total_presentes = $stmt_presentes->fetch()['total_presentes'];
+
+// Buscar total de participantes (independente da paginação)
+$sql_total_inscritos = "
+    SELECT COUNT(*) AS total_inscritos
+    FROM inscricoes i
+    WHERE i.ritual_id = ?
+";
+$stmt_total_inscritos = $pdo->prepare($sql_total_inscritos);
+$stmt_total_inscritos->execute([$id]);
+$total_inscritos = $stmt_total_inscritos->fetch()['total_inscritos'];
 
 // Determinar o tipo e ID baseado na URL atual
 $current_path = $_SERVER['REQUEST_URI'];
