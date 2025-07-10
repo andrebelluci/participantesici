@@ -647,6 +647,9 @@ function togglePresenca(button) {
 
             button.setAttribute('data-current-status', newStatus);
             atualizarContadorParticipantes(newStatus);
+            setTimeout(() => {
+              atualizarContadores(newStatus);
+            }, 200);
             showToast(`Presença atualizada para: ${newStatus}`, 'success');
           } else {
             showToast('Erro ao atualizar presença: ' + data.error, 'error');
