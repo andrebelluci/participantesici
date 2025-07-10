@@ -29,7 +29,7 @@ $tentativas = CaptchaService::obterTentativas($identificador);
 <html lang="pt-br">
 
 <head>
-  <title>Participantes - ICI</title>
+  <title>ICI Participantes</title>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
@@ -151,15 +151,19 @@ $tentativas = CaptchaService::obterTentativas($identificador);
           </div>
         <?php endif; ?>
 
-        <!-- ✅ NOVA SEÇÃO: CHECKBOX LEMBRAR-ME -->
-        <div class="flex items-center justify-between">
-          <label class="flex items-center cursor-pointer group">
-            <input type="checkbox" name="lembrar_me" id="lembrar_me" value="1"
-              class="w-4 h-4 text-[#00bfff] bg-gray-100 border-gray-300 rounded focus:ring-[#00bfff] focus:ring-2">
-            <span class="ml-2 text-sm text-yellow-400 group-hover:text-[#00bfff] transition">
-              <i class="fa-solid fa-clock mr-1"></i>Lembrar-me por 30 dias
-            </span>
-          </label>
+        <div class="mb-6">
+          <div class="bg-yellow-400/20 border border-yellow-400 rounded-lg p-4">
+            <label for="lembrar_me" class="flex items-start cursor-pointer">
+              <input type="checkbox" id="lembrar_me" name="lembrar_me" value="1"
+                class="mt-1 h-5 w-5 text-[#00bfff] border-2 border-yellow-400 rounded focus:ring-[#00bfff] focus:ring-2">
+              <div class="ml-3">
+                <span class="text-white font-semibold text-base">
+                  <i class="fa-solid fa-mobile-alt mr-1 text-yellow-400"></i>
+                  Manter conectado por 30 dias
+                </span>
+              </div>
+            </label>
+          </div>
         </div>
 
         <button type="submit"
