@@ -84,6 +84,8 @@ function compressImage(file, maxWidth = 800, maxHeight = 800, quality = 0.8) {
 // ✅ ATUALIZADA: Processa e comprime imagem
 async function showPreview(file) {
   try {
+    // ✅ CORREÇÃO: Reset do estado ao carregar nova imagem
+    imageManuallyRemoved = false;
 
     // Comprime a imagem
     const compressed = await compressImage(file, 800, 800, 0.8);
@@ -146,44 +148,6 @@ function hidePreview() {
     input.name = 'remover_foto';
     input.value = '1';
     document.getElementById('formulario-ritual')?.appendChild(input);
-  }
-}
-
-async function showPreview(file) {
-  try {
-    // ✅ CORREÇÃO: Reset do estado ao carregar nova imagem
-    imageManuallyRemoved = false;
-
-    // Comprime a imagem
-    const compressed = await compressImage(file, 800, 800, 0.8);
-
-    // Armazena dados processados
-    processedImageData = compressed.dataUrl;
-
-    // Mostra preview
-    previewImage.src = compressed.dataUrl;
-
-    // Atualiza interface
-    uploadArea?.classList.add('hidden');
-    uploadArea.style.display = 'none';
-
-    previewContainer?.classList.remove('hidden');
-    previewContainer.style.display = 'block';
-
-    // Feedback para o usuário
-    const reducao = Math.round((1 - compressed.compressedSize / compressed.originalSize) * 100);
-    showToast('Imagem carregada!', 'success');
-
-    console.log('Compressão:', {
-      original: `${(compressed.originalSize / 1024 / 1024).toFixed(2)}MB`,
-      comprimida: `${(compressed.compressedSize / 1024 / 1024).toFixed(2)}MB`,
-      reducao: `${reducao}%`,
-      dimensoes: `${compressed.width}x${compressed.height}`
-    });
-
-  } catch (error) {
-    console.error('Erro ao processar imagem:', error);
-    showToast('Erro ao processar imagem. Tente novamente.', 'error');
   }
 }
 
@@ -292,9 +256,7 @@ function setupFormValidation() {
     // Validar padrinho/madrinha
     if (!padrinhoInput?.value && !hasError) {
       event.preventDefault();
-      showToast('Por favor, selecione o padrinho ou madrinha.');
-      padrinhoInput.focus();
-      hasError = true;
+      showToast('Por favor, selecione o padrinho ou madrinha.');      padrinhoInput.focus();
     }
   });
 }
