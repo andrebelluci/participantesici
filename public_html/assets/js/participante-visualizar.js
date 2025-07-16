@@ -1135,7 +1135,6 @@ function atualizarPaginaFundo() {
       if (novoContadorAusente && contadorAusenteAtual) {
         contadorAusenteAtual.textContent = novoContadorAusente.textContent;
       }
-
     })
     .catch(error => {
       console.error('Erro ao atualizar página de fundo:', error);
