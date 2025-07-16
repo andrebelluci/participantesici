@@ -751,15 +751,18 @@ function removerAcentos(texto) {
     .trim();
 }
 
+// ✅ FUNÇÃO pesquisarRituais()
 function pesquisarRituais() {
   const nomePesquisa = document.getElementById('nome_pesquisa').value.trim();
 
+  // Validação mínima de 3 caracteres
   if (nomePesquisa.length < 3) {
     showToast("Digite pelo menos 3 caracteres para pesquisar.", 'error');
     document.getElementById('nome_pesquisa').focus();
     return;
   }
 
+  // Loading state no botão
   const pesquisarBtn = document.getElementById('pesquisar-btn');
   const originalText = pesquisarBtn ? pesquisarBtn.textContent : 'Pesquisar';
 
@@ -786,22 +789,34 @@ function pesquisarRituais() {
   const listaRituais = document.getElementById('lista-rituais');
   if (listaRituais) listaRituais.innerHTML = '';
 
+  // Texto de pesquisa normalizado (sem acentos)
   const pesquisaNormalizada = removerAcentos(nomePesquisa);
 
+  // ✅ CORREÇÃO: Aguarda AMBAS as requisições completarem
   Promise.all([
     fetch(`/api/participante/buscar-ritual?nome=${encodeURIComponent(nomePesquisa)}`),
     fetch(`/api/inscricoes/rituais-vinculados?participante_id=${pessoaId}`)
   ])
     .then(responses => Promise.all(responses.map(r => r.json())))
     .then(([rituaisData, rituaisVinculadosData]) => {
+      console.log('📱 Dados recebidos:', {
+        rituais: rituaisData.length,
+        vinculados: rituaisVinculadosData.rituais_ids?.length || 0
+      });
+
       if (rituaisData.error) {
         showToast(rituaisData.error, 'error');
         return;
       }
 
-      const rituaisVinculados = rituaisVinculadosData.rituais_ids || [];
-      console.log('🔍 Rituais vinculados:', rituaisVinculados);
+      // ✅ SEGURANÇA: Garante que rituaisVinculados sempre seja um array
+      const rituaisVinculados = Array.isArray(rituaisVinculadosData.rituais_ids)
+        ? rituaisVinculadosData.rituais_ids
+        : [];
 
+      console.log('📱 Rituais vinculados:', rituaisVinculados);
+
+      // Filtro adicional no frontend para ignorar acentos
       const rituaisFiltrados = rituaisData.filter(ritual => {
         const nomeNormalizado = removerAcentos(ritual.nome || '');
         return nomeNormalizado.includes(pesquisaNormalizada);
@@ -820,6 +835,7 @@ function pesquisarRituais() {
         return;
       }
 
+      // Exibe contador de resultados
       if (listaRituais) {
         const contadorResultados = document.createElement('li');
         contadorResultados.className = 'p-2 bg-blue-50 border-b border-blue-200 text-blue-700 text-sm font-medium';
@@ -830,61 +846,17 @@ function pesquisarRituais() {
         listaRituais.appendChild(contadorResultados);
       }
 
-      // ✅ Aplicar mesma lógica para rituais
-      rituaisFiltrados.forEach(ritual => {
-        const jaAdicionado = rituaisVinculados.includes(ritual.id);
-        console.log(`📋 Ritual ${ritual.id}: ${jaAdicionado ? 'JÁ ADICIONADO' : 'DISPONÍVEL'}`);
+      // ✅ CORREÇÃO: Renderiza items COM DELAY para garantir dados
+      renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesquisa, listaRituais);
 
-        const li = document.createElement('li');
-        li.className = 'p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0';
-        li.setAttribute('data-ritual-id', ritual.id);
-
-        const nomeDestacado = ritual.nome ?
-          ritual.nome.replace(
-            new RegExp(`(${nomePesquisa})`, 'gi'),
-            '<mark class="bg-yellow-200 px-1 rounded">$1</mark>'
-          ) : 'Nome não informado';
-
-        const dataFormatada = formatarData(ritual.data_ritual);
-        const botaoHTML = criarBotaoOuStatus(ritual.id, jaAdicionado, 'ritual');
-
-        li.innerHTML = `
-          <div class="grid grid-cols-[auto_1fr] gap-4">
-            <div class="flex-shrink-0">
-              <img src="${ritual.foto || '/assets/images/no-image.png'}"
-                   onerror="this.src='/assets/images/no-image.png';"
-                   alt="Foto do ritual"
-                   class="w-16 h-16 rounded-lg object-cover border border-gray-200">
-            </div>
-            <div class="space-y-2">
-              <h3 class="!font-semibold !text-gray-900 !text-lg !leading-tight !m-0 !p-0">
-                ${nomeDestacado}
-              </h3>
-              <div class="flex items-center gap-1">
-                <span class="text-sm font-semibold">Data:</span>
-                <p class="text-sm text-gray-600">
-                  ${ritual.data_ritual ? `<i class="fa-solid fa-calendar mr-1"></i>${dataFormatada}` : 'Data não informada'}
-                </p>
-              </div>
-              <div class="pt-1" data-button-container="${ritual.id}">
-                ${botaoHTML}
-              </div>
-            </div>
-          </div>
-        `;
-
-        if (listaRituais) listaRituais.appendChild(li);
-      });
-
-      setTimeout(() => {
-        verificarECorrigirBotoesMobile('ritual');
-      }, 100);
-
+      // Feedback de sucesso
       showToast(`${rituaisFiltrados.length} ritual(is) encontrado(s)!`, 'success');
     })
     .catch(error => {
       console.error('Erro ao buscar rituais:', error);
       showToast('Erro ao carregar rituais. Verifique sua conexão e tente novamente.', 'error');
+
+      // Exibe mensagem de erro na lista
       if (listaRituais) {
         listaRituais.innerHTML = `
           <li class="p-4 text-center text-red-500">
@@ -899,6 +871,7 @@ function pesquisarRituais() {
       }
     })
     .finally(() => {
+      // Restaura o botão após pesquisa
       if (pesquisarBtn) {
         pesquisarBtn.textContent = originalText;
         pesquisarBtn.disabled = false;
@@ -906,24 +879,88 @@ function pesquisarRituais() {
     });
 }
 
-function criarBotaoOuStatus(id, jaAdicionado, tipo) {
+// ✅ NOVA FUNÇÃO: Renderiza rituais com verificação segura
+function renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesquisa, listaRituais) {
+  console.log('📱 Iniciando renderização:', {
+    filtrados: rituaisFiltrados.length,
+    vinculados: rituaisVinculados
+  });
+
+  // ✅ Pequeno delay para garantir que dados estão prontos
+  setTimeout(() => {
+    rituaisFiltrados.forEach((ritual, index) => {
+      // ✅ SEGURANÇA: Converte IDs para mesmo tipo para comparação
+      const ritualId = parseInt(ritual.id);
+      const rituaisVinculadosInt = rituaisVinculados.map(id => parseInt(id));
+      const jaAdicionado = rituaisVinculadosInt.includes(ritualId);
+
+      console.log(`📱 Ritual ${ritual.nome}:`, {
+        id: ritualId,
+        vinculados: rituaisVinculadosInt,
+        jaAdicionado: jaAdicionado
+      });
+
+      const li = document.createElement('li');
+      li.className = 'p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0';
+
+      // Destacar termo pesquisado no nome
+      const nomeDestacado = ritual.nome ?
+        ritual.nome.replace(
+          new RegExp(`(${nomePesquisa})`, 'gi'),
+          '<mark class="bg-yellow-200 px-1 rounded">$1</mark>'
+        ) : 'Nome não informado';
+
+      const dataFormatada = formatarData(ritual.data_ritual);
+
+      li.innerHTML = `
+        <div class="grid grid-cols-[auto_1fr] gap-4">
+          <div class="flex-shrink-0">
+            <img src="${ritual.foto || '/assets/images/no-image.png'}"
+                 onerror="this.src='/assets/images/no-image.png';"
+                 alt="Foto do ritual"
+                 class="w-16 h-16 rounded-lg object-cover border border-gray-200">
+          </div>
+          <div class="space-y-2">
+            <h3 class="!font-semibold !text-gray-900 !text-lg !leading-tight !m-0 !p-0">
+              ${nomeDestacado}
+            </h3>
+            <div class="flex items-center gap-1">
+              <span class="text-sm font-semibold">Data:</span>
+              <p class="text-sm text-gray-600">
+                ${ritual.data_ritual ? `<i class="fa-solid fa-calendar mr-1"></i>${dataFormatada}` : 'Data não informada'}
+              </p>
+            </div>
+            <div class="pt-1" id="acao-ritual-${ritualId}">
+              ${renderizarBotaoAcao(ritualId, jaAdicionado)}
+            </div>
+          </div>
+        </div>
+      `;
+
+      if (listaRituais) {
+        listaRituais.appendChild(li);
+      }
+
+      // ✅ VERIFICAÇÃO ADICIONAL: Re-verifica após 100ms (mobile safety)
+      setTimeout(() => {
+        verificarEAtualizarBotao(ritualId, rituaisVinculadosInt);
+      }, 100 + (index * 10)); // Escalonado para evitar sobrecarga
+    });
+  }, 50); // Delay inicial pequeno
+}
+
+// ✅ NOVA FUNÇÃO: Renderiza botão/tag baseado no status
+function renderizarBotaoAcao(ritualId, jaAdicionado) {
   if (jaAdicionado) {
-    console.log(`✅ Criando status "já adicionado" para ${tipo} ${id}`);
     return `
-      <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-            data-status="ja-adicionado"
-            data-${tipo}-id="${id}">
+      <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
         <i class="fa-solid fa-check"></i>
         Já adicionado
       </span>
     `;
   } else {
-    console.log(`➕ Criando botão "adicionar" para ${tipo} ${id}`);
-    const funcaoClick = tipo === 'participante' ? 'adicionarParticipante' : 'adicionarRitual';
     return `
-      <button onclick="${funcaoClick}(${id})"
-              data-${tipo}-id="${id}"
-              data-status="disponivel"
+      <button onclick="adicionarRitual(${ritualId})"
               class="bg-[#00bfff] hover:bg-yellow-400 text-black px-4 py-2 rounded text-sm font-semibold transition-colors shadow-sm">
         <i class="fa-solid fa-plus mr-1"></i>
         Adicionar
@@ -932,34 +969,25 @@ function criarBotaoOuStatus(id, jaAdicionado, tipo) {
   }
 }
 
-function verificarECorrigirBotoesMobile(tipo) {
-  console.log(`🔍 Verificando botões no mobile para ${tipo}s...`);
+// ✅ NOVA FUNÇÃO: Verificação adicional para mobile
+function verificarEAtualizarBotao(ritualId, rituaisVinculados) {
+  const containerAcao = document.getElementById(`acao-ritual-${ritualId}`);
+  if (!containerAcao) return;
 
-  const lista = document.getElementById(tipo === 'participante' ? 'lista-participantes' : 'lista-rituais');
-  if (!lista) return;
+  const jaAdicionado = rituaisVinculados.includes(parseInt(ritualId));
+  const temBotaoAdicionar = containerAcao.querySelector('button');
+  const temTagAdicionado = containerAcao.querySelector('span.bg-green-100');
 
-  // Busca todos os containers de botão
-  const containers = lista.querySelectorAll('[data-button-container]');
-
-  containers.forEach(container => {
-    const id = container.getAttribute('data-button-container');
-    const botao = container.querySelector('button');
-    const status = container.querySelector('span[data-status="ja-adicionado"]');
-
-    console.log(`🔍 ${tipo} ${id}: botão=${!!botao}, status=${!!status}`);
-
-    // Se não tem nem botão nem status, algo deu errado
-    if (!botao && !status) {
-      console.warn(`⚠️ Container vazio para ${tipo} ${id} - recriando...`);
-
-      // Recriar baseado no que deveria ter
-      // Aqui você pode fazer uma verificação adicional se necessário
-      container.innerHTML = criarBotaoOuStatus(id, false, tipo);
-    }
-  });
+  // ✅ Corrige inconsistências
+  if (jaAdicionado && temBotaoAdicionar) {
+    console.log(`📱 Corrigindo botão para "Já adicionado" - Ritual ${ritualId}`);
+    containerAcao.innerHTML = renderizarBotaoAcao(ritualId, true);
+  } else if (!jaAdicionado && temTagAdicionado) {
+    console.log(`📱 Corrigindo tag para "Adicionar" - Ritual ${ritualId}`);
+    containerAcao.innerHTML = renderizarBotaoAcao(ritualId, false);
+  }
 }
 
-// Funções de filtro
 function toggleFiltroRitual() {
   const formularioFiltro = document.getElementById('pesquisa-ritual-form');
   const botaoToggle = document.getElementById('botao-toggle-filtro');

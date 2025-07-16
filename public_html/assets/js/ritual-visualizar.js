@@ -727,12 +727,13 @@ document.addEventListener('keypress', function (event) {
   }
 });
 
+// ✅ FUNÇÃO pesquisarParticipantes()
 function pesquisarParticipantes() {
   const nomePesquisa = document.getElementById('nome_pesquisa').value.trim();
 
   // Validação melhorada: CPF precisa ter exatamente 11 dígitos, nome pelo menos 3 caracteres
   const apenasNumeros = nomePesquisa.replace(/\D/g, '');
-  const ehCPF = apenasNumeros.length === 11;
+  const ehCPF = apenasNumeros.length === 11; // Exatamente 11 dígitos
   const ehNome = nomePesquisa.length >= 3 && apenasNumeros.length !== 11;
 
   if (!ehCPF && !ehNome) {
@@ -772,20 +773,32 @@ function pesquisarParticipantes() {
   const listaParticipantes = document.getElementById('lista-participantes');
   if (listaParticipantes) listaParticipantes.innerHTML = '';
 
-  // Executa pesquisa
+  const apiUrl = `/api/ritual/buscar-participante?nome=${encodeURIComponent(nomePesquisa)}`;
+  console.log('🌐 URL da API:', apiUrl);
+
+  // ✅ CORREÇÃO: Aguarda AMBAS as requisições completarem
   Promise.all([
     fetch(`/api/ritual/buscar-participante?nome=${encodeURIComponent(nomePesquisa)}`),
     fetch(`/api/inscricoes/participantes-vinculados?ritual_id=${ritualId}`)
   ])
     .then(responses => Promise.all(responses.map(r => r.json())))
     .then(([participantesData, participantesVinculadosData]) => {
+      console.log('📱 Dados recebidos:', {
+        participantes: participantesData.length,
+        vinculados: participantesVinculadosData.participantes_ids?.length || 0
+      });
+
       if (participantesData.error) {
         showToast(participantesData.error, 'error');
         return;
       }
 
-      const participantesVinculados = participantesVinculadosData.participantes_ids || [];
-      console.log('🔍 Participantes vinculados:', participantesVinculados);
+      // ✅ SEGURANÇA: Garante que participantesVinculados sempre seja um array
+      const participantesVinculados = Array.isArray(participantesVinculadosData.participantes_ids)
+        ? participantesVinculadosData.participantes_ids
+        : [];
+
+      console.log('📱 Participantes vinculados:', participantesVinculados);
 
       if (participantesData.length === 0) {
         if (listaParticipantes) {
@@ -812,68 +825,17 @@ function pesquisarParticipantes() {
         listaParticipantes.appendChild(contadorResultados);
       }
 
-      // ✅ CORREÇÃO: Cria lista com verificação explícita
-      participantesData.forEach(participante => {
-        const jaAdicionado = participantesVinculados.includes(participante.id);
-        console.log(`📋 Participante ${participante.id}: ${jaAdicionado ? 'JÁ ADICIONADO' : 'DISPONÍVEL'}`);
+      // ✅ CORREÇÃO: Renderiza items COM DELAY para garantir dados
+      renderizarParticipantesComDelay(participantesData, participantesVinculados, nomePesquisa, ehCPF, listaParticipantes);
 
-        const li = document.createElement('li');
-        li.className = 'p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0';
-        li.setAttribute('data-participante-id', participante.id); // ✅ Adiciona identificador
-
-        // Destacar termo pesquisado no nome
-        let nomeDestacado = participante.nome_completo || 'Nome não informado';
-        if (!ehCPF && participante.nome_completo) {
-          nomeDestacado = participante.nome_completo.replace(
-            new RegExp(`(${nomePesquisa.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
-            '<mark class="bg-yellow-200 px-1 rounded">$1</mark>'
-          );
-        }
-
-        const cpfFormatado = formatarCPF(participante.cpf);
-
-        // ✅ SOLUÇÃO: Renderização explícita baseada no status
-        const botaoHTML = criarBotaoOuStatus(participante.id, jaAdicionado, 'participante');
-
-        li.innerHTML = `
-          <div class="grid grid-cols-[auto_1fr] gap-4">
-            <div class="flex-shrink-0">
-              <img src="${participante.foto || '/assets/images/no-image.png'}"
-                   onerror="this.src='/assets/images/no-image.png';"
-                   alt="Foto do participante"
-                   class="w-16 h-16 rounded-lg object-cover border border-gray-200">
-            </div>
-            <div class="space-y-2">
-              <h3 class="!font-semibold !text-gray-900 !text-lg !leading-tight !m-0 !p-0">
-                ${nomeDestacado}
-              </h3>
-              <div class="flex items-center gap-1">
-                <span class="text-sm font-semibold">CPF:</span>
-                <p class="text-sm text-gray-600">
-                  ${cpfFormatado ? `<i class="fa-solid fa-id-card mr-1"></i>${cpfFormatado}` : 'CPF não informado'}
-                </p>
-              </div>
-              <div class="pt-1" data-button-container="${participante.id}">
-                ${botaoHTML}
-              </div>
-            </div>
-          </div>
-        `;
-
-        if (listaParticipantes) listaParticipantes.appendChild(li);
-      });
-
-      // ✅ CORREÇÃO MÓVEL: Força re-renderização após pequeno delay
-      setTimeout(() => {
-        verificarECorrigirBotoesMobile('participante');
-      }, 100);
-
+      // Feedback de sucesso
       showToast(`${participantesData.length} participante(s) encontrado(s)!`, 'success');
     })
     .catch(error => {
       console.error('Erro ao buscar participantes:', error);
       showToast('Erro ao carregar participantes. Verifique sua conexão e tente novamente.', 'error');
 
+      // Exibe mensagem de erro na lista
       if (listaParticipantes) {
         listaParticipantes.innerHTML = `
           <li class="p-4 text-center text-red-500">
@@ -888,6 +850,7 @@ function pesquisarParticipantes() {
       }
     })
     .finally(() => {
+      // Restaura o botão após pesquisa
       if (pesquisarBtn) {
         pesquisarBtn.textContent = originalText;
         pesquisarBtn.disabled = false;
@@ -895,24 +858,92 @@ function pesquisarParticipantes() {
     });
 }
 
-function criarBotaoOuStatus(id, jaAdicionado, tipo) {
+// ✅ NOVA FUNÇÃO: Renderiza participantes com verificação segura
+function renderizarParticipantesComDelay(participantesData, participantesVinculados, nomePesquisa, ehCPF, listaParticipantes) {
+  console.log('📱 Iniciando renderização participantes:', {
+    encontrados: participantesData.length,
+    vinculados: participantesVinculados
+  });
+
+  // ✅ Pequeno delay para garantir que dados estão prontos
+  setTimeout(() => {
+    participantesData.forEach((participante, index) => {
+      // ✅ SEGURANÇA: Converte IDs para mesmo tipo para comparação
+      const participanteId = parseInt(participante.id);
+      const participantesVinculadosInt = participantesVinculados.map(id => parseInt(id));
+      const jaAdicionado = participantesVinculadosInt.includes(participanteId);
+
+      console.log(`📱 Participante ${participante.nome_completo}:`, {
+        id: participanteId,
+        vinculados: participantesVinculadosInt,
+        jaAdicionado: jaAdicionado
+      });
+
+      const li = document.createElement('li');
+      li.className = 'p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0';
+
+      // Destacar termo pesquisado no nome
+      let nomeDestacado = participante.nome_completo || 'Nome não informado';
+
+      // Se busca foi por nome, destacar no nome
+      if (!ehCPF && participante.nome_completo) {
+        nomeDestacado = participante.nome_completo.replace(
+          new RegExp(`(${nomePesquisa.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
+          '<mark class="bg-yellow-200 px-1 rounded">$1</mark>'
+        );
+      }
+
+      const cpfFormatado = formatarCPF(participante.cpf);
+
+      li.innerHTML = `
+        <div class="grid grid-cols-[auto_1fr] gap-4">
+          <div class="flex-shrink-0">
+            <img src="${participante.foto || '/assets/images/no-image.png'}"
+                 onerror="this.src='/assets/images/no-image.png';"
+                 alt="Foto do participante"
+                 class="w-16 h-16 rounded-lg object-cover border border-gray-200">
+          </div>
+          <div class="space-y-2">
+            <h3 class="!font-semibold !text-gray-900 !text-lg !leading-tight !m-0 !p-0">
+              ${nomeDestacado}
+            </h3>
+            <div class="flex items-center gap-1">
+              <span class="text-sm font-semibold">CPF:</span>
+              <p class="text-sm text-gray-600">
+                ${cpfFormatado ? `<i class="fa-solid fa-id-card mr-1"></i>${cpfFormatado}` : 'CPF não informado'}
+              </p>
+            </div>
+            <div class="pt-1" id="acao-participante-${participanteId}">
+              ${renderizarBotaoAcaoParticipante(participanteId, jaAdicionado)}
+            </div>
+          </div>
+        </div>
+      `;
+
+      if (listaParticipantes) {
+        listaParticipantes.appendChild(li);
+      }
+
+      // ✅ VERIFICAÇÃO ADICIONAL: Re-verifica após 100ms (mobile safety)
+      setTimeout(() => {
+        verificarEAtualizarBotaoParticipante(participanteId, participantesVinculadosInt);
+      }, 100 + (index * 10)); // Escalonado para evitar sobrecarga
+    });
+  }, 50); // Delay inicial pequeno
+}
+
+// ✅ NOVA FUNÇÃO: Renderiza botão/tag baseado no status do participante
+function renderizarBotaoAcaoParticipante(participanteId, jaAdicionado) {
   if (jaAdicionado) {
-    console.log(`✅ Criando status "já adicionado" para ${tipo} ${id}`);
     return `
-      <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
-            data-status="ja-adicionado"
-            data-${tipo}-id="${id}">
+      <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
         <i class="fa-solid fa-check"></i>
         Já adicionado
       </span>
     `;
   } else {
-    console.log(`➕ Criando botão "adicionar" para ${tipo} ${id}`);
-    const funcaoClick = tipo === 'participante' ? 'adicionarParticipante' : 'adicionarRitual';
     return `
-      <button onclick="${funcaoClick}(${id})"
-              data-${tipo}-id="${id}"
-              data-status="disponivel"
+      <button onclick="adicionarParticipante(${participanteId})"
               class="bg-[#00bfff] hover:bg-yellow-400 text-black px-4 py-2 rounded text-sm font-semibold transition-colors shadow-sm">
         <i class="fa-solid fa-plus mr-1"></i>
         Adicionar
@@ -921,31 +952,23 @@ function criarBotaoOuStatus(id, jaAdicionado, tipo) {
   }
 }
 
-function verificarECorrigirBotoesMobile(tipo) {
-  console.log(`🔍 Verificando botões no mobile para ${tipo}s...`);
+// ✅ NOVA FUNÇÃO: Verificação adicional para mobile (participantes)
+function verificarEAtualizarBotaoParticipante(participanteId, participantesVinculados) {
+  const containerAcao = document.getElementById(`acao-participante-${participanteId}`);
+  if (!containerAcao) return;
 
-  const lista = document.getElementById(tipo === 'participante' ? 'lista-participantes' : 'lista-rituais');
-  if (!lista) return;
+  const jaAdicionado = participantesVinculados.includes(parseInt(participanteId));
+  const temBotaoAdicionar = containerAcao.querySelector('button');
+  const temTagAdicionado = containerAcao.querySelector('span.bg-green-100');
 
-  // Busca todos os containers de botão
-  const containers = lista.querySelectorAll('[data-button-container]');
-
-  containers.forEach(container => {
-    const id = container.getAttribute('data-button-container');
-    const botao = container.querySelector('button');
-    const status = container.querySelector('span[data-status="ja-adicionado"]');
-
-    console.log(`🔍 ${tipo} ${id}: botão=${!!botao}, status=${!!status}`);
-
-    // Se não tem nem botão nem status, algo deu errado
-    if (!botao && !status) {
-      console.warn(`⚠️ Container vazio para ${tipo} ${id} - recriando...`);
-
-      // Recriar baseado no que deveria ter
-      // Aqui você pode fazer uma verificação adicional se necessário
-      container.innerHTML = criarBotaoOuStatus(id, false, tipo);
-    }
-  });
+  // ✅ Corrige inconsistências
+  if (jaAdicionado && temBotaoAdicionar) {
+    console.log(`📱 Corrigindo botão para "Já adicionado" - Participante ${participanteId}`);
+    containerAcao.innerHTML = renderizarBotaoAcaoParticipante(participanteId, true);
+  } else if (!jaAdicionado && temTagAdicionado) {
+    console.log(`📱 Corrigindo tag para "Adicionar" - Participante ${participanteId}`);
+    containerAcao.innerHTML = renderizarBotaoAcaoParticipante(participanteId, false);
+  }
 }
 
 function toggleFiltroRitual() {
