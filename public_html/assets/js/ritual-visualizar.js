@@ -164,7 +164,7 @@ function abrirModalDetalhes(participanteId) {
           });
 
           // Verifica se os dados de primeira vez vieram de inscrição anterior
-            verificarDadosAnteriores(participanteId, inscricaoId, detalhes);
+          verificarDadosAnteriores(participanteId, inscricaoId, detalhes);
 
           const salvoEm = detalhes.salvo_em ?
             new Date(detalhes.salvo_em).toLocaleDateString('pt-BR') : 'Nunca salvo';
@@ -732,7 +732,7 @@ function pesquisarParticipantes() {
 
   // Validação melhorada: CPF precisa ter exatamente 11 dígitos, nome pelo menos 3 caracteres
   const apenasNumeros = nomePesquisa.replace(/\D/g, '');
-  const ehCPF = apenasNumeros.length === 11; // Exatamente 11 dígitos
+  const ehCPF = apenasNumeros.length === 11;
   const ehNome = nomePesquisa.length >= 3 && apenasNumeros.length !== 11;
 
   if (!ehCPF && !ehNome) {
@@ -772,8 +772,6 @@ function pesquisarParticipantes() {
   const listaParticipantes = document.getElementById('lista-participantes');
   if (listaParticipantes) listaParticipantes.innerHTML = '';
 
-  const apiUrl = `/api/ritual/buscar-participante?nome=${encodeURIComponent(nomePesquisa)}`;
-  console.log('🌐 URL da API:', apiUrl);
   // Executa pesquisa
   Promise.all([
     fetch(`/api/ritual/buscar-participante?nome=${encodeURIComponent(nomePesquisa)}`),
@@ -787,6 +785,7 @@ function pesquisarParticipantes() {
       }
 
       const participantesVinculados = participantesVinculadosData.participantes_ids || [];
+      console.log('🔍 Participantes vinculados:', participantesVinculados);
 
       if (participantesData.length === 0) {
         if (listaParticipantes) {
@@ -813,16 +812,17 @@ function pesquisarParticipantes() {
         listaParticipantes.appendChild(contadorResultados);
       }
 
-      // Cria lista de participantes
+      // ✅ CORREÇÃO: Cria lista com verificação explícita
       participantesData.forEach(participante => {
         const jaAdicionado = participantesVinculados.includes(participante.id);
+        console.log(`📋 Participante ${participante.id}: ${jaAdicionado ? 'JÁ ADICIONADO' : 'DISPONÍVEL'}`);
+
         const li = document.createElement('li');
         li.className = 'p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0';
+        li.setAttribute('data-participante-id', participante.id); // ✅ Adiciona identificador
 
         // Destacar termo pesquisado no nome
         let nomeDestacado = participante.nome_completo || 'Nome não informado';
-
-        // Se busca foi por nome, destacar no nome
         if (!ehCPF && participante.nome_completo) {
           nomeDestacado = participante.nome_completo.replace(
             new RegExp(`(${nomePesquisa.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi'),
@@ -831,6 +831,9 @@ function pesquisarParticipantes() {
         }
 
         const cpfFormatado = formatarCPF(participante.cpf);
+
+        // ✅ SOLUÇÃO: Renderização explícita baseada no status
+        const botaoHTML = criarBotaoOuStatus(participante.id, jaAdicionado, 'participante');
 
         li.innerHTML = `
           <div class="grid grid-cols-[auto_1fr] gap-4">
@@ -850,18 +853,8 @@ function pesquisarParticipantes() {
                   ${cpfFormatado ? `<i class="fa-solid fa-id-card mr-1"></i>${cpfFormatado}` : 'CPF não informado'}
                 </p>
               </div>
-              <div class="pt-1">
-                ${jaAdicionado ?
-            `<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    <i class="fa-solid fa-check"></i>
-                    Já adicionado
-                  </span>` :
-            `<button onclick="adicionarParticipante(${participante.id})"
-                           class="bg-[#00bfff] hover:bg-yellow-400 text-black px-4 py-2 rounded text-sm font-semibold transition-colors shadow-sm">
-                    <i class="fa-solid fa-plus mr-1"></i>
-                    Adicionar
-                  </button>`
-          }
+              <div class="pt-1" data-button-container="${participante.id}">
+                ${botaoHTML}
               </div>
             </div>
           </div>
@@ -870,14 +863,17 @@ function pesquisarParticipantes() {
         if (listaParticipantes) listaParticipantes.appendChild(li);
       });
 
-      // Feedback de sucesso
+      // ✅ CORREÇÃO MÓVEL: Força re-renderização após pequeno delay
+      setTimeout(() => {
+        verificarECorrigirBotoesMobile('participante');
+      }, 100);
+
       showToast(`${participantesData.length} participante(s) encontrado(s)!`, 'success');
     })
     .catch(error => {
       console.error('Erro ao buscar participantes:', error);
       showToast('Erro ao carregar participantes. Verifique sua conexão e tente novamente.', 'error');
 
-      // Exibe mensagem de erro na lista
       if (listaParticipantes) {
         listaParticipantes.innerHTML = `
           <li class="p-4 text-center text-red-500">
@@ -892,7 +888,6 @@ function pesquisarParticipantes() {
       }
     })
     .finally(() => {
-      // Restaura o botão após pesquisa
       if (pesquisarBtn) {
         pesquisarBtn.textContent = originalText;
         pesquisarBtn.disabled = false;
@@ -900,7 +895,59 @@ function pesquisarParticipantes() {
     });
 }
 
-// Funções de filtro
+function criarBotaoOuStatus(id, jaAdicionado, tipo) {
+  if (jaAdicionado) {
+    console.log(`✅ Criando status "já adicionado" para ${tipo} ${id}`);
+    return `
+      <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+            data-status="ja-adicionado"
+            data-${tipo}-id="${id}">
+        <i class="fa-solid fa-check"></i>
+        Já adicionado
+      </span>
+    `;
+  } else {
+    console.log(`➕ Criando botão "adicionar" para ${tipo} ${id}`);
+    const funcaoClick = tipo === 'participante' ? 'adicionarParticipante' : 'adicionarRitual';
+    return `
+      <button onclick="${funcaoClick}(${id})"
+              data-${tipo}-id="${id}"
+              data-status="disponivel"
+              class="bg-[#00bfff] hover:bg-yellow-400 text-black px-4 py-2 rounded text-sm font-semibold transition-colors shadow-sm">
+        <i class="fa-solid fa-plus mr-1"></i>
+        Adicionar
+      </button>
+    `;
+  }
+}
+
+function verificarECorrigirBotoesMobile(tipo) {
+  console.log(`🔍 Verificando botões no mobile para ${tipo}s...`);
+
+  const lista = document.getElementById(tipo === 'participante' ? 'lista-participantes' : 'lista-rituais');
+  if (!lista) return;
+
+  // Busca todos os containers de botão
+  const containers = lista.querySelectorAll('[data-button-container]');
+
+  containers.forEach(container => {
+    const id = container.getAttribute('data-button-container');
+    const botao = container.querySelector('button');
+    const status = container.querySelector('span[data-status="ja-adicionado"]');
+
+    console.log(`🔍 ${tipo} ${id}: botão=${!!botao}, status=${!!status}`);
+
+    // Se não tem nem botão nem status, algo deu errado
+    if (!botao && !status) {
+      console.warn(`⚠️ Container vazio para ${tipo} ${id} - recriando...`);
+
+      // Recriar baseado no que deveria ter
+      // Aqui você pode fazer uma verificação adicional se necessário
+      container.innerHTML = criarBotaoOuStatus(id, false, tipo);
+    }
+  });
+}
+
 function toggleFiltroRitual() {
   const formularioFiltro = document.getElementById('pesquisa-participante-form');
   const botaoToggle = document.getElementById('botao-toggle-filtro');

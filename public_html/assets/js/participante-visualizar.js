@@ -166,7 +166,7 @@ function abrirModalDetalhes(ritualId) {
           });
 
           // Verifica se os dados de primeira vez vieram de inscrição anterior
-            verificarDadosAnteriores(pessoaId, inscricaoId, detalhes);
+          verificarDadosAnteriores(pessoaId, inscricaoId, detalhes);
 
 
           const salvoEm = detalhes.salvo_em ?
@@ -754,14 +754,12 @@ function removerAcentos(texto) {
 function pesquisarRituais() {
   const nomePesquisa = document.getElementById('nome_pesquisa').value.trim();
 
-  // Validação mínima de 3 caracteres
   if (nomePesquisa.length < 3) {
     showToast("Digite pelo menos 3 caracteres para pesquisar.", 'error');
     document.getElementById('nome_pesquisa').focus();
     return;
   }
 
-  // Loading state no botão
   const pesquisarBtn = document.getElementById('pesquisar-btn');
   const originalText = pesquisarBtn ? pesquisarBtn.textContent : 'Pesquisar';
 
@@ -788,10 +786,8 @@ function pesquisarRituais() {
   const listaRituais = document.getElementById('lista-rituais');
   if (listaRituais) listaRituais.innerHTML = '';
 
-  // Texto de pesquisa normalizado (sem acentos)
   const pesquisaNormalizada = removerAcentos(nomePesquisa);
 
-  // Executa pesquisa
   Promise.all([
     fetch(`/api/participante/buscar-ritual?nome=${encodeURIComponent(nomePesquisa)}`),
     fetch(`/api/inscricoes/rituais-vinculados?participante_id=${pessoaId}`)
@@ -804,8 +800,8 @@ function pesquisarRituais() {
       }
 
       const rituaisVinculados = rituaisVinculadosData.rituais_ids || [];
+      console.log('🔍 Rituais vinculados:', rituaisVinculados);
 
-      // Filtro adicional no frontend para ignorar acentos
       const rituaisFiltrados = rituaisData.filter(ritual => {
         const nomeNormalizado = removerAcentos(ritual.nome || '');
         return nomeNormalizado.includes(pesquisaNormalizada);
@@ -824,7 +820,6 @@ function pesquisarRituais() {
         return;
       }
 
-      // Exibe contador de resultados
       if (listaRituais) {
         const contadorResultados = document.createElement('li');
         contadorResultados.className = 'p-2 bg-blue-50 border-b border-blue-200 text-blue-700 text-sm font-medium';
@@ -835,13 +830,15 @@ function pesquisarRituais() {
         listaRituais.appendChild(contadorResultados);
       }
 
-      // Cria lista de rituais filtrados
+      // ✅ Aplicar mesma lógica para rituais
       rituaisFiltrados.forEach(ritual => {
         const jaAdicionado = rituaisVinculados.includes(ritual.id);
+        console.log(`📋 Ritual ${ritual.id}: ${jaAdicionado ? 'JÁ ADICIONADO' : 'DISPONÍVEL'}`);
+
         const li = document.createElement('li');
         li.className = 'p-4 hover:bg-gray-50 transition-colors border-b border-gray-100 last:border-b-0';
+        li.setAttribute('data-ritual-id', ritual.id);
 
-        // Destacar termo pesquisado no nome
         const nomeDestacado = ritual.nome ?
           ritual.nome.replace(
             new RegExp(`(${nomePesquisa})`, 'gi'),
@@ -849,6 +846,7 @@ function pesquisarRituais() {
           ) : 'Nome não informado';
 
         const dataFormatada = formatarData(ritual.data_ritual);
+        const botaoHTML = criarBotaoOuStatus(ritual.id, jaAdicionado, 'ritual');
 
         li.innerHTML = `
           <div class="grid grid-cols-[auto_1fr] gap-4">
@@ -868,18 +866,8 @@ function pesquisarRituais() {
                   ${ritual.data_ritual ? `<i class="fa-solid fa-calendar mr-1"></i>${dataFormatada}` : 'Data não informada'}
                 </p>
               </div>
-              <div class="pt-1">
-                ${jaAdicionado ?
-            `<span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                    <i class="fa-solid fa-check"></i>
-                    Já adicionado
-                  </span>` :
-            `<button onclick="adicionarRitual(${ritual.id})"
-                           class="bg-[#00bfff] hover:bg-yellow-400 text-black px-4 py-2 rounded text-sm font-semibold transition-colors shadow-sm">
-                    <i class="fa-solid fa-plus mr-1"></i>
-                    Adicionar
-                  </button>`
-          }
+              <div class="pt-1" data-button-container="${ritual.id}">
+                ${botaoHTML}
               </div>
             </div>
           </div>
@@ -888,14 +876,15 @@ function pesquisarRituais() {
         if (listaRituais) listaRituais.appendChild(li);
       });
 
-      // Feedback de sucesso
+      setTimeout(() => {
+        verificarECorrigirBotoesMobile('ritual');
+      }, 100);
+
       showToast(`${rituaisFiltrados.length} ritual(is) encontrado(s)!`, 'success');
     })
     .catch(error => {
       console.error('Erro ao buscar rituais:', error);
       showToast('Erro ao carregar rituais. Verifique sua conexão e tente novamente.', 'error');
-
-      // Exibe mensagem de erro na lista
       if (listaRituais) {
         listaRituais.innerHTML = `
           <li class="p-4 text-center text-red-500">
@@ -910,12 +899,64 @@ function pesquisarRituais() {
       }
     })
     .finally(() => {
-      // Restaura o botão após pesquisa
       if (pesquisarBtn) {
         pesquisarBtn.textContent = originalText;
         pesquisarBtn.disabled = false;
       }
     });
+}
+
+function criarBotaoOuStatus(id, jaAdicionado, tipo) {
+  if (jaAdicionado) {
+    console.log(`✅ Criando status "já adicionado" para ${tipo} ${id}`);
+    return `
+      <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800"
+            data-status="ja-adicionado"
+            data-${tipo}-id="${id}">
+        <i class="fa-solid fa-check"></i>
+        Já adicionado
+      </span>
+    `;
+  } else {
+    console.log(`➕ Criando botão "adicionar" para ${tipo} ${id}`);
+    const funcaoClick = tipo === 'participante' ? 'adicionarParticipante' : 'adicionarRitual';
+    return `
+      <button onclick="${funcaoClick}(${id})"
+              data-${tipo}-id="${id}"
+              data-status="disponivel"
+              class="bg-[#00bfff] hover:bg-yellow-400 text-black px-4 py-2 rounded text-sm font-semibold transition-colors shadow-sm">
+        <i class="fa-solid fa-plus mr-1"></i>
+        Adicionar
+      </button>
+    `;
+  }
+}
+
+function verificarECorrigirBotoesMobile(tipo) {
+  console.log(`🔍 Verificando botões no mobile para ${tipo}s...`);
+
+  const lista = document.getElementById(tipo === 'participante' ? 'lista-participantes' : 'lista-rituais');
+  if (!lista) return;
+
+  // Busca todos os containers de botão
+  const containers = lista.querySelectorAll('[data-button-container]');
+
+  containers.forEach(container => {
+    const id = container.getAttribute('data-button-container');
+    const botao = container.querySelector('button');
+    const status = container.querySelector('span[data-status="ja-adicionado"]');
+
+    console.log(`🔍 ${tipo} ${id}: botão=${!!botao}, status=${!!status}`);
+
+    // Se não tem nem botão nem status, algo deu errado
+    if (!botao && !status) {
+      console.warn(`⚠️ Container vazio para ${tipo} ${id} - recriando...`);
+
+      // Recriar baseado no que deveria ter
+      // Aqui você pode fazer uma verificação adicional se necessário
+      container.innerHTML = criarBotaoOuStatus(id, false, tipo);
+    }
+  });
 }
 
 // Funções de filtro
@@ -1094,7 +1135,7 @@ function atualizarPaginaFundo() {
       if (novoContadorAusente && contadorAusenteAtual) {
         contadorAusenteAtual.textContent = novoContadorAusente.textContent;
       }
-      
+
     })
     .catch(error => {
       console.error('Erro ao atualizar página de fundo:', error);
