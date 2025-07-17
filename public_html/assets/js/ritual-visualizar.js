@@ -15,6 +15,24 @@ function showToast(message, type = 'error') {
   }).showToast();
 }
 
+function showToastPresenca(message, type = 'error') {
+  const backgroundColor = type === 'success' ? '#dbfce7' : '#ffe2e2';
+
+  // ✅ Força criação de elemento HTML correto
+  const toastContainer = document.createElement('span');
+  toastContainer.innerHTML = message;
+
+  Toastify({
+    node: toastContainer,
+    duration: 2000,
+    close: true,
+    gravity: "top",
+    position: "right",
+    backgroundColor: backgroundColor,
+    stopOnFocus: true,
+  }).showToast();
+}
+
 // Variável para armazenar a posição do scroll
 let scrollPosition = 0;
 
@@ -649,7 +667,11 @@ function togglePresenca(button) {
             setTimeout(() => {
               atualizarContadorParticipantes(newStatus);
             }, 200);
-            showToast(`Presença atualizada para: ${newStatus}`, 'success');
+            const presenca = newStatus === 'Sim' ? 'success' : 'error';
+            const mensagem = newStatus === 'Sim'
+              ? `<i class="fa-solid fa-user-check text-green-700 text-lg"></i><span class="text-green-100">...</span><span class="text-green-700 text-lg">Presente</span>`
+              : `<i class="fa-solid fa-user-xmark text-red-700 text-lg"></i><span class="text-red-100">...</span><span class="text-red-700 text-lg">Ausente</span>`;
+            showToastPresenca(mensagem, presenca);
           } else {
             showToast('Erro ao atualizar presença: ' + data.error, 'error');
           }
@@ -668,8 +690,8 @@ function togglePresenca(button) {
 function atualizarContadorParticipantes(novoStatus) {
   try {
     // Método 1: Busca por classe específica
-    let contadorPresentes = document.querySelector('span.text-green-700');
-    let contadorAusentes = document.querySelector('span.text-red-700');
+    let contadorPresentes = document.querySelector('.contador-presentes span.text-green-700');
+    let contadorAusentes = document.querySelector('.contador-presentes span.text-red-700');
 
     // Método 2: Se não encontrar, busca por contexto
     if (!contadorPresentes) {
