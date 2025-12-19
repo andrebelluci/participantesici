@@ -1,12 +1,14 @@
 <?php
-// ✅ Configura sessão para 30 dias APENAS se não estiver ativa
+// ✅ Configura sessão com cookie persistente se não estiver ativa
 if (session_status() === PHP_SESSION_NONE) {
     // Configura parâmetros ANTES de iniciar a sessão
-    ini_set('session.gc_maxlifetime', 30 * 24 * 60 * 60); // 30 dias
-    ini_set('session.cookie_lifetime', 30 * 24 * 60 * 60); // 30 dias
+    // Cookie de sessão com expiração muito longa quando há remember_token
+    $session_lifetime = isset($_COOKIE['remember_token']) ? (10 * 365 * 24 * 60 * 60) : (8 * 60 * 60); // 10 anos ou 8 horas
+    ini_set('session.gc_maxlifetime', $session_lifetime);
+    ini_set('session.cookie_lifetime', $session_lifetime);
 
     session_set_cookie_params([
-        'lifetime' => 30 * 24 * 60 * 60, // 30 dias para PWA
+        'lifetime' => $session_lifetime,
         'path' => '/',
         'domain' => '',
         'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
@@ -49,9 +51,9 @@ function verificarTokenLembrarMe($pdo)
             $_SESSION['last_activity'] = time();
             $_SESSION['login_method'] = 'remember_me'; // Marca como login via token
 
-            // ✅ RENOVAR TOKEN para mais 30 dias (automático)
+            // ✅ RENOVAR TOKEN para mais 10 anos (automático - persistente)
             $novo_token = bin2hex(random_bytes(32));
-            $nova_expiracao = date('Y-m-d H:i:s', time() + (30 * 24 * 60 * 60));
+            $nova_expiracao = date('Y-m-d H:i:s', time() + (10 * 365 * 24 * 60 * 60));
 
             // Atualiza token no banco
             $stmt_update = $pdo->prepare("
@@ -61,8 +63,8 @@ function verificarTokenLembrarMe($pdo)
             ");
             $stmt_update->execute([$novo_token, $nova_expiracao, $result['id']]);
 
-            // ✅ Atualiza cookie com configuração para ambiente
-            $cookie_expiry = time() + (30 * 24 * 60 * 60);
+            // ✅ Atualiza cookie com expiração muito longa (10 anos)
+            $cookie_expiry = time() + (10 * 365 * 24 * 60 * 60);
 
             if (
                 $_SERVER['HTTP_HOST'] === 'localhost' ||
@@ -94,7 +96,7 @@ function verificarTokenLembrarMe($pdo)
                 );
             }
 
-            error_log("[REMEMBER_ME] Sessão restaurada e token renovado para usuário: {$result['usuario']} (ID: {$result['id']}) por mais 30 dias");
+            error_log("[REMEMBER_ME] Sessão restaurada e token renovado para usuário: {$result['usuario']} (ID: {$result['id']}) - persistente até limpar cache");
             return true;
         } else {
             // Token inválido/expirado - remove cookie
@@ -111,48 +113,42 @@ function verificarTokenLembrarMe($pdo)
 
 // ✅ VERIFICAÇÃO DE AUTENTICAÇÃO MELHORADA
 if (!isset($_SESSION['user_id'])) {
-    // Tenta restaurar sessão via cookie de lembrar-me
+    // Tenta restaurar sessão via cookie de manter conectado
     if (!verificarTokenLembrarMe($pdo)) {
         // Não está logado e não tem token válido
         header("Location: /login");
         exit;
     }
+} else if (isset($_COOKIE['remember_token']) && (!isset($_SESSION['login_method']) || $_SESSION['login_method'] !== 'remember_me')) {
+    // Se tem cookie mas sessão não está marcada como remember_me, marca agora
+    $_SESSION['login_method'] = 'remember_me';
 }
 
-// ✅ VERIFICAÇÃO DE TIMEOUT MELHORADA PARA PWA
-$timeout_remember = 30 * 24 * 60 * 60; // 30 dias para remember_me
-$timeout_normal = 8 * 60 * 60; // 8 horas para login normal
-
-// Verifica se tem cookie de lembrar-me ativo ou se logou via remember_me
+// ✅ VERIFICAÇÃO DE TIMEOUT SIMPLIFICADA
+// Se tem cookie de "manter conectado", não aplica timeout - sessão persiste até limpar cache
 $tem_cookie_lembrar = isset($_COOKIE['remember_token']);
 $login_via_remember = isset($_SESSION['login_method']) && $_SESSION['login_method'] === 'remember_me';
 
-if (isset($_SESSION['last_activity'])) {
-    // ✅ Define timeout baseado no método de login
-    $timeout_atual = ($tem_cookie_lembrar || $login_via_remember) ? $timeout_remember : $timeout_normal;
+// Timeout apenas para login normal (sem "manter conectado")
+$timeout_normal = 8 * 60 * 60; // 8 horas para login normal
 
-    if ((time() - $_SESSION['last_activity']) > $timeout_atual) {
-        if ($tem_cookie_lembrar) {
-            // Se tem cookie, tenta renovar sessão ao invés de logout
-            error_log("[SESSION] Tentando renovar sessão via remember token...");
-
-            if (verificarTokenLembrarMe($pdo)) {
-                error_log("[SESSION] Sessão renovada com sucesso");
-                $_SESSION['last_activity'] = time();
-            } else {
-                error_log("[SESSION] Falha ao renovar - fazendo logout");
-                session_unset();
-                session_destroy();
-                header("Location: /login?timeout=1");
-                exit;
-            }
-        } else {
-            // Sem cookie de lembrar-me - timeout normal
-            error_log("[SESSION] Timeout de sessão - fazendo logout");
-            session_unset();
-            session_destroy();
-            header("Location: /login?timeout=1");
-            exit;
+if (isset($_SESSION['last_activity']) && !$tem_cookie_lembrar && !$login_via_remember) {
+    // Aplica timeout apenas se NÃO tiver cookie de manter conectado
+    if ((time() - $_SESSION['last_activity']) > $timeout_normal) {
+        error_log("[SESSION] Timeout de sessão normal - fazendo logout");
+        session_unset();
+        session_destroy();
+        header("Location: /login?timeout=1");
+        exit;
+    }
+} else if ($tem_cookie_lembrar && isset($_SESSION['last_activity'])) {
+    // Se tem cookie mas sessão expirou, tenta renovar automaticamente
+    // Não aplica timeout rigoroso - cookie mantém conectado
+    if ((time() - $_SESSION['last_activity']) > (24 * 60 * 60)) { // Renova se inativo por mais de 24h
+        error_log("[SESSION] Renovando sessão via cookie de manter conectado...");
+        if (verificarTokenLembrarMe($pdo)) {
+            error_log("[SESSION] Sessão renovada com sucesso");
+            $_SESSION['last_activity'] = time();
         }
     }
 }
