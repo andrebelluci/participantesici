@@ -11,9 +11,10 @@ if (!$inscricao_id || !is_numeric($inscricao_id)) {
 
 try {
     $stmt = $pdo->prepare("
-        SELECT *
-        FROM inscricoes
-        WHERE id = ?
+        SELECT i.*, r.nome as ritual_nome, r.id as ritual_id
+        FROM inscricoes i
+        JOIN rituais r ON i.ritual_id = r.id
+        WHERE i.id = ?
     ");
     $stmt->execute([$inscricao_id]);
     $inscricao = $stmt->fetch(PDO::FETCH_ASSOC);

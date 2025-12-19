@@ -12,10 +12,10 @@ if (!$pesquisa) {
 try {
   $pesquisaLimpa = preg_replace('/[^0-9]/', '', $pesquisa);
   if (strlen($pesquisaLimpa) === 11) {
-    $stmt = $pdo->prepare("SELECT id, nome_completo, foto, cpf FROM participantes WHERE cpf = ? LIMIT 20");
+    $stmt = $pdo->prepare("SELECT id, nome_completo, foto, cpf, pode_vincular_rituais, motivo_bloqueio_vinculacao FROM participantes WHERE cpf = ? LIMIT 20");
     $stmt->execute([$pesquisaLimpa]);
   } else {
-    $stmt = $pdo->prepare("SELECT id, nome_completo, foto, cpf FROM participantes WHERE nome_completo LIKE ? LIMIT 20");
+    $stmt = $pdo->prepare("SELECT id, nome_completo, foto, cpf, pode_vincular_rituais, motivo_bloqueio_vinculacao FROM participantes WHERE nome_completo LIKE ? LIMIT 20");
     $stmt->execute(["%$pesquisa%"]);
   }
 

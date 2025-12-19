@@ -51,6 +51,7 @@ const excluirBtn = document.getElementById('excluir-imagem-btn');
 // Variáveis para crop
 let cropper = null;
 let originalImageSrc = null;
+let processedImageData = null; // ✅ NOVA: Armazena imagem processada (cropada e comprimida)
 
 // Elementos do DOM para crop
 const cropBtn = document.getElementById('crop-image-btn');
@@ -100,6 +101,7 @@ function hidePreview() {
   previewContainer?.classList.add('hidden');
   fileInput.value = '';
   originalImageSrc = null;
+  processedImageData = null; // ✅ NOVA: Limpa imagem processada
 
   // ✅ ADICIONAR FLAG PARA REMOÇÃO
   const removerFotoInput = document.createElement('input');
@@ -123,6 +125,56 @@ function validateFile(file) {
   }
 
   return true;
+}
+
+// ✅ NOVA FUNÇÃO: Comprime imagem automaticamente
+function compressImageFromDataUrl(dataUrl, maxWidth = 400, maxHeight = 400, quality = 0.8) {
+  return new Promise((resolve) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    const img = new Image();
+
+    img.onload = function () {
+      // Calcula novas dimensões mantendo proporção
+      let { width, height } = img;
+
+      if (width > height) {
+        if (width > maxWidth) {
+          height = (height * maxWidth) / width;
+          width = maxWidth;
+        }
+      } else {
+        if (height > maxHeight) {
+          width = (width * maxHeight) / height;
+          height = maxHeight;
+        }
+      }
+
+      // Configura canvas
+      canvas.width = width;
+      canvas.height = height;
+
+      // Desenha imagem redimensionada
+      ctx.drawImage(img, 0, 0, width, height);
+
+      // Converte para blob comprimido
+      canvas.toBlob((blob) => {
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          resolve({
+            dataUrl: e.target.result,
+            blob: blob,
+            width: width,
+            height: height,
+            compressedSize: blob.size
+          });
+        };
+        reader.readAsDataURL(blob);
+      }, 'image/jpeg', quality);
+    };
+
+    img.src = dataUrl;
+  });
 }
 
 // ============= CROP DE IMAGEM =============
@@ -182,7 +234,7 @@ function closeCropModalOk() {
   }
 }
 
-function applyCrop() {
+async function applyCrop() {
   if (!cropper) return;
 
   const canvas = cropper.getCroppedCanvas({
@@ -192,20 +244,58 @@ function applyCrop() {
     imageSmoothingQuality: 'high'
   });
 
-  canvas.toBlob((blob) => {
+  canvas.toBlob(async (blob) => {
     const reader = new FileReader();
-    reader.onload = function (e) {
+    reader.onload = async function (e) {
       const croppedImageSrc = e.target.result;
 
-      previewImage.src = croppedImageSrc;
+      // ✅ NOVO: Comprimir imagem após crop
+      try {
+        const compressed = await compressImageFromDataUrl(croppedImageSrc, 400, 400, 0.8);
 
-      const fotoCropadaInput = document.getElementById('foto-cropada');
-      if (fotoCropadaInput) {
-        fotoCropadaInput.value = croppedImageSrc;
+        // Armazena imagem comprimida
+        processedImageData = compressed.dataUrl;
+
+        previewImage.src = compressed.dataUrl;
+
+        const fotoCropadaInput = document.getElementById('foto-cropada');
+        if (fotoCropadaInput) {
+          fotoCropadaInput.value = compressed.dataUrl;
+        }
+
+        // ✅ NOVO: Adicionar também campo foto_comprimida para compatibilidade
+        let fotoComprimidaInput = document.getElementById('foto-comprimida');
+        if (!fotoComprimidaInput) {
+          fotoComprimidaInput = document.createElement('input');
+          fotoComprimidaInput.type = 'hidden';
+          fotoComprimidaInput.id = 'foto-comprimida';
+          fotoComprimidaInput.name = 'foto_comprimida';
+          const form = document.getElementById('formulario-participante');
+          if (form) form.appendChild(fotoComprimidaInput);
+        }
+        fotoComprimidaInput.value = compressed.dataUrl;
+
+        const reducao = Math.round((1 - compressed.compressedSize / blob.size) * 100);
+        console.log('Compressão:', {
+          original: `${(blob.size / 1024).toFixed(2)}KB`,
+          comprimida: `${(compressed.compressedSize / 1024).toFixed(2)}KB`,
+          reducao: `${reducao}%`,
+          dimensoes: `${compressed.width}x${compressed.height}`
+        });
+
+        closeCropModalOk();
+        showToast('Imagem ajustada e comprimida com sucesso!', 'success');
+      } catch (error) {
+        console.error('Erro ao comprimir imagem:', error);
+        // Fallback: usar imagem cropada sem compressão
+        previewImage.src = croppedImageSrc;
+        const fotoCropadaInput = document.getElementById('foto-cropada');
+        if (fotoCropadaInput) {
+          fotoCropadaInput.value = croppedImageSrc;
+        }
+        closeCropModalOk();
+        showToast('Imagem ajustada com sucesso!', 'success');
       }
-
-      closeCropModalOk();
-      showToast('Imagem ajustada com sucesso!', 'success');
     };
     reader.readAsDataURL(blob);
   }, 'image/jpeg', 0.9);
@@ -288,7 +378,34 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // Inicializar funcionalidades
   setupFormValidation();
+  setupFormSubmission(); // ✅ NOVA: Configura envio com compressão
 });
+
+// ✅ NOVA FUNÇÃO: Envia imagem comprimida no formulário
+function setupFormSubmission() {
+  const form = document.getElementById('formulario-participante');
+  if (!form) return;
+
+  form.addEventListener('submit', function (event) {
+    // Se há imagem processada, garante que está no formulário
+    if (processedImageData) {
+      // Remove input anterior se existir
+      const existingInput = document.querySelector('input[name="foto_comprimida"]');
+      if (existingInput) {
+        existingInput.remove();
+      }
+
+      // Adiciona nova imagem comprimida
+      const input = document.createElement('input');
+      input.type = 'hidden';
+      input.name = 'foto_comprimida';
+      input.value = processedImageData;
+      form.appendChild(input);
+
+      console.log('Enviando imagem comprimida no formulário');
+    }
+  });
+}
 
 // Event listeners para upload
 uploadArea?.addEventListener('click', openFileSelector);

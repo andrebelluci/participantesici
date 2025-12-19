@@ -164,7 +164,7 @@ $tentativas = CaptchaService::obterTentativas($identificador);
               <div class="ml-3">
                 <span class="text-white font-semibold text-base">
                   <i class="fa-solid fa-mobile-alt mr-1 text-yellow-400"></i>
-                  Manter conectado por 30 dias
+                  Manter conectado
                 </span>
               </div>
             </label>

@@ -44,6 +44,9 @@ RewriteRule ^participante/([0-9]+)/excluir/?$ /app/participantes/actions/excluir
 RewriteRule ^api/participante/verifica-cpf/?$ /app/participantes/api/verifica_cpf.php [L]
 RewriteRule ^api/participante/adicionar-ritual/?$ /app/participantes/api/adicionar_ritual.php [L]
 RewriteRule ^api/participante/buscar-ritual/?$ /app/participantes/api/buscar_ritual.php [L]
+RewriteRule ^api/participante/dados-vinculacao/?$ /app/participantes/api/dados-vinculacao.php [L]
+RewriteRule ^api/participantes/baixar-documentos/?$ /app/participantes/api/baixar_documentos.php [L,QSA]
+RewriteRule ^api/participantes/listar-documentos/?$ /app/participantes/api/listar_documentos.php [L,QSA]
 
 # ============= URL AMIGÁVEL PARA USUÁRIOS =============
 RewriteRule ^usuarios/?$ /app/usuarios/actions/listar.php [L,QSA]
@@ -54,6 +57,7 @@ RewriteRule ^usuario/([0-9]+)/excluir/?$ /app/usuarios/actions/excluir.php?id=$1
 # ============= URL AMIGÁVEL PARA INSCRIÇÕES =============
 RewriteRule ^api/inscricoes/atualizar-presenca/?$ /app/inscricoes/api/atualizar_presenca.php [L]
 RewriteRule ^api/inscricoes/buscar-id/?$ /app/inscricoes/api/buscar_id.php [L]
+RewriteRule ^api/inscricoes/buscar-ultima-inscricao-salva/?$ /app/inscricoes/api/buscar-ultima-inscricao-salva.php [L]
 RewriteRule ^api/inscricoes/detalhes-inscricao/?$ /app/inscricoes/api/detalhes_inscricao.php [L]
 RewriteRule ^api/inscricoes/excluir-participacao/?$ /app/inscricoes/api/excluir_participacao.php [L]
 RewriteRule ^api/inscricoes/rituais-vinculados/?$ /app/inscricoes/api/rituais_vinculados.php [L]
@@ -61,6 +65,9 @@ RewriteRule ^api/inscricoes/participantes-vinculados/?$ /app/inscricoes/api/part
 RewriteRule ^api/inscricoes/salvar-inscricao/?$ /app/inscricoes/api/salvar_inscricao.php [L]
 RewriteRule ^api/inscricoes/salvar-observacao/?$ /app/inscricoes/api/salvar_observacao.php [L]
 RewriteRule ^api/inscricoes/verificar-primeira-inscricao/?$ /app/inscricoes/api/verificar_primeira_inscricao.php [L]
+RewriteRule ^api/inscricoes/salvar-assinatura/?$ /app/inscricoes/api/salvar_assinatura.php [L]
+RewriteRule ^api/inscricoes/buscar-assinatura/?$ /app/inscricoes/api/buscar-assinatura.php [L,QSA]
+RewriteRule ^api/inscricoes/excluir-assinatura/?$ /app/inscricoes/api/excluir_assinatura.php [L]
 
 # ============= RELATÓRIOS =============
 RewriteRule ^participante/([0-9]+)/relatorio/pdf/?$ /app/participantes/relatorios/visualizar.php?id=$1&formato=pdf [L]

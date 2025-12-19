@@ -116,7 +116,7 @@ require_once __DIR__ . '/../../includes/header.php';
           </a>
           <?php if ($is_admin): ?>
             <button
-              onclick="abrirConfirmacaoExcluir('/participante/<?= $pessoa['id'] ?>/excluir')"
+              onclick="abrirConfirmacaoExcluirComDownload(<?= $pessoa['id'] ?>, '/participante/<?= $pessoa['id'] ?>/excluir')"
               class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded flex items-center gap-1"
               title="Excluir participante">
               <div class="flex flex-col items-center sm:flex-row sm:gap-1">
@@ -204,12 +204,12 @@ require_once __DIR__ . '/../../includes/header.php';
                       <i class="fa-solid fa-edit"></i>
                     </a>
                     <?php if ($is_admin): ?>
-                    <button
-                      onclick="abrirConfirmacaoExcluir('/participante/<?= $pessoa['id'] ?>/excluir')"
-                      class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded flex items-center gap-1"
-                      title="Excluir participante">
-                      <i class="fa-solid fa-trash"></i>
-                    </button>
+                      <button
+                        onclick="abrirConfirmacaoExcluirComDownload(<?= $pessoa['id'] ?>, '/participante/<?= $pessoa['id'] ?>/excluir')"
+                        class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded flex items-center gap-1"
+                        title="Excluir participante">
+                        <i class="fa-solid fa-trash"></i>
+                      </button>
                     <?php endif; ?>
                   </div>
                 </td>
@@ -258,6 +258,26 @@ require_once __DIR__ . '/../../includes/header.php';
       <i class="fa-solid fa-window-close"></i>
     </button>
     <img id="modal-image-content" class="w-full h-auto object-contain max-h-[80vh]" alt="Imagem Ampliada">
+  </div>
+</div>
+
+<!-- Modal de Download de Documentos -->
+<div id="downloadModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
+    <h2 class="text-xl font-bold mb-4 text-blue-600" id="downloadModalTitle"><i
+        class="fa-solid fa-download mr-2"></i>Baixar Arquivos</h2>
+    <p class="text-gray-700 mb-6" id="downloadModalText">Deseja baixar documentos/foto deste participante antes de
+      excluí-lo?</p>
+    <div class="flex justify-end gap-3">
+      <button id="downloadModalSimBtn"
+        class="px-4 py-2 bg-[#00bfff] text-black rounded hover:bg-yellow-400 transition font-semibold">
+        <i class="fa-solid fa-check mr-2"></i>Sim
+      </button>
+      <button id="downloadModalNaoBtn"
+        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-900 transition font-semibold">
+        <i class="fa-solid fa-times mr-2"></i>Não
+      </button>
+    </div>
   </div>
 </div>
 

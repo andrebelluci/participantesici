@@ -1,0 +1,30 @@
+/* assinatura.css - Estilos para modal de assinatura */
+
+#canvas-assinatura {
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  background-color: #ffffff;
+  cursor: crosshair;
+  touch-action: none;
+  width: 100%;
+  max-width: 600px;
+  height: 200px;
+}
+
+#canvas-assinatura:active {
+  cursor: crosshair;
+}
+
+/* Responsivo para mobile */
+@media (max-width: 768px) {
+  #canvas-assinatura {
+    height: 150px;
+  }
+}
+
+/* Botão salvar desabilitado */
+#btn-salvar-assinatura:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+

@@ -59,6 +59,15 @@ O Sistema de Participantes ICI é uma aplicação web completa para gestão de p
 - ✅ Validação de CPF e email
 - ✅ Histórico de participação em rituais
 - ✅ Sistema de observações individuais
+- ✅ Gestão completa de documentos
+  - Upload de imagens e PDFs com compressão automática
+  - Crop flexível de documentos (qualquer tamanho/orientação)
+  - Visualização com PhotoSwipe e zoom dinâmico
+  - Download e exclusão de documentos
+- ✅ Bloqueio de vinculação a novos rituais
+  - Controle de permissão para vincular a novos rituais
+  - Campo obrigatório de motivo quando bloqueado
+  - Validação automática ao tentar adicionar participante bloqueado
 
 ### 🔥 Gestão de Rituais
 - ✅ Criação e edição de rituais
@@ -66,6 +75,16 @@ O Sistema de Participantes ICI é uma aplicação web completa para gestão de p
 - ✅ Vinculação de participantes
 - ✅ Upload de imagens dos rituais
 - ✅ Relatórios de participação
+- ✅ Sistema inteligente de inscrições com cópia automática de dados
+- ✅ Validação visual de campos obrigatórios
+
+### 📋 Sistema de Inscrições
+- ✅ Lógica de "primeira vez" com campos condicionais
+- ✅ Cópia automática de dados entre inscrições
+- ✅ Notificação visual de campos obrigatórios não preenchidos
+- ✅ Botão dinâmico Fechar/Salvar baseado em alterações
+- ✅ Confirmação ao fechar modal com mudanças não salvas
+- ✅ Campos condicionais (doença/medicação) sempre editáveis quando aplicável
 
 ### 🔐 Sistema de Autenticação
 - ✅ Login seguro com captcha
@@ -78,6 +97,8 @@ O Sistema de Participantes ICI é uma aplicação web completa para gestão de p
 - ✅ Prevenção de seleção acidental de texto
 - ✅ Navegação otimizada para touch
 - ✅ Suporte a PWA (Progressive Web App)
+- ✅ Crop flexível de documentos para qualquer tamanho
+- ✅ Zoom dinâmico em visualização de imagens
 
 ## 🛠️ Tecnologias Utilizadas
 
@@ -92,7 +113,8 @@ O Sistema de Participantes ICI é uma aplicação web completa para gestão de p
 - **Tailwind CSS v4** - Framework CSS
 - **JavaScript (Vanilla)** - Interatividade
 - **Font Awesome** - Ícones
-- **Cropper.js** - Edição de imagens
+- **Cropper.js** - Edição de imagens com crop flexível
+- **PhotoSwipe** - Visualização de imagens com zoom dinâmico
 
 ### Ferramentas de Desenvolvimento
 - **NPM** - Gerenciamento de dependências

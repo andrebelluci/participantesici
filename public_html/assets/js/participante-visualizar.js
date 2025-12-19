@@ -138,6 +138,217 @@ document.addEventListener("DOMContentLoaded", function () {
   aplicarFocoModalAdicionar();
 });
 
+// Função para copiar dados da última inscrição salva
+function copiarDadosUltimaInscricao(participanteId, inscricaoAtualId) {
+  console.log('🔄 Buscando última inscrição salva...', { participanteId, inscricaoAtualId });
+  return fetch(`/api/inscricoes/buscar-ultima-inscricao-salva?participante_id=${participanteId}&inscricao_atual_id=${inscricaoAtualId}`)
+    .then(response => {
+      console.log('📡 Resposta da API:', response.status);
+      return response.json();
+    })
+    .then(data => {
+      console.log('📦 Dados recebidos:', data);
+      if (data.error) {
+        console.error('❌ Erro na API:', data.error);
+        return { copiado: false, erro: data.error };
+      }
+      if (data.encontrada && data.dados) {
+        console.log('✅ Dados encontrados, copiando...', data.dados);
+        // Copia os dados (exceto primeira_vez_instituto e primeira_vez_ayahuasca)
+        const camposParaCopiar = ['doenca_psiquiatrica', 'nome_doenca', 'uso_medicao', 'nome_medicao', 'mensagem'];
+        let camposCopiados = 0;
+
+        camposParaCopiar.forEach(campo => {
+          const element = document.querySelector(`[name="${campo}"]`);
+          if (element) {
+            const valorAnterior = element.value;
+            const valorFonte = data.dados[campo];
+
+            // Verifica se o valor não é null, undefined ou string vazia
+            if (valorFonte !== null && valorFonte !== undefined && valorFonte !== '') {
+              // Para campos de texto, também verifica se não é apenas espaços
+              if (typeof valorFonte === 'string' && valorFonte.trim() === '') {
+                console.log(`  ⊘ Campo "${campo}" contém apenas espaços`);
+              } else {
+                element.value = valorFonte;
+                camposCopiados++;
+                console.log(`  ✓ Campo "${campo}" copiado: "${valorFonte}"`);
+              }
+            } else {
+              console.log(`  ⊘ Campo "${campo}" vazio na fonte (valor: ${valorFonte})`);
+            }
+          } else {
+            console.warn(`  ⚠ Campo "${campo}" não encontrado no formulário`);
+          }
+        });
+
+        console.log(`📊 Total de campos copiados: ${camposCopiados}`);
+
+        // Atualiza o estado dos campos condicionais após copiar
+        atualizarCamposCondicionais();
+
+        // Mostra mensagem informando de qual ritual os dados foram copiados
+        mostrarMensagemDadosCopiados(data.ritual_nome, data.ritual_id);
+
+        // Salva dados originais e muda botão para "Fechar"
+        setTimeout(() => {
+          salvarDadosOriginaisModal();
+          mudarBotaoParaFechar();
+        }, 100);
+
+        return { copiado: true, ritual_nome: data.ritual_nome, ritual_id: data.ritual_id, camposCopiados };
+      } else {
+        console.log('ℹ️ Nenhuma inscrição anterior encontrada');
+        return { copiado: false };
+      }
+    })
+    .catch(error => {
+      console.error('❌ Erro ao copiar dados da última inscrição:', error);
+      return { copiado: false, erro: error.message };
+    });
+}
+
+// Função para mostrar mensagem de dados copiados
+function mostrarMensagemDadosCopiados(ritualNome, ritualId) {
+  // Remove mensagens anteriores
+  document.querySelectorAll('.aviso-dados-copiados').forEach(el => el.remove());
+
+  const avisoGeral = document.createElement('div');
+  avisoGeral.className = 'aviso-dados-copiados bg-yellow-50 border border-yellow-200 rounded p-3 mb-4';
+  avisoGeral.innerHTML = `
+    <div class="flex items-center">
+      <i class="fa-solid fa-info-circle text-yellow-600 mr-2"></i>
+      <span class="text-yellow-800 text-sm">
+        <strong>Informação:</strong> Os dados abaixo foram copiados automaticamente do ritual "<strong>${ritualNome}</strong>".
+        Você pode alterar as informações conforme necessário.
+      </span>
+    </div>
+  `;
+
+  // Busca o campo primeira_vez_ayahuasca para inserir a mensagem após ele
+  const campoPrimeiraVezAyahuasca = document.querySelector('select[name="primeira_vez_ayahuasca"]');
+  if (campoPrimeiraVezAyahuasca) {
+    // Encontra o div pai que contém o campo (geralmente é um <div> com a classe do campo)
+    const divPai = campoPrimeiraVezAyahuasca.closest('div');
+    if (divPai && divPai.parentNode) {
+      // Insere a mensagem após o div que contém o campo primeira_vez_ayahuasca
+      divPai.parentNode.insertBefore(avisoGeral, divPai.nextSibling);
+      return;
+    }
+  }
+
+  // Fallback: se não encontrar o campo, insere no início do formulário
+  const formContainer = document.querySelector('#form-detalhes-inscricao .space-y-4');
+  if (formContainer) {
+    formContainer.insertBefore(avisoGeral, formContainer.firstChild);
+  } else {
+    const form = document.querySelector('#form-detalhes-inscricao');
+    if (form) {
+      form.insertBefore(avisoGeral, form.firstChild);
+    }
+  }
+}
+
+// Função para verificar se os dados foram copiados de uma inscrição anterior
+function verificarSeDadosForamCopiados(participanteId, inscricaoAtualId, detalhes) {
+  // Se a inscrição não foi salva ainda (salvo_em é null), pode ter sido copiada
+  if (detalhes.salvo_em) {
+    // Se já foi salva, não mostra mensagem de cópia
+    return;
+  }
+
+  // Verifica se há uma última inscrição salva anterior
+  fetch(`/api/inscricoes/buscar-ultima-inscricao-salva?participante_id=${participanteId}&inscricao_atual_id=${inscricaoAtualId}`)
+    .then(response => response.json())
+    .then(data => {
+      if (data.encontrada && data.dados) {
+        // Compara os dados atuais com os dados da última inscrição salva
+        const camposParaComparar = ['doenca_psiquiatrica', 'nome_doenca', 'uso_medicao', 'nome_medicao', 'mensagem'];
+        let dadosIguais = true;
+
+        for (const campo of camposParaComparar) {
+          const valorAtual = detalhes[campo] || '';
+          const valorOrigem = data.dados[campo] || '';
+
+          // Compara os valores (normaliza strings vazias e null)
+          const valorAtualNormalizado = valorAtual === null ? '' : String(valorAtual).trim();
+          const valorOrigemNormalizado = valorOrigem === null ? '' : String(valorOrigem).trim();
+
+          if (valorAtualNormalizado !== valorOrigemNormalizado) {
+            dadosIguais = false;
+            break;
+          }
+        }
+
+        // Se os dados são iguais, significa que foram copiados
+        if (dadosIguais) {
+          console.log('✅ Dados foram copiados do ritual:', data.ritual_nome);
+          mostrarMensagemDadosCopiados(data.ritual_nome, data.ritual_id);
+          // Salva dados originais e muda botão para "Fechar"
+          setTimeout(() => {
+            salvarDadosOriginaisModal();
+            mudarBotaoParaFechar();
+          }, 100);
+        }
+      }
+    })
+    .catch(error => {
+      console.error('Erro ao verificar se dados foram copiados:', error);
+    });
+}
+
+// Função auxiliar para preencher campos do formulário
+function preencherCamposFormulario(detalhes) {
+  Object.keys(detalhes).forEach(key => {
+    const element = document.querySelector(`[name="${key}"]`);
+    if (element && detalhes[key] !== null && detalhes[key] !== '') {
+      // Só preenche se o campo estiver vazio (para não sobrescrever dados copiados)
+      if (!element.value || element.value === '') {
+        element.value = detalhes[key];
+      }
+    }
+  });
+
+  // Atualiza o estado dos campos condicionais após preencher
+  atualizarCamposCondicionais();
+}
+
+// Função para atualizar o estado dos campos condicionais baseado nos valores atuais
+function atualizarCamposCondicionais() {
+  const doencaPsiquiatrica = document.getElementById("doenca_psiquiatrica");
+  const nomeDoenca = document.getElementById("nome_doenca");
+  const usoMedicacao = document.getElementById("uso_medicao");
+  const nomeMedicacao = document.getElementById("nome_medicao");
+
+  if (doencaPsiquiatrica && nomeDoenca) {
+    if (doencaPsiquiatrica.value === "Sim") {
+      nomeDoenca.disabled = false;
+      nomeDoenca.required = true;
+    } else {
+      nomeDoenca.disabled = true;
+      nomeDoenca.required = false;
+      // Só limpa o valor se não foi copiado (para não apagar dados copiados)
+      if (!nomeDoenca.value || nomeDoenca.value === '') {
+        nomeDoenca.value = "";
+      }
+    }
+  }
+
+  if (usoMedicacao && nomeMedicacao) {
+    if (usoMedicacao.value === "Sim") {
+      nomeMedicacao.disabled = false;
+      nomeMedicacao.required = true;
+    } else {
+      nomeMedicacao.disabled = true;
+      nomeMedicacao.required = false;
+      // Só limpa o valor se não foi copiado (para não apagar dados copiados)
+      if (!nomeMedicacao.value || nomeMedicacao.value === '') {
+        nomeMedicacao.value = "";
+      }
+    }
+  }
+}
+
 // Função para abrir o modal de detalhes da inscrição
 function abrirModalDetalhes(ritualId) {
   disableScroll();
@@ -148,10 +359,15 @@ function abrirModalDetalhes(ritualId) {
   document.querySelector('select[name="primeira_vez_instituto"]').value = '';
   document.querySelector('select[name="primeira_vez_ayahuasca"]').value = '';
   document.querySelector('select[name="doenca_psiquiatrica"]').value = '';
-  // ... demais campos
+  document.querySelector('input[name="nome_doenca"]').value = '';
+  document.querySelector('select[name="uso_medicao"]').value = '';
+  document.querySelector('input[name="nome_medicao"]').value = '';
+  const mensagemField = document.querySelector('textarea[name="mensagem"]');
+  if (mensagemField) mensagemField.value = '';
 
   // Remove avisos anteriores se existirem
   document.querySelectorAll('.aviso-dados-anteriores').forEach(el => el.remove());
+  document.querySelectorAll('.aviso-dados-copiados').forEach(el => el.remove());
 
   // Reabilita os campos por padrão
   document.querySelector('select[name="primeira_vez_instituto"]').disabled = false;
@@ -175,17 +391,71 @@ function abrirModalDetalhes(ritualId) {
             return;
           }
 
-          // Preenche todos os campos com os dados da inscrição
-          Object.keys(detalhes).forEach(key => {
-            const element = document.querySelector(`[name="${key}"]`);
-            if (element) {
-              element.value = detalhes[key] || '';
+          // Verifica se a inscrição está vazia (campos que devem ser copiados estão vazios)
+          // Considera vazia se os campos copiáveis estão vazios (independente de ter salvo_em ou não)
+          const camposCopiaveisVazios =
+            (!detalhes.doenca_psiquiatrica || detalhes.doenca_psiquiatrica === '') &&
+            (!detalhes.nome_doenca || detalhes.nome_doenca.trim() === '') &&
+            (!detalhes.uso_medicao || detalhes.uso_medicao === '') &&
+            (!detalhes.nome_medicao || detalhes.nome_medicao.trim() === '') &&
+            (!detalhes.mensagem || detalhes.mensagem.trim() === '');
+
+          const inscricaoVazia = camposCopiaveisVazios;
+
+          console.log('🔍 Verificando inscrição:', {
+            inscricaoId,
+            camposCopiaveisVazios,
+            inscricaoVazia,
+            detalhes: {
+              doenca_psiquiatrica: detalhes.doenca_psiquiatrica,
+              nome_doenca: detalhes.nome_doenca,
+              uso_medicao: detalhes.uso_medicao,
+              nome_medicao: detalhes.nome_medicao,
+              mensagem: detalhes.mensagem,
+              salvo_em: detalhes.salvo_em
             }
           });
 
-          // Verifica se os dados de primeira vez vieram de inscrição anterior
-          verificarDadosAnteriores(pessoaId, inscricaoId, detalhes);
+          // Se a inscrição está vazia, tenta copiar dados da última inscrição salva
+          if (inscricaoVazia) {
+            console.log('📋 Inscrição vazia detectada, copiando dados...');
+            copiarDadosUltimaInscricao(pessoaId, inscricaoId).then(resultado => {
+              console.log('✅ Resultado da cópia:', resultado);
+              // Preenche apenas os campos que não foram copiados (como primeira_vez_instituto e primeira_vez_ayahuasca)
+              // Esses campos serão tratados pela função verificarDadosAnteriores
+              if (detalhes.primeira_vez_instituto) {
+                const element = document.querySelector('[name="primeira_vez_instituto"]');
+                if (element) element.value = detalhes.primeira_vez_instituto;
+              }
+              if (detalhes.primeira_vez_ayahuasca) {
+                const element = document.querySelector('[name="primeira_vez_ayahuasca"]');
+                if (element) element.value = detalhes.primeira_vez_ayahuasca;
+              }
+              // Verifica dados anteriores para primeira vez
+              verificarDadosAnteriores(pessoaId, inscricaoId, detalhes).then(() => {
+                // Após verificar dados anteriores, verifica se pode remover a notificação
+                setTimeout(() => verificarECondicionalmenteRemoverNotificacao(), 200);
+              }).catch(() => {
+                // Mesmo em caso de erro, tenta verificar
+                setTimeout(() => verificarECondicionalmenteRemoverNotificacao(), 200);
+              });
+            });
+          } else {
+            console.log('📝 Inscrição já tem dados, preenchendo normalmente...');
+            // Se já tem dados, preenche todos os campos normalmente
+            preencherCamposFormulario(detalhes);
 
+            // Verifica se os dados foram copiados de uma inscrição anterior
+            verificarSeDadosForamCopiados(pessoaId, inscricaoId, detalhes);
+
+            verificarDadosAnteriores(pessoaId, inscricaoId, detalhes).then(() => {
+              // Após verificar dados anteriores, verifica se pode remover a notificação
+              setTimeout(() => verificarECondicionalmenteRemoverNotificacao(), 200);
+            }).catch(() => {
+              // Mesmo em caso de erro, tenta verificar
+              setTimeout(() => verificarECondicionalmenteRemoverNotificacao(), 200);
+            });
+          }
 
           const salvoEm = detalhes.salvo_em ?
             new Date(detalhes.salvo_em).toLocaleDateString('pt-BR') : 'Nunca salvo';
@@ -203,11 +473,39 @@ function abrirModalDetalhes(ritualId) {
 
   document.getElementById('modal-detalhes-inscricao').style.display = 'flex';
 
+  // Reseta estado do botão e dados originais
+  dadosCopiadosSemAlteracoes = false;
+  dadosOriginaisModal = {};
+  mudarBotaoParaSalvar();
+
   // Foco no primeiro campo do formulário
   const primeiroCampo = document.querySelector('#form-detalhes-inscricao input, #form-detalhes-inscricao select, #form-detalhes-inscricao textarea');
   if (primeiroCampo) {
     primeiroCampo.focus();
   }
+
+  // Adiciona listeners para detectar mudanças após um pequeno delay
+  // para garantir que os dados já foram preenchidos
+  setTimeout(() => {
+    const form = document.getElementById('form-detalhes-inscricao');
+    if (form) {
+      // Salva dados originais após preencher
+      salvarDadosOriginaisModal();
+
+      // Função para verificar mudanças e atualizar botão
+      const verificarEMudarBotao = () => {
+        if (dadosCopiadosSemAlteracoes && verificarMudancasModal()) {
+          mudarBotaoParaSalvar();
+        }
+      };
+
+      // Adiciona listeners (remove antes para evitar duplicação)
+      form.removeEventListener('input', verificarEMudarBotao);
+      form.removeEventListener('change', verificarEMudarBotao);
+      form.addEventListener('input', verificarEMudarBotao);
+      form.addEventListener('change', verificarEMudarBotao);
+    }
+  }, 300);
 }
 
 function aplicarAvisosPrimeiraInscricao() {
@@ -216,6 +514,10 @@ function aplicarAvisosPrimeiraInscricao() {
 
   // Remove avisos anteriores se existirem
   document.querySelectorAll('.aviso-dados-anteriores').forEach(el => el.remove());
+
+  // Garante que os campos estão habilitados
+  institutoSelect.disabled = false;
+  ayahuascaSelect.disabled = false;
 
   // Adiciona aviso para primeira inscrição
   const avisoInstituto = document.createElement('div');
@@ -232,39 +534,106 @@ function aplicarAvisosPrimeiraInscricao() {
 
 // Nova função para verificar se os dados vieram de inscrição anterior
 function verificarDadosAnteriores(participanteId, inscricaoAtualId, detalhes) {
-  fetch(`/api/inscricoes/verificar-primeira-inscricao?participante_id=${participanteId}&inscricao_atual_id=${inscricaoAtualId}`)
-    .then(response => response.json())
-    .then(data => {
-      if (data.dados_anteriores) {
-        aplicarDadosAnteriores(detalhes);
-      } else {
-        // É primeira inscrição - aplica avisos especiais
-        aplicarAvisosPrimeiraInscricao();
-      }
-    })
-    .catch(error => {
-      console.error('Erro ao verificar dados anteriores:', error);
-    });
-}
-
-// Função para aplicar indicação de dados anteriores na modal
-function aplicarDadosAnteriores(detalhes) {
   const institutoSelect = document.querySelector('select[name="primeira_vez_instituto"]');
   const ayahuascaSelect = document.querySelector('select[name="primeira_vez_ayahuasca"]');
 
-  // Desabilita os campos
+  // Verifica se os campos estão NULL (não preenchidos)
+  const camposNulos = (!detalhes.primeira_vez_instituto || detalhes.primeira_vez_instituto === '') &&
+    (!detalhes.primeira_vez_ayahuasca || detalhes.primeira_vez_ayahuasca === '');
+
+  // Se a inscrição atual tem "Sim" em algum campo, mostra mensagem de primeira vez
+  const temSimAtual = (detalhes.primeira_vez_instituto === 'Sim' || detalhes.primeira_vez_ayahuasca === 'Sim');
+
+  if (temSimAtual) {
+    // Se a inscrição atual tem "Sim", mostra mensagem de primeira vez
+    aplicarAvisosPrimeiraInscricao();
+    return Promise.resolve();
+  }
+
+  // Se os campos estão NULL, verifica se há inscrição anterior SALVA
+  if (camposNulos) {
+    return fetch(`/api/inscricoes/verificar-primeira-inscricao?participante_id=${participanteId}&inscricao_atual_id=${inscricaoAtualId}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.dados_anteriores) {
+          // Preenche automaticamente com "Não" se houver inscrição anterior salva
+          institutoSelect.value = 'Não';
+          ayahuascaSelect.value = 'Não';
+          // Atualiza detalhes para refletir os valores preenchidos
+          detalhes.primeira_vez_instituto = 'Não';
+          detalhes.primeira_vez_ayahuasca = 'Não';
+          // Aplica a lógica de bloqueio
+          aplicarDadosAnteriores(detalhes, data.tem_sim, data.ambos_nao);
+        } else {
+          // É primeira inscrição - aplica avisos especiais
+          aplicarAvisosPrimeiraInscricao();
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao verificar dados anteriores:', error);
+        throw error;
+      });
+  } else {
+    // Se os campos já estão preenchidos, verifica normalmente
+    return fetch(`/api/inscricoes/verificar-primeira-inscricao?participante_id=${participanteId}&inscricao_atual_id=${inscricaoAtualId}`)
+      .then(response => response.json())
+      .then(data => {
+        if (data.dados_anteriores) {
+          // Passa informações adicionais sobre se tinha "Sim" ou ambos "Não"
+          aplicarDadosAnteriores(detalhes, data.tem_sim, data.ambos_nao);
+        } else {
+          // É primeira inscrição - aplica avisos especiais
+          aplicarAvisosPrimeiraInscricao();
+        }
+      })
+      .catch(error => {
+        console.error('Erro ao verificar dados anteriores:', error);
+        throw error;
+      });
+  }
+}
+
+// Função para aplicar indicação de dados anteriores na modal
+function aplicarDadosAnteriores(detalhes, temSim = false, ambosNao = false) {
+  const institutoSelect = document.querySelector('select[name="primeira_vez_instituto"]');
+  const ayahuascaSelect = document.querySelector('select[name="primeira_vez_ayahuasca"]');
+
+  // Remove avisos anteriores
+  document.querySelectorAll('.aviso-dados-anteriores').forEach(el => el.remove());
+
+  // Desabilita os campos se já tiver dados anteriores
   institutoSelect.disabled = true;
   ayahuascaSelect.disabled = true;
 
-  // Adiciona aviso visual
+  // Define mensagens baseado na situação
+  let mensagemInstituto, mensagemAyahuasca, mensagemGeral;
+
+  if (temSim) {
+    // Se algum campo anterior era "Sim", mostra mensagem específica
+    mensagemInstituto = '* Participante já foi inscrito em outro ritual, por isso foi salvo como "Não".';
+    mensagemAyahuasca = '* Participante já foi inscrito em outro ritual, por isso foi salvo como "Não".';
+    mensagemGeral = '<strong>Informação:</strong> Como este participante já teve "Sim" em uma inscrição anterior, os campos "Primeira vez" foram automaticamente definidos como "Não" e não podem ser alterados.';
+  } else if (ambosNao) {
+    // Se ambos eram "Não", mostra mensagem diferente
+    mensagemInstituto = '* Participante não é a primeira vez, por isso foi salvo como "Não".';
+    mensagemAyahuasca = '* Participante não é a primeira vez, por isso foi salvo como "Não".';
+    mensagemGeral = '<strong>Informação:</strong> Como este participante não é a primeira vez, os campos "Primeira vez" foram automaticamente definidos como "Não" e não podem ser alterados.';
+  } else {
+    // Fallback (caso não tenha as flags)
+    mensagemInstituto = '* Como este participante já tem inscrições anteriores, os campos "Primeira vez" foram automaticamente definidos como "Não" e não podem ser alterados.';
+    mensagemAyahuasca = '* Como este participante já tem inscrições anteriores, os campos "Primeira vez" foram automaticamente definidos como "Não" e não podem ser alterados.';
+    mensagemGeral = '<strong>Informação:</strong> Como este participante já tem inscrições anteriores, os campos "Primeira vez" foram automaticamente definidos como "Não" e não podem ser alterados.';
+  }
+
+  // Adiciona aviso visual em cada campo
   const avisoInstituto = document.createElement('div');
   avisoInstituto.className = 'aviso-dados-anteriores text-blue-600 text-xs mt-1 italic';
-  avisoInstituto.textContent = '* Como este participante já tem inscrições anteriores, os campos "Primeira vez" foram automaticamente definidos como "Não" e não podem ser alterados.';
+  avisoInstituto.textContent = mensagemInstituto;
   institutoSelect.parentNode.appendChild(avisoInstituto);
 
   const avisoAyahuasca = document.createElement('div');
   avisoAyahuasca.className = 'aviso-dados-anteriores text-blue-600 text-xs mt-1 italic';
-  avisoAyahuasca.textContent = '* Como este participante já tem inscrições anteriores, os campos "Primeira vez" foram automaticamente definidos como "Não" e não podem ser alterados.';
+  avisoAyahuasca.textContent = mensagemAyahuasca;
   ayahuascaSelect.parentNode.appendChild(avisoAyahuasca);
 
   // Adiciona aviso geral no topo do formulário
@@ -274,14 +643,21 @@ function aplicarDadosAnteriores(detalhes) {
     <div class="flex items-center">
       <i class="fa-solid fa-info-circle text-blue-500 mr-2"></i>
       <span class="text-blue-700 text-sm">
-        <strong>Informação:</strong> Como este participante já tem inscrições anteriores,
-        os campos "Primeira vez" foram automaticamente definidos como "Não" e não podem ser alterados.
+        ${mensagemGeral}
       </span>
     </div>
   `;
 
   const formContainer = document.querySelector('#form-detalhes-inscricao .space-y-4');
-  formContainer.insertBefore(avisoGeral, formContainer.firstChild);
+  if (formContainer) {
+    formContainer.insertBefore(avisoGeral, formContainer.firstChild);
+  } else {
+    // Fallback: adiciona no início do formulário
+    const form = document.querySelector('#form-detalhes-inscricao');
+    if (form) {
+      form.insertBefore(avisoGeral, form.firstChild);
+    }
+  }
 }
 
 // Nova função para abrir modal com dados anteriores já aplicados
@@ -304,8 +680,12 @@ function abrirModalDetalhesComDadosAnteriores(ritualId, dadosAPI) {
       document.querySelector('select[name="primeira_vez_instituto"]').value = dadosAPI.primeira_vez_instituto;
       document.querySelector('select[name="primeira_vez_ayahuasca"]').value = dadosAPI.primeira_vez_ayahuasca;
 
+      // Verifica se tem "Sim" nos dados anteriores
+      const temSim = (dadosAPI.primeira_vez_instituto === 'Sim' || dadosAPI.primeira_vez_ayahuasca === 'Sim');
+      const ambosNao = (dadosAPI.primeira_vez_instituto === 'Não' && dadosAPI.primeira_vez_ayahuasca === 'Não');
+
       // Aplica a indicação de dados anteriores
-      aplicarDadosAnteriores(dadosAPI);
+      aplicarDadosAnteriores(dadosAPI, temSim, ambosNao);
 
       document.getElementById('modal-detalhes-inscricao').style.display = 'flex';
     })
@@ -372,11 +752,124 @@ function abrirModalObservacao(ritualId) {
     });
 }
 
+// Variável para rastrear se os dados foram copiados (sem alterações)
+let dadosCopiadosSemAlteracoes = false;
+let dadosOriginaisModal = {};
+
+// Função para mudar o botão para "Fechar"
+function mudarBotaoParaFechar() {
+  const btnSalvar = document.getElementById('btn-salvar-detalhes');
+  if (btnSalvar) {
+    btnSalvar.innerHTML = '<i class="fa-solid fa-times mr-1"></i> Fechar';
+    btnSalvar.type = 'button';
+    btnSalvar.onclick = () => fecharModalDetalhes();
+    // Muda para estilo vermelho com texto branco
+    btnSalvar.className = 'w-full bg-red-600 text-white py-2 rounded hover:bg-red-700 transition font-semibold';
+    dadosCopiadosSemAlteracoes = true;
+  }
+}
+
+// Função para mudar o botão para "Salvar"
+function mudarBotaoParaSalvar() {
+  const btnSalvar = document.getElementById('btn-salvar-detalhes');
+  if (btnSalvar) {
+    btnSalvar.innerHTML = '<i class="fa-solid fa-save mr-1"></i> Salvar';
+    btnSalvar.type = 'submit';
+    btnSalvar.onclick = null;
+    // Volta para estilo azul com texto preto (original)
+    btnSalvar.className = 'w-full bg-[#00bfff] text-black py-2 rounded hover:bg-yellow-400 transition font-semibold';
+    dadosCopiadosSemAlteracoes = false;
+  }
+}
+
+// Função para salvar dados originais do modal
+function salvarDadosOriginaisModal() {
+  const form = document.getElementById('form-detalhes-inscricao');
+  if (!form) return;
+
+  dadosOriginaisModal = {};
+  const formData = new FormData(form);
+  for (let [key, value] of formData.entries()) {
+    dadosOriginaisModal[key] = value;
+  }
+
+  // Também salva valores de campos disabled
+  form.querySelectorAll('select[name="primeira_vez_instituto"], select[name="primeira_vez_ayahuasca"]').forEach(el => {
+    dadosOriginaisModal[el.name] = el.value;
+  });
+}
+
+// Função para verificar se houve mudanças no modal
+function verificarMudancasModal() {
+  const form = document.getElementById('form-detalhes-inscricao');
+  if (!form || Object.keys(dadosOriginaisModal).length === 0) return false;
+
+  const dadosAtuais = {};
+  const formData = new FormData(form);
+  for (let [key, value] of formData.entries()) {
+    dadosAtuais[key] = value;
+  }
+
+  // Também verifica valores de campos disabled
+  form.querySelectorAll('select[name="primeira_vez_instituto"], select[name="primeira_vez_ayahuasca"]').forEach(el => {
+    dadosAtuais[el.name] = el.value;
+  });
+
+  // Compara os dados
+  for (let key in dadosOriginaisModal) {
+    if (dadosOriginaisModal[key] !== dadosAtuais[key]) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
 // Funções para fechar modais
 function fecharModalDetalhes() {
-  document.getElementById('modal-detalhes-inscricao').style.display = 'none';
-  enableScroll();
-  currentRitualId = null;
+  const modal = document.getElementById('modal-detalhes-inscricao');
+  if (!modal) return;
+
+  // Se o botão é "Fechar" e não há mudanças, fecha diretamente
+  if (dadosCopiadosSemAlteracoes && !verificarMudancasModal()) {
+    modal.style.display = 'none';
+    enableScroll();
+    currentRitualId = null;
+    dadosCopiadosSemAlteracoes = false;
+    dadosOriginaisModal = {};
+    if (unsavedChangesDetector) {
+      unsavedChangesDetector.modalChangesMap.set('modal-detalhes-inscricao', false);
+    }
+    return;
+  }
+
+  // Verifica se há mudanças não salvas
+  const temMudancas = verificarMudancasModal();
+
+  if (temMudancas && unsavedChangesDetector) {
+    // Usa o detector de mudanças não salvas para mostrar confirmação
+    unsavedChangesDetector.showUnsavedChangesModal(() => {
+      // Confirmou saída sem salvar
+      modal.style.display = 'none';
+      enableScroll();
+      currentRitualId = null;
+      dadosCopiadosSemAlteracoes = false;
+      dadosOriginaisModal = {};
+      if (unsavedChangesDetector) {
+        unsavedChangesDetector.modalChangesMap.set('modal-detalhes-inscricao', false);
+      }
+    });
+  } else {
+    // Fecha normalmente se não houver mudanças
+    modal.style.display = 'none';
+    enableScroll();
+    currentRitualId = null;
+    dadosCopiadosSemAlteracoes = false;
+    dadosOriginaisModal = {};
+    if (unsavedChangesDetector) {
+      unsavedChangesDetector.modalChangesMap.set('modal-detalhes-inscricao', false);
+    }
+  }
 }
 
 function fecharModalObservacao() {
@@ -465,11 +958,54 @@ function removerNotificacaoObservacao(ritualId) {
   });
 }
 
+// Função auxiliar para verificar se todos os campos obrigatórios estão preenchidos e remover notificação
+function verificarECondicionalmenteRemoverNotificacao() {
+  if (!currentRitualId) return;
+
+  const formDetalhes = document.querySelector('#form-detalhes-inscricao');
+  if (!formDetalhes) return;
+
+  const primeiraVezInstituto = formDetalhes.querySelector('[name="primeira_vez_instituto"]')?.value;
+  const primeiraVezAyahuasca = formDetalhes.querySelector('[name="primeira_vez_ayahuasca"]')?.value;
+  const doencaPsiquiatrica = formDetalhes.querySelector('[name="doenca_psiquiatrica"]')?.value;
+  const nomeDoenca = formDetalhes.querySelector('[name="nome_doenca"]')?.value || '';
+  const usoMedicao = formDetalhes.querySelector('[name="uso_medicao"]')?.value;
+  const nomeMedicao = formDetalhes.querySelector('[name="nome_medicao"]')?.value || '';
+
+  // Verifica se todos os campos obrigatórios estão preenchidos
+  const todosPreenchidos = primeiraVezInstituto && primeiraVezAyahuasca && doencaPsiquiatrica && usoMedicao &&
+    (doencaPsiquiatrica !== 'Sim' || nomeDoenca.trim()) &&
+    (usoMedicao !== 'Sim' || nomeMedicao.trim());
+
+  // Remove a bolinha apenas se todos os campos obrigatórios estiverem preenchidos
+  if (todosPreenchidos) {
+    console.log('✅ Todos os campos obrigatórios preenchidos, removendo notificação...');
+    removerNotificacaoDetalhes(currentRitualId);
+  } else {
+    console.log('⚠️ Campos ainda não estão todos preenchidos:', {
+      primeiraVezInstituto,
+      primeiraVezAyahuasca,
+      doencaPsiquiatrica,
+      nomeDoenca: nomeDoenca.trim() || '(vazio)',
+      usoMedicao,
+      nomeMedicao: nomeMedicao.trim() || '(vazio)'
+    });
+  }
+}
+
 function removerNotificacaoDetalhes(ritualId) {
   console.log('Removendo notificação detalhes para ritual:', ritualId);
 
-  const cards = document.querySelectorAll('.bg-white.p-4.rounded-lg.shadow');
+  // Remove bolinha usando o ID específico (método mais confiável)
+  const bolinhaCard = document.querySelector(`#notificacao-detalhes-${ritualId}`);
+  if (bolinhaCard) {
+    bolinhaCard.remove();
+    console.log('Bolinha de detalhes removida para ritual:', ritualId);
+    return;
+  }
 
+  // Fallback: busca por onclick também (para compatibilidade)
+  const cards = document.querySelectorAll('.bg-white.p-4.rounded-lg.shadow');
   cards.forEach(card => {
     const botaoDetalhes = card.querySelector('button[onclick*="abrirModalDetalhes"]');
     if (botaoDetalhes) {
@@ -478,8 +1014,20 @@ function removerNotificacaoDetalhes(ritualId) {
         const bolinha = botaoDetalhes.querySelector('.bg-red-500');
         if (bolinha) {
           bolinha.remove();
-          console.log('Bolinha de detalhes removida para ritual:', ritualId);
+          console.log('Bolinha de detalhes removida para ritual (fallback):', ritualId);
         }
+      }
+    }
+  });
+
+  // Busca também em tabelas
+  const tabelaBotoes = document.querySelectorAll('button[onclick*="abrirModalDetalhes"]');
+  tabelaBotoes.forEach(botao => {
+    const onclickAttr = botao.getAttribute('onclick');
+    if (onclickAttr && onclickAttr.includes(`abrirModalDetalhes(${ritualId})`)) {
+      const bolinha = botao.querySelector('.bg-red-500');
+      if (bolinha) {
+        bolinha.remove();
       }
     }
   });
@@ -554,18 +1102,81 @@ function initFormDetalhes() {
       // Prossegue com o AJAX
       const formData = new FormData(formDetalhes);
 
+      // Inclui manualmente valores de campos desabilitados (campos disabled não são incluídos no FormData)
+      const primeiraVezInstituto = formDetalhes.querySelector('[name="primeira_vez_instituto"]');
+      const primeiraVezAyahuasca = formDetalhes.querySelector('[name="primeira_vez_ayahuasca"]');
+      const nomeDoenca = formDetalhes.querySelector('[name="nome_doenca"]');
+      const nomeMedicao = formDetalhes.querySelector('[name="nome_medicao"]');
+
+      if (primeiraVezInstituto && primeiraVezInstituto.disabled && primeiraVezInstituto.value) {
+        formData.set('primeira_vez_instituto', primeiraVezInstituto.value);
+      }
+      if (primeiraVezAyahuasca && primeiraVezAyahuasca.disabled && primeiraVezAyahuasca.value) {
+        formData.set('primeira_vez_ayahuasca', primeiraVezAyahuasca.value);
+      }
+      if (nomeDoenca && nomeDoenca.disabled) {
+        formData.set('nome_doenca', nomeDoenca.value || '');
+      }
+      if (nomeMedicao && nomeMedicao.disabled) {
+        formData.set('nome_medicao', nomeMedicao.value || '');
+      }
+
       fetch('/api/inscricoes/salvar-inscricao', {
         method: 'POST',
         body: formData
       })
-        .then(response => response.json())
+        .then(response => {
+          // Primeiro lê o texto da resposta
+          return response.text().then(text => {
+            try {
+              // Remove warnings/notices do PHP que podem aparecer antes do JSON
+              // Procura pelo último objeto JSON válido na resposta (mais completo)
+              const jsonMatches = text.match(/\{[^{}]*(?:\{[^{}]*\}[^{}]*)*\}/g);
+              if (jsonMatches && jsonMatches.length > 0) {
+                // Pega o último match (geralmente o mais completo)
+                const jsonStr = jsonMatches[jsonMatches.length - 1];
+                return JSON.parse(jsonStr);
+              }
+              // Se não encontrar JSON com regex, tenta encontrar manualmente
+              const lastBrace = text.lastIndexOf('}');
+              const firstBrace = text.lastIndexOf('{', lastBrace);
+              if (firstBrace !== -1 && lastBrace !== -1) {
+                const jsonStr = text.substring(firstBrace, lastBrace + 1);
+                return JSON.parse(jsonStr);
+              }
+              // Se não encontrar JSON, tenta parsear o texto completo
+              return JSON.parse(text);
+            } catch (e) {
+              // Se não for JSON válido, retorna erro
+              console.error('Resposta não é JSON válido:', text);
+              throw new Error('Resposta do servidor não é JSON válido');
+            }
+          });
+        })
         .then(data => {
           if (data.success) {
             showToast("Detalhes da inscrição salvos com sucesso!", 'success');
+            // Reseta estado antes de fechar
+            dadosCopiadosSemAlteracoes = false;
+            dadosOriginaisModal = {};
+            mudarBotaoParaSalvar();
             fecharModalDetalhes();
 
-            // AGORA remove a bolinha porque os dados foram salvos (salvo_em será preenchido)
-            if (currentRitualId) {
+            // Verifica se todos os campos obrigatórios estão preenchidos antes de remover a bolinha
+            const primeiraVezInstituto = formDetalhes.querySelector('[name="primeira_vez_instituto"]').value;
+            const primeiraVezAyahuasca = formDetalhes.querySelector('[name="primeira_vez_ayahuasca"]').value;
+            const doencaPsiquiatrica = formDetalhes.querySelector('[name="doenca_psiquiatrica"]').value;
+            const nomeDoenca = formDetalhes.querySelector('[name="nome_doenca"]').value || '';
+            const usoMedicao = formDetalhes.querySelector('[name="uso_medicao"]').value;
+            const nomeMedicao = formDetalhes.querySelector('[name="nome_medicao"]').value || '';
+
+            // Verifica se todos os campos obrigatórios estão preenchidos
+            const todosPreenchidos = primeiraVezInstituto && primeiraVezAyahuasca && doencaPsiquiatrica && usoMedicao &&
+              (doencaPsiquiatrica !== 'Sim' || nomeDoenca.trim()) &&
+              (usoMedicao !== 'Sim' || nomeMedicao.trim());
+
+            // Remove a bolinha apenas se todos os campos obrigatórios estiverem preenchidos
+            if (currentRitualId && todosPreenchidos) {
               removerNotificacaoDetalhes(currentRitualId);
             }
 
@@ -573,7 +1184,7 @@ function initFormDetalhes() {
               location.reload();
             }, 1000);
           } else {
-            showToast("Erro ao salvar detalhes da inscrição: " + data.error, 'error');
+            showToast("Erro ao salvar detalhes da inscrição: " + (data.error || 'Erro desconhecido'), 'error');
           }
         })
         .catch(error => {
@@ -680,6 +1291,10 @@ function togglePresenca(button) {
             }
 
             button.setAttribute('data-current-status', newStatus);
+
+            // Atualizar estado do botão de assinatura baseado na presença
+            atualizarBotaoAssinaturaPorPresenca(inscricaoId, newStatus);
+
             setTimeout(() => {
               atualizarContadores(newStatus);
             }, 200);
@@ -701,6 +1316,28 @@ function togglePresenca(button) {
       console.error('Erro ao buscar ID da inscrição:', error);
       showToast('Erro ao buscar dados da inscrição', 'error');
     });
+}
+
+// Atualizar botão de assinatura baseado na presença
+function atualizarBotaoAssinaturaPorPresenca(inscricaoId, novoStatus) {
+  // Encontrar todos os botões de assinatura relacionados
+  const assinaturaButtons = document.querySelectorAll('button[onclick*="abrirModalAssinatura"]');
+  assinaturaButtons.forEach(btn => {
+    const onclickAttr = btn.getAttribute('onclick');
+    if (onclickAttr && onclickAttr.includes(inscricaoId)) {
+      if (novoStatus === 'Sim') {
+        // Habilitar botão se presença for 'Sim'
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+        btn.removeAttribute('title');
+      } else {
+        // Desabilitar botão se presença for 'Não'
+        btn.disabled = true;
+        btn.classList.add('opacity-50', 'cursor-not-allowed');
+        btn.setAttribute('title', 'Marque como presente para assinar');
+      }
+    }
+  });
 }
 
 function atualizarContadores(novoStatus) {
@@ -869,7 +1506,19 @@ function pesquisarRituais() {
       }
 
       // ✅ CORREÇÃO: Renderiza items COM DELAY para garantir dados
-      renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesquisa, listaRituais);
+      // Buscar dados do participante atual para verificar bloqueio
+      fetch(`/api/participante/dados-vinculacao?id=${pessoaId}`)
+        .then(response => response.json())
+        .then(dadosParticipante => {
+          const podeVincular = dadosParticipante.pode_vincular_rituais || 'Sim';
+          const motivoBloqueio = dadosParticipante.motivo_bloqueio_vinculacao || null;
+          renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesquisa, listaRituais, podeVincular, motivoBloqueio);
+        })
+        .catch(error => {
+          console.error('Erro ao buscar dados de vinculação:', error);
+          // Se der erro, assume que pode vincular
+          renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesquisa, listaRituais, 'Sim', null);
+        });
 
       // Feedback de sucesso
       showToast(`${rituaisFiltrados.length} ritual(is) encontrado(s)!`, 'success');
@@ -902,7 +1551,7 @@ function pesquisarRituais() {
 }
 
 // ✅ NOVA FUNÇÃO: Renderiza rituais com verificação segura
-function renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesquisa, listaRituais) {
+function renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesquisa, listaRituais, podeVincular = 'Sim', motivoBloqueio = null) {
   console.log('📱 Iniciando renderização:', {
     filtrados: rituaisFiltrados.length,
     vinculados: rituaisVinculados
@@ -953,7 +1602,7 @@ function renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesq
               </p>
             </div>
             <div class="pt-1" id="acao-ritual-${ritualId}">
-              ${renderizarBotaoAcao(ritualId, jaAdicionado)}
+              ${renderizarBotaoAcao(ritualId, jaAdicionado, podeVincular, motivoBloqueio)}
             </div>
           </div>
         </div>
@@ -972,13 +1621,30 @@ function renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesq
 }
 
 // ✅ NOVA FUNÇÃO: Renderiza botão/tag baseado no status
-function renderizarBotaoAcao(ritualId, jaAdicionado) {
+function renderizarBotaoAcao(ritualId, jaAdicionado, podeVincular = 'Sim', motivoBloqueio = null) {
   if (jaAdicionado) {
     return `
       <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
         <i class="fa-solid fa-check"></i>
         Já adicionado
       </span>
+    `;
+  } else if (podeVincular === 'Não') {
+    // Escapar o motivo corretamente para evitar problemas com aspas e quebras de linha
+    const motivoEscapado = motivoBloqueio
+      ? motivoBloqueio
+        .replace(/\\/g, '\\\\')  // Escapar barras invertidas primeiro
+        .replace(/'/g, "\\'")     // Escapar aspas simples
+        .replace(/"/g, '&quot;')  // Escapar aspas duplas
+        .replace(/\n/g, ' ')      // Substituir quebras de linha por espaços
+        .replace(/\r/g, '')       // Remover retornos de carro
+      : 'Motivo não informado';
+    return `
+      <button onclick="abrirModalMotivoBloqueioParticipante('${motivoEscapado}')"
+              class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded text-sm font-semibold transition-colors shadow-sm">
+        <i class="fa-solid fa-ban mr-1"></i>
+        Não pode adicionar (ver motivo)
+      </button>
     `;
   } else {
     return `
@@ -991,6 +1657,8 @@ function renderizarBotaoAcao(ritualId, jaAdicionado) {
   }
 }
 
+// Funções de modal de motivo movidas para modal.js
+
 // ✅ NOVA FUNÇÃO: Verificação adicional para mobile
 function verificarEAtualizarBotao(ritualId, rituaisVinculados) {
   const containerAcao = document.getElementById(`acao-ritual-${ritualId}`);
@@ -1000,14 +1668,33 @@ function verificarEAtualizarBotao(ritualId, rituaisVinculados) {
   const temBotaoAdicionar = containerAcao.querySelector('button');
   const temTagAdicionado = containerAcao.querySelector('span.bg-green-100');
 
-  // ✅ Corrige inconsistências
-  if (jaAdicionado && temBotaoAdicionar) {
-    console.log(`📱 Corrigindo botão para "Já adicionado" - Ritual ${ritualId}`);
-    containerAcao.innerHTML = renderizarBotaoAcao(ritualId, true);
-  } else if (!jaAdicionado && temTagAdicionado) {
-    console.log(`📱 Corrigindo tag para "Adicionar" - Ritual ${ritualId}`);
-    containerAcao.innerHTML = renderizarBotaoAcao(ritualId, false);
-  }
+  // Buscar dados do participante para verificar bloqueio
+  fetch(`/api/participante/dados-vinculacao?id=${pessoaId}`)
+    .then(response => response.json())
+    .then(dadosParticipante => {
+      const podeVincular = dadosParticipante.pode_vincular_rituais || 'Sim';
+      const motivoBloqueio = dadosParticipante.motivo_bloqueio_vinculacao || null;
+
+      // ✅ Sempre atualiza para garantir que o botão está correto
+      const botaoEsperado = renderizarBotaoAcao(ritualId, jaAdicionado, podeVincular, motivoBloqueio);
+      const botaoAtual = containerAcao.innerHTML.trim();
+
+      // Verifica se precisa atualizar
+      if (botaoAtual !== botaoEsperado.trim()) {
+        console.log(`📱 Atualizando botão - Ritual ${ritualId}`, {
+          jaAdicionado,
+          podeVincular,
+          temMotivo: !!motivoBloqueio
+        });
+        containerAcao.innerHTML = botaoEsperado;
+      }
+    })
+    .catch(error => {
+      console.error('Erro ao buscar dados de vinculação:', error);
+      // Se der erro, assume que pode vincular
+      const botaoEsperado = renderizarBotaoAcao(ritualId, jaAdicionado, 'Sim', null);
+      containerAcao.innerHTML = botaoEsperado;
+    });
 }
 
 function toggleFiltroRitual() {
@@ -1098,15 +1785,29 @@ function adicionarRitual(ritualId) {
     .then(response => response.json())
     .then(data => {
       if (data.success) {
-        showToast('Ritual adicionado com sucesso!', 'success');
+        const mensagem = data.dados_copiados
+          ? `Ritual adicionado com sucesso! Dados copiados do ritual "${data.ritual_nome_origem}".`
+          : 'Ritual adicionado com sucesso!';
+        showToast(mensagem, 'success');
 
         // 1. Atualiza o botão na lista para "Já adicionado"
         atualizarBotaoParaJaAdicionado(ritualId);
 
         // 2. Atualiza a página de fundo (sem fechar modal)
-        atualizarPaginaFundo();
+        atualizarPaginaFundo().then(() => {
+          // 3. Após atualizar a página, verifica se pode remover a bolinha
+          // Se os dados foram copiados e os campos de primeira vez foram preenchidos automaticamente,
+          // verifica se todos os campos obrigatórios estão preenchidos
+          if (data.dados_copiados && data.dados_anteriores) {
+            // Os campos primeira_vez já foram preenchidos como "Não" na API
+            // Se os dados foram copiados, todos os campos devem estar preenchidos
+            setTimeout(() => {
+              removerNotificacaoDetalhes(ritualId);
+            }, 500);
+          }
+        });
 
-        // 3. Expande filtro e limpa para nova pesquisa
+        // 4. Expande filtro e limpa para nova pesquisa
         setTimeout(() => {
           expandirFiltroELimpar();
         }, 1000);
@@ -1143,7 +1844,7 @@ function atualizarPaginaFundo() {
   // Faz uma requisição silenciosa para buscar a lista atualizada
   const currentUrl = window.location.href;
 
-  fetch(currentUrl)
+  return fetch(currentUrl)
     .then(response => response.text())
     .then(html => {
       // Cria um parser temporário
@@ -1188,6 +1889,7 @@ function atualizarPaginaFundo() {
     })
     .catch(error => {
       console.error('Erro ao atualizar página de fundo:', error);
+      throw error;
     });
 }
 

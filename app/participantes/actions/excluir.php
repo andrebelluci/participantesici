@@ -29,6 +29,7 @@ function excluirFotoParticipante($cpf)
   }
 }
 
+
 try {
   $pdo->beginTransaction();
 
@@ -43,19 +44,36 @@ try {
     exit;
   }
 
+  // ✅ BUSCAR DOCUMENTOS ANTES DE EXCLUIR O PARTICIPANTE (para excluir arquivos físicos)
+  $stmt_documentos = $pdo->prepare("SELECT caminho FROM documentos WHERE participante_id = ?");
+  $stmt_documentos->execute([$id]);
+  $documentos = $stmt_documentos->fetchAll(PDO::FETCH_ASSOC);
+
   // 1. Remove as inscrições associadas
   $stmt_delete_inscricoes = $pdo->prepare("DELETE FROM inscricoes WHERE participante_id = ?");
   $stmt_delete_inscricoes->execute([$id]);
 
-  // 2. Remove o participante
+  // 2. Remove o participante (os documentos serão excluídos automaticamente pelo CASCADE)
   $stmt_delete_participante = $pdo->prepare("DELETE FROM participantes WHERE id = ?");
   $stmt_delete_participante->execute([$id]);
 
   $pdo->commit();
 
-  // ✅ EXCLUIR FOTO APÓS COMMIT BEM-SUCEDIDO
+  // ✅ EXCLUIR FOTO E DOCUMENTOS FÍSICOS APÓS COMMIT BEM-SUCEDIDO
   if ($participante['cpf']) {
     excluirFotoParticipante($participante['cpf']);
+  }
+
+  // Excluir arquivos físicos dos documentos (já temos os caminhos salvos)
+  foreach ($documentos as $doc) {
+    $caminho_completo = __DIR__ . '/../../../public_html' . $doc['caminho'];
+    if (file_exists($caminho_completo)) {
+      if (unlink($caminho_completo)) {
+        error_log("Documento excluído: " . $doc['caminho']);
+      } else {
+        error_log("Erro ao excluir documento: " . $doc['caminho']);
+      }
+    }
   }
 
   $_SESSION['success'] = "Participante excluído com sucesso!";

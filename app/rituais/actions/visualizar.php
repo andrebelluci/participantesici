@@ -53,11 +53,12 @@ $total_paginas = ceil($total_registros / $itens_por_pagina);
 
 // ✅ CONSULTA PRINCIPAL - Modificar a consulta existente para incluir paginação
 $sql_participantes = "
-    SELECT p.*, i.presente, i.observacao,
+    SELECT p.*, i.id as inscricao_id, i.presente, i.observacao,
            i.primeira_vez_instituto, i.primeira_vez_ayahuasca,
            i.doenca_psiquiatrica, i.nome_doenca,
            i.uso_medicao, i.nome_medicao, i.mensagem,
-           i.salvo_em, i.obs_salvo_em
+           i.salvo_em, i.obs_salvo_em,
+           i.assinatura, i.assinatura_data
     FROM inscricoes i
     JOIN participantes p ON i.participante_id = p.id
     WHERE i.ritual_id = ?
@@ -95,6 +96,29 @@ $sql_total_inscritos = "
 $stmt_total_inscritos = $pdo->prepare($sql_total_inscritos);
 $stmt_total_inscritos->execute([$id]);
 $total_inscritos = $stmt_total_inscritos->fetch()['total_inscritos'];
+
+// Função para verificar se os detalhes obrigatórios estão preenchidos
+function temDetalhesCompletos($inscricao) {
+  // Campos obrigatórios básicos
+  if (empty($inscricao['primeira_vez_instituto']) ||
+      empty($inscricao['primeira_vez_ayahuasca']) ||
+      empty($inscricao['doenca_psiquiatrica']) ||
+      empty($inscricao['uso_medicao'])) {
+    return false;
+  }
+
+  // Se tem doença psiquiátrica, nome_doenca é obrigatório
+  if ($inscricao['doenca_psiquiatrica'] === 'Sim' && empty($inscricao['nome_doenca'])) {
+    return false;
+  }
+
+  // Se usa medicação, nome_medicao é obrigatório
+  if ($inscricao['uso_medicao'] === 'Sim' && empty($inscricao['nome_medicao'])) {
+    return false;
+  }
+
+  return true;
+}
 
 // Determinar o tipo e ID baseado na URL atual
 $current_path = $_SERVER['REQUEST_URI'];
