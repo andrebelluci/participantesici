@@ -136,11 +136,11 @@ if (isset($_SESSION['last_activity']) && !$tem_cookie_lembrar && !$login_via_rem
     // Aplica timeout apenas se NÃO tiver cookie de manter conectado
     if ((time() - $_SESSION['last_activity']) > $timeout_normal) {
         error_log("[SESSION] Timeout de sessão normal - fazendo logout");
-                session_unset();
-                session_destroy();
-                header("Location: /login?timeout=1");
-                exit;
-            }
+        session_unset();
+        session_destroy();
+        header("Location: /login?timeout=1");
+        exit;
+    }
 } else if ($tem_cookie_lembrar && isset($_SESSION['last_activity'])) {
     // Se tem cookie mas sessão expirou, tenta renovar automaticamente
     // Não aplica timeout rigoroso - cookie mantém conectado
