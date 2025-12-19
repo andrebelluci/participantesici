@@ -52,7 +52,48 @@ try {
   ");
   $stmt->execute([$ritual_id, $participante_id, $primeira_vez_instituto, $primeira_vez_ayahuasca]);
 
-  $response = ['success' => true];
+  $inscricao_id = $pdo->lastInsertId();
+
+  // Copia dados da última inscrição salva (se existir)
+  $dadosCopiados = false;
+  $ritualNomeOrigem = null;
+  $stmt = $pdo->prepare("
+    SELECT i.*, r.nome as ritual_nome
+    FROM inscricoes i
+    JOIN rituais r ON i.ritual_id = r.id
+    WHERE i.participante_id = ?
+    AND i.salvo_em IS NOT NULL
+    AND i.id != ?
+    ORDER BY i.salvo_em DESC
+    LIMIT 1
+  ");
+  $stmt->execute([$participante_id, $inscricao_id]);
+  $ultimaInscricao = $stmt->fetch(PDO::FETCH_ASSOC);
+
+  if ($ultimaInscricao) {
+    // Copia os campos da última inscrição salva
+    $stmt = $pdo->prepare("
+      UPDATE inscricoes
+      SET doenca_psiquiatrica = ?,
+          nome_doenca = ?,
+          uso_medicao = ?,
+          nome_medicao = ?,
+          mensagem = ?
+      WHERE id = ?
+    ");
+    $stmt->execute([
+      $ultimaInscricao['doenca_psiquiatrica'],
+      $ultimaInscricao['nome_doenca'],
+      $ultimaInscricao['uso_medicao'],
+      $ultimaInscricao['nome_medicao'],
+      $ultimaInscricao['mensagem'],
+      $inscricao_id
+    ]);
+    $dadosCopiados = true;
+    $ritualNomeOrigem = $ultimaInscricao['ritual_nome'];
+  }
+
+  $response = ['success' => true, 'inscricao_id' => $inscricao_id];
 
   // Retorna informação se os dados vieram de inscrição anterior
   if ($inscricao_anterior) {
@@ -61,6 +102,14 @@ try {
     $response['primeira_vez_ayahuasca'] = $primeira_vez_ayahuasca;
   } else {
     $response['dados_anteriores'] = false;
+  }
+
+  // Retorna informação sobre cópia de dados
+  if ($dadosCopiados) {
+    $response['dados_copiados'] = true;
+    $response['ritual_nome_origem'] = $ritualNomeOrigem;
+  } else {
+    $response['dados_copiados'] = false;
   }
 
   echo json_encode($response);

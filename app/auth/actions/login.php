@@ -1,24 +1,9 @@
 <?php
 // app/auth/actions/login.php - VERSÃO ATUALIZADA COM CAPTCHA E 30 DIAS
 
-// ✅ Configura sessão para 30 dias APENAS se não estiver ativa
+// ✅ Inicia sessão se não estiver ativa (configurações serão aplicadas no header.php)
 if (session_status() === PHP_SESSION_NONE) {
-  // Configura parâmetros ANTES de iniciar a sessão
-  ini_set('session.gc_maxlifetime', 30 * 24 * 60 * 60); // 30 dias
-  ini_set('session.cookie_lifetime', 30 * 24 * 60 * 60); // 30 dias
-
-  session_set_cookie_params([
-    'lifetime' => 30 * 24 * 60 * 60, // 30 dias
-    'path' => '/',
-    'domain' => '',
-    'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on',
-    'httponly' => true,
-    'samesite' => 'Lax'
-  ]);
   session_start();
-} else {
-  // ✅ Se sessão já está ativa, só faz log
-  error_log("[LOGIN] Sessão já ativa - usando configurações existentes");
 }
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../services/CaptchaService.php';
@@ -29,11 +14,12 @@ function gerarTokenSeguro($length = 64)
   return bin2hex(random_bytes($length / 2));
 }
 
-// ✅ Função corrigida para definir cookie de lembrar-me
+// ✅ Função corrigida para definir cookie de lembrar-me (persistente até limpar cache)
 function definirCookieLembrarMe($user_id, $pdo)
 {
   $token = gerarTokenSeguro();
-  $expira_em = date('Y-m-d H:i:s', time() + (30 * 24 * 60 * 60)); // 30 dias
+  // Expiração muito longa (10 anos) - efetivamente até limpar cache do navegador
+  $expira_em = date('Y-m-d H:i:s', time() + (10 * 365 * 24 * 60 * 60)); // 10 anos
 
   try {
     // Remove tokens antigos do usuário
@@ -44,8 +30,8 @@ function definirCookieLembrarMe($user_id, $pdo)
     $stmt = $pdo->prepare("INSERT INTO remember_tokens (user_id, token, expires_at) VALUES (?, ?, ?)");
     $stmt->execute([$user_id, $token, $expira_em]);
 
-    // ✅ Define cookie seguro com configuração estendida
-    $cookie_expiry = time() + (30 * 24 * 60 * 60); // 30 dias
+    // ✅ Define cookie seguro com expiração muito longa (10 anos)
+    $cookie_expiry = time() + (10 * 365 * 24 * 60 * 60); // 10 anos
 
     // Para ambiente local/desenvolvimento
     if (
@@ -84,7 +70,7 @@ function definirCookieLembrarMe($user_id, $pdo)
       return false;
     }
 
-    error_log("[REMEMBER_ME] Token criado para usuário: $user_id, expira em: $expira_em, cookie expira: " . date('Y-m-d H:i:s', $cookie_expiry));
+    error_log("[REMEMBER_ME] Token criado para usuário: $user_id - Cookie persistente até limpar cache do navegador");
     return true;
 
   } catch (Exception $e) {
@@ -172,28 +158,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       $_SESSION['last_activity'] = time();
       $_SESSION['login_method'] = $lembrar_me ? 'remember_me' : 'normal'; // Para distinguir
 
-      // ✅ Se marcou "lembrar-me", cria token persistente
+      // ✅ Se marcou "manter conectado", cria token persistente
       if ($lembrar_me) {
         $cookie_success = definirCookieLembrarMe($user['id'], $pdo);
         if ($cookie_success) {
-          error_log("[LOGIN] Usuário {$user['usuario']} logou com lembrar-me ativado - sessão válida por 30 dias");
+          error_log("[LOGIN] Usuário {$user['usuario']} logou com 'manter conectado' ativado - sessão persistente até limpar cache");
         } else {
           error_log("[LOGIN] Falha ao criar cookie para usuário {$user['usuario']}");
         }
 
-        // ✅ Limpeza preventiva de tokens expirados
+        // ✅ Limpeza preventiva de tokens expirados (apenas os realmente antigos)
         limparTokensExpirados($pdo);
       } else {
-        error_log("[LOGIN] Usuário {$user['usuario']} logou sem lembrar-me - sessão padrão");
+        error_log("[LOGIN] Usuário {$user['usuario']} logou sem 'manter conectado' - sessão padrão");
       }
 
       // Log do login
-      error_log("[LOGIN] Login bem-sucedido: {$user['usuario']} (ID: {$user['id']}) - Método: " . ($lembrar_me ? 'REMEMBER_ME' : 'NORMAL'));
-
-      // ✅ Debug das configurações de sessão
-      error_log("[LOGIN] Configurações de sessão:");
-      error_log("  - session.gc_maxlifetime: " . ini_get('session.gc_maxlifetime') . " segundos (" . (ini_get('session.gc_maxlifetime') / 86400) . " dias)");
-      error_log("  - session.cookie_lifetime: " . ini_get('session.cookie_lifetime') . " segundos (" . (ini_get('session.cookie_lifetime') / 86400) . " dias)");
+      error_log("[LOGIN] Login bem-sucedido: {$user['usuario']} (ID: {$user['id']}) - Método: " . ($lembrar_me ? 'MANTER_CONECTADO' : 'NORMAL'));
 
       header("Location: /login?success=1");
       exit;

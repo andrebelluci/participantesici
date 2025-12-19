@@ -177,8 +177,11 @@ if (!isset($ritual)) {
               <div class="flex items-center gap-2">
                 <span class="font-semibold">Presente:</span>
                 <button
-                  class="presence-btn <?= $participante['presente'] === 'Sim' ? 'active bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200' ?> px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-w-[80px] flex items-center justify-center gap-2"
-                  data-participante-id="<?= $participante['id'] ?>" data-current-status="<?= $participante['presente'] ?>"
+                  class="presence-btn <?= $participante['presente'] === 'Sim' ? 'active bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200' ?> px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-w-[80px] flex items-center justify-center gap-2 <?= !empty($participante['assinatura']) ? 'opacity-50 cursor-not-allowed' : '' ?>"
+                  data-participante-id="<?= $participante['id'] ?>"
+                  data-current-status="<?= $participante['presente'] ?>"
+                  data-inscricao-id="<?= $participante['inscricao_id'] ?? 0 ?>"
+                  <?= !empty($participante['assinatura']) ? 'disabled' : '' ?>
                   onclick="togglePresenca(this)">
 
                   <?php if ($participante['presente'] === 'Sim'): ?>
@@ -187,6 +190,22 @@ if (!isset($ritual)) {
                   <?php else: ?>
                     <i class="fa-solid fa-xmark"></i>
                     <span>Não</span>
+                  <?php endif; ?>
+                </button>
+                <?php
+                $temAssinatura = !empty($participante['assinatura']);
+                $podeAssinar = $participante['presente'] === 'Sim';
+                ?>
+                <button
+                  onclick="abrirModalAssinatura(<?= $participante['inscricao_id'] ?? 0 ?>, <?= $participante['id'] ?>, <?= $id ?>)"
+                  class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm flex items-center gap-1 <?= !$podeAssinar ? 'opacity-50 cursor-not-allowed' : '' ?>"
+                  <?= !$podeAssinar ? 'disabled title="Marque como presente para assinar"' : '' ?>>
+                  <?php if ($temAssinatura): ?>
+                    <i class="fa-solid fa-check-circle"></i>
+                    <span>Assinado</span>
+                  <?php else: ?>
+                    <i class="fa-solid fa-pen"></i>
+                    <span>Assinar</span>
                   <?php endif; ?>
                 </button>
               </div>
@@ -257,12 +276,12 @@ if (!isset($ritual)) {
               <span class="block sm:hidden text-xs mt-1">Inscrição</span>
             </div>
 
-            <!-- Bolinha vermelha se não tem detalhes preenchidos -->
+            <!-- Bolinha vermelha se não tem detalhes obrigatórios preenchidos -->
             <?php
-            $temDetalhes = !empty($participante['salvo_em']);
+            $temDetalhes = temDetalhesCompletos($participante);
             ?>
             <?php if (!$temDetalhes): ?>
-              <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white"></span>
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white" id="notificacao-detalhes-<?= $participante['id'] ?>"></span>
             <?php endif; ?>
           </button>
 
@@ -382,9 +401,13 @@ if (!isset($ritual)) {
 
                 <!-- Presente -->
                 <td class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-2">
                   <button
-                    class="presence-btn <?= $participante['presente'] === 'Sim' ? 'active bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200' ?> px-3 py-1 rounded-lg text-sm font-medium transition-all duration-200 min-w-[70px] flex items-center justify-center gap-1"
-                    data-participante-id="<?= $participante['id'] ?>" data-current-status="<?= $participante['presente'] ?>"
+                      class="presence-btn <?= $participante['presente'] === 'Sim' ? 'active bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200' ?> px-3 py-1 rounded-lg text-sm font-medium transition-all duration-200 min-w-[70px] flex items-center justify-center gap-1 <?= !empty($participante['assinatura']) ? 'opacity-50 cursor-not-allowed' : '' ?>"
+                      data-participante-id="<?= $participante['id'] ?>"
+                      data-current-status="<?= $participante['presente'] ?>"
+                      data-inscricao-id="<?= $participante['inscricao_id'] ?? 0 ?>"
+                      <?= !empty($participante['assinatura']) ? 'disabled' : '' ?>
                     onclick="togglePresenca(this)">
                     <?php if ($participante['presente'] === 'Sim'): ?>
                       <i class="fa-solid fa-check"></i>
@@ -394,6 +417,22 @@ if (!isset($ritual)) {
                       <span>Não</span>
                     <?php endif; ?>
                   </button>
+                    <?php
+                    $temAssinatura = !empty($participante['assinatura']);
+                    $podeAssinar = $participante['presente'] === 'Sim';
+                    ?>
+                    <button onclick="abrirModalAssinatura(<?= $participante['inscricao_id'] ?? 0 ?>, <?= $participante['id'] ?>, <?= $id ?>)"
+                      class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm flex items-center gap-1 <?= !$podeAssinar ? 'opacity-50 cursor-not-allowed' : '' ?>"
+                      <?= !$podeAssinar ? 'disabled title="Marque como presente para assinar"' : '' ?>>
+                      <?php if ($temAssinatura): ?>
+                        <i class="fa-solid fa-check-circle"></i>
+                        <span>Assinado</span>
+                      <?php else: ?>
+                        <i class="fa-solid fa-pen"></i>
+                        <span>Assinar</span>
+                      <?php endif; ?>
+                    </button>
+                  </div>
                 </td>
 
                 <!-- Observação -->
@@ -444,12 +483,12 @@ if (!isset($ritual)) {
                       class="relative bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
                       title="Detalhes da inscrição do participante">
                       <i class="fa-solid fa-pencil"></i>
-                      <!-- Bolinha vermelha se detalhes estão vazios -->
+                      <!-- Bolinha vermelha se detalhes obrigatórios não estão preenchidos -->
                       <?php
-                      $temDetalhes = !empty($participante['salvo_em']);
+                      $temDetalhes = temDetalhesCompletos($participante);
                       ?>
                       <?php if (!$temDetalhes): ?>
-                        <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                        <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white" id="notificacao-detalhes-<?= $participante['id'] ?>"></span>
                       <?php endif; ?>
                     </button>
 
@@ -672,7 +711,7 @@ if (!isset($ritual)) {
             class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-sm">
         </div>
 
-        <button type="submit"
+        <button type="submit" id="btn-salvar-detalhes"
           class="w-full bg-[#00bfff] text-black py-2 rounded hover:bg-yellow-400 transition font-semibold">
           <i class="fa-solid fa-save mr-1"></i>
           Salvar
@@ -750,6 +789,41 @@ if (!isset($ritual)) {
   </div>
 </div>
 
+<!-- Modal de Assinatura Digital -->
+<div id="modal-assinatura" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] hidden">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative mx-4">
+    <button onclick="fecharModalAssinatura()"
+      class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg z-10">
+      <i class="fa-solid fa-window-close"></i>
+    </button>
+
+    <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+      <i class="fa-solid fa-signature text-blue-600"></i>
+      Assinatura Digital
+    </h2>
+
+    <div class="mb-4">
+      <p class="text-sm text-gray-600 mb-2">Desenhe sua assinatura abaixo:</p>
+      <canvas id="canvas-assinatura" class="w-full"></canvas>
+    </div>
+
+    <div class="flex justify-end gap-3">
+      <button onclick="limparAssinatura()"
+        class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition font-semibold">
+        <i class="fa-solid fa-eraser mr-2"></i> Limpar
+      </button>
+      <button onclick="fecharModalAssinatura()"
+        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition font-semibold">
+        <i class="fa-solid fa-times mr-2"></i> Cancelar
+      </button>
+      <button id="btn-salvar-assinatura" onclick="salvarAssinatura()"
+        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+        <i class="fa-solid fa-check mr-2"></i> Salvar
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
   const ritualId = <?= json_encode($id) ?>;
 </script>
@@ -763,8 +837,33 @@ if (!isset($ritual)) {
   }
 </style>
 
+<!-- Modal de Motivo de Bloqueio -->
+<div id="modal-motivo-bloqueio-ritual" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
+    <button onclick="fecharModalMotivoBloqueioRitual()" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg z-10">
+      <i class="fa-solid fa-window-close"></i>
+    </button>
+
+    <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+      <i class="fa-solid fa-ban text-red-600"></i>
+      Motivo do Bloqueio
+    </h2>
+
+    <div class="space-y-4">
+      <div>
+        <p class="text-sm text-gray-600 mb-2">Este participante não pode ser vinculado a novos rituais pelo seguinte motivo:</p>
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <p id="motivo-bloqueio-ritual-content" class="text-gray-800 whitespace-pre-wrap"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<link rel="stylesheet" href="/assets/css/assinatura.css">
 <script src="/assets/js/ritual-visualizar.js"></script>
 <script src="/assets/js/modal.js"></script>
 <script src="/assets/js/relatorios.js"></script>
+<script src="/assets/js/assinatura.js"></script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

@@ -28,6 +28,22 @@ if (!isset($pessoa)) {
             echo $nascimento->format('d/m/Y');
             ?>
           </p>
+          <p><span class="font-semibold">Permite vincular a novos rituais:</span>
+            <?php
+            $podeVincular = $pessoa['pode_vincular_rituais'] ?? 'Sim';
+            $corBg = $podeVincular === 'Sim' ? 'bg-green-50' : 'bg-red-50';
+            $corTexto = $podeVincular === 'Sim' ? 'text-green-700' : 'text-red-700';
+            ?>
+            <span class="<?= $corBg ?> <?= $corTexto ?> px-2 py-1 rounded font-bold">
+              <?= $podeVincular ?>
+            </span>
+            <?php if ($podeVincular === 'Não' && !empty($pessoa['motivo_bloqueio_vinculacao'])): ?>
+              <button onclick="abrirModalMotivoBloqueio()"
+                class="ml-2 text-xs text-gray-600 hover:text-gray-800 underline">
+                Ver motivo
+              </button>
+            <?php endif; ?>
+          </p>
           <p><span class="font-semibold">Inscrito:</span>
             <span class="text-blue-500 px-2 py-1 rounded font-bold">
               <?= $total_inscritos ?>
@@ -46,11 +62,22 @@ if (!isset($pessoa)) {
         </div>
       </div>
 
+      <div class="flex gap-2">
       <button onclick="abrirModalCadastro()"
         class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg flex items-center gap-2 transition">
         <i class="fa-solid fa-eye"></i>
-        <span>Ver cadastro</span>
+          <span>Cadastro</span>
+        </button>
+
+        <button onclick="abrirModalDocumentos(<?= $pessoa['id'] ?>)"
+          class="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg flex items-center gap-2 transition">
+          <i class="fa-solid fa-file-lines"></i>
+          <span>Documentos</span>
+          <span id="documentos-count-<?= $pessoa['id'] ?>"
+            class="bg-green-500 text-white px-1.5 py-0.5 rounded text-xs <?= count($documentos) > 0 ? '' : 'hidden' ?>"><?= count($documentos) ?></span>
       </button>
+      </div>
+
     </div>
 
     <!-- Botões de ação -->
@@ -182,8 +209,11 @@ if (!isset($pessoa)) {
               <div class="flex items-center gap-2">
                 <span class="font-semibold">Presente:</span>
                 <button
-                  class="presence-btn <?= $ritual['presente'] === 'Sim' ? 'active bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200' ?> px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-w-[80px] flex items-center justify-center gap-2"
-                  data-ritual-id="<?= $ritual['id'] ?>" data-current-status="<?= $ritual['presente'] ?>"
+                  class="presence-btn <?= $ritual['presente'] === 'Sim' ? 'active bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200' ?> px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 min-w-[80px] flex items-center justify-center gap-2 <?= !empty($ritual['assinatura']) ? 'opacity-50 cursor-not-allowed' : '' ?>"
+                  data-ritual-id="<?= $ritual['id'] ?>"
+                  data-current-status="<?= $ritual['presente'] ?>"
+                  data-inscricao-id="<?= $ritual['inscricao_id'] ?? 0 ?>"
+                  <?= !empty($ritual['assinatura']) ? 'disabled' : '' ?>
                   onclick="togglePresenca(this)">
 
                   <?php if ($ritual['presente'] === 'Sim'): ?>
@@ -192,6 +222,22 @@ if (!isset($pessoa)) {
                   <?php else: ?>
                     <i class="fa-solid fa-xmark"></i>
                     <span>Não</span>
+                  <?php endif; ?>
+                </button>
+                <?php
+                $temAssinatura = !empty($ritual['assinatura']);
+                $podeAssinar = $ritual['presente'] === 'Sim';
+                ?>
+                <button
+                  onclick="abrirModalAssinatura(<?= $ritual['inscricao_id'] ?? 0 ?>, <?= $pessoa['id'] ?>, <?= $ritual['id'] ?>)"
+                  class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm flex items-center gap-1 <?= !$podeAssinar ? 'opacity-50 cursor-not-allowed' : '' ?>"
+                  <?= !$podeAssinar ? 'disabled title="Marque como presente para assinar"' : '' ?>>
+                  <?php if ($temAssinatura): ?>
+                    <i class="fa-solid fa-check-circle"></i>
+                    <span>Assinado</span>
+                  <?php else: ?>
+                    <i class="fa-solid fa-pen"></i>
+                    <span>Assinar</span>
                   <?php endif; ?>
                 </button>
               </div>
@@ -262,12 +308,12 @@ if (!isset($pessoa)) {
               <span class="block sm:hidden text-xs mt-1">Inscrição</span>
             </div>
 
-            <!-- ✅ BOLINHA VERMELHA se não tem detalhes preenchidos -->
+            <!-- ✅ BOLINHA VERMELHA se não tem detalhes obrigatórios preenchidos -->
             <?php
-            $temDetalhes = !empty($ritual['salvo_em']);
+            $temDetalhes = temDetalhesCompletos($ritual);
             ?>
             <?php if (!$temDetalhes): ?>
-              <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white"></span>
+              <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full border border-white" id="notificacao-detalhes-<?= $ritual['id'] ?>"></span>
             <?php endif; ?>
           </button>
 
@@ -406,9 +452,13 @@ if (!isset($pessoa)) {
 
                 <!-- Presente -->
                 <td class="px-4 py-3 text-center">
+                  <div class="flex items-center justify-center gap-2">
                   <button
-                    class="presence-btn <?= $ritual['presente'] === 'Sim' ? 'active bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200' ?> px-3 py-1 rounded-lg text-sm font-medium transition-all duration-200 min-w-[70px] flex items-center justify-center gap-1"
-                    data-ritual-id="<?= $ritual['id'] ?>" data-current-status="<?= $ritual['presente'] ?>"
+                      class="presence-btn <?= $ritual['presente'] === 'Sim' ? 'active bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200' ?> px-3 py-1 rounded-lg text-sm font-medium transition-all duration-200 min-w-[70px] flex items-center justify-center gap-1 <?= !empty($ritual['assinatura']) ? 'opacity-50 cursor-not-allowed' : '' ?>"
+                      data-ritual-id="<?= $ritual['id'] ?>"
+                      data-current-status="<?= $ritual['presente'] ?>"
+                      data-inscricao-id="<?= $ritual['inscricao_id'] ?? 0 ?>"
+                      <?= !empty($ritual['assinatura']) ? 'disabled' : '' ?>
                     onclick="togglePresenca(this)">
                     <?php if ($ritual['presente'] === 'Sim'): ?>
                       <i class="fa-solid fa-check"></i>
@@ -418,6 +468,22 @@ if (!isset($pessoa)) {
                       <span>Não</span>
                     <?php endif; ?>
                   </button>
+                    <?php
+                    $temAssinatura = !empty($ritual['assinatura']);
+                    $podeAssinar = $ritual['presente'] === 'Sim';
+                    ?>
+                    <button onclick="abrirModalAssinatura(<?= $ritual['inscricao_id'] ?? 0 ?>, <?= $pessoa['id'] ?>, <?= $ritual['id'] ?>)"
+                      class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-sm flex items-center gap-1 <?= !$podeAssinar ? 'opacity-50 cursor-not-allowed' : '' ?>"
+                      <?= !$podeAssinar ? 'disabled title="Marque como presente para assinar"' : '' ?>>
+                      <?php if ($temAssinatura): ?>
+                        <i class="fa-solid fa-check-circle"></i>
+                        <span>Assinado</span>
+                      <?php else: ?>
+                        <i class="fa-solid fa-pen"></i>
+                        <span>Assinar</span>
+                      <?php endif; ?>
+                    </button>
+                  </div>
                 </td>
 
                 <!-- Observação -->
@@ -463,12 +529,12 @@ if (!isset($pessoa)) {
                       class="relative bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
                       title="Detalhes da inscrição neste ritual">
                       <i class="fa-solid fa-pencil"></i>
-                      <!-- Bolinha vermelha se detalhes estão vazios -->
+                      <!-- Bolinha vermelha se detalhes obrigatórios não estão preenchidos -->
                       <?php
-                      $temDetalhes = !empty($ritual['salvo_em']);
+                      $temDetalhes = temDetalhesCompletos($ritual);
                       ?>
                       <?php if (!$temDetalhes): ?>
-                        <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                        <span class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full border border-white" id="notificacao-detalhes-<?= $ritual['id'] ?>"></span>
                       <?php endif; ?>
                     </button>
 
@@ -683,7 +749,7 @@ if (!isset($pessoa)) {
             class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 text-sm">
         </div>
 
-        <button type="submit"
+        <button type="submit" id="btn-salvar-detalhes"
           class="w-full bg-[#00bfff] text-black py-2 rounded hover:bg-yellow-400 transition font-semibold">
           <i class="fa-solid fa-save mr-1"></i>
           Salvar
@@ -804,6 +870,18 @@ if (!isset($pessoa)) {
             <p class="mt-1 text-gray-600"><?= htmlspecialchars($pessoa['sobre_participante']) ?></p>
           </div>
         </div>
+        <div><strong>Permite vincular a novos rituais:</strong>
+          <?php
+          $podeVincular = $pessoa['pode_vincular_rituais'] ?? 'Sim';
+          $corTexto = $podeVincular === 'Sim' ? 'text-green-700' : 'text-red-700';
+          ?>
+          <span class="<?= $corTexto ?> font-semibold"><?= $podeVincular ?></span>
+          <?php if ($podeVincular === 'Não' && !empty($pessoa['motivo_bloqueio_vinculacao'])): ?>
+            <button onclick="abrirModalMotivoBloqueio()" class="ml-2 text-xs text-blue-600 hover:text-blue-800 underline">
+              Ver motivo
+            </button>
+          <?php endif; ?>
+        </div>
       </div>
 
       <div class="pt-4 border-t">
@@ -818,8 +896,8 @@ if (!isset($pessoa)) {
 </div>
 
 <!-- Modal de Confirmação Genérico -->
-<div id="confirmModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
+<div id="confirmModal" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] hidden">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4 z-[101]">
     <h2 class="text-xl font-bold mb-4 text-red-600" id="confirmModalTitle"><i
         class="fa-solid fa-exclamation-triangle mr-2"></i>ATENÇÃO!</h2>
     <p class="text-gray-700 mb-6" id="confirmModalText">Tem certeza que deseja remover este ritual do participante?</p>
@@ -849,8 +927,338 @@ if (!isset($pessoa)) {
   }
 </style>
 
+<!-- Modal de Lista de Documentos -->
+<div id="modal-documentos" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative mx-4 max-h-[90vh] overflow-y-auto">
+    <button onclick="fecharModalDocumentos()"
+      class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg z-10">
+      <i class="fa-solid fa-window-close"></i>
+    </button>
+
+    <!-- Cabeçalho da Modal -->
+    <h2 id="modal-documentos-titulo" class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+      <i class="fa-solid fa-file-lines text-blue-600"></i>
+      Documentos do Participante
+    </h2>
+
+    <!-- Botão Voltar (aparece quando visualizando imagem) -->
+    <button id="btn-voltar-lista-documentos" onclick="voltarParaListaDocumentos()"
+      class="hidden mb-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition font-medium flex items-center gap-2">
+      <i class="fa-solid fa-arrow-left"></i>
+      Voltar para lista
+    </button>
+
+    <!-- Formulário de Upload -->
+    <form method="POST" enctype="multipart/form-data" id="form-upload-documento"
+      class="mb-6 p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+      <input type="hidden" name="upload_documento" value="1">
+      <!-- Input para câmera (mobile) -->
+      <input type="file" name="documento" id="documento-upload-input-camera" accept="image/*"
+        capture="environment" class="hidden">
+      <!-- Input para arquivo (desktop e mobile) -->
+      <input type="file" name="documento" id="documento-upload-input" accept="image/*,application/pdf"
+        class="hidden">
+      <input type="hidden" name="documento_comprimido" id="documento-comprimido">
+      <input type="hidden" name="nome_arquivo_personalizado" id="nome-arquivo-personalizado">
+
+      <!-- Seleção de Nome do Arquivo -->
+      <div class="mb-4 space-y-3">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Nome do arquivo:</label>
+
+        <div class="space-y-2">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="tipo_nome_documento" value="ficha" id="tipo-nome-ficha" checked
+              class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+            <span class="text-sm text-gray-700">Ficha de inscrição</span>
+          </label>
+
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="radio" name="tipo_nome_documento" value="outro" id="tipo-nome-outro"
+              class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
+            <span class="text-sm text-gray-700">Outro</span>
+          </label>
+        </div>
+
+        <div id="campo-nome-outro" class="hidden">
+          <input type="text" id="nome-outro-input" placeholder="Digite o nome do arquivo" required
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            maxlength="100">
+          <p class="text-xs text-red-600 mt-1">* Campo obrigatório</p>
+        </div>
+      </div>
+
+      <!-- Botões Mobile (mostrar apenas no mobile) -->
+      <div class="flex flex-col gap-2 md:hidden">
+        <button type="button" onclick="document.getElementById('documento-upload-input-camera').click()"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition font-medium flex items-center justify-center gap-2">
+          <i class="fa-solid fa-camera"></i>
+          Tirar Foto
+        </button>
+        <button type="button" onclick="document.getElementById('documento-upload-input').click()"
+          class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition font-medium flex items-center justify-center gap-2">
+          <i class="fa-solid fa-folder-open"></i>
+          Escolher Arquivo
+        </button>
+      </div>
+
+      <!-- Botão Desktop (mostrar apenas no desktop) -->
+      <button type="button" onclick="document.getElementById('documento-upload-input').click()"
+        class="hidden md:flex w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition font-medium items-center justify-center gap-2">
+        <i class="fa-solid fa-plus"></i>
+        Adicionar Documento
+      </button>
+
+      <p class="text-xs text-gray-500 mt-2 text-center">Tirar foto ou escolher arquivo (Imagens ou PDF)</p>
+    </form>
+
+    <!-- Galeria PhotoSwipe para documentos (oculta, será usada pelo PhotoSwipe) -->
+    <div id="documentos-gallery" class="hidden"></div>
+
+    <!-- Lista de Documentos -->
+    <div id="documentos-lista" class="space-y-3">
+      <?php if (empty($documentos)): ?>
+        <div class="text-center text-gray-500 py-8">
+          <i class="fa-solid fa-file-lines text-4xl mb-2"></i>
+          <p>Nenhum documento cadastrado</p>
+        </div>
+      <?php else: ?>
+        <?php foreach ($documentos as $doc): ?>
+          <?php
+          $isImagem = $doc['tipo'] && strpos($doc['tipo'], 'image/') === 0;
+          $tamanhoFormatado = $doc['tamanho'] ? number_format($doc['tamanho'] / 1024, 2) . ' KB' : '0 KB';
+          $dataFormatada = date('d/m/Y H:i', strtotime($doc['criado_em']));
+          $icone = $isImagem ? 'fa-image' : 'fa-file-pdf';
+          ?>
+          <div
+            class="bg-gray-50 border border-gray-200 rounded-lg p-4 flex items-center justify-between hover:bg-gray-100 transition">
+            <div class="flex items-center gap-3 flex-1 min-w-0">
+              <div class="bg-blue-100 p-3 rounded-lg flex-shrink-0">
+                <i class="fa-solid <?= $icone ?> text-blue-600 text-xl"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-medium text-gray-800 truncate"><?= htmlspecialchars($doc['nome_arquivo']) ?></p>
+                <p class="text-xs text-gray-500"><?= $tamanhoFormatado ?> • <?= $dataFormatada ?></p>
+              </div>
+            </div>
+            <div class="flex gap-2 flex-shrink-0">
+              <?php if ($isImagem): ?>
+                <!-- Botão Visualizar Imagem -->
+                <button onclick="visualizarDocumentoImagem('<?= htmlspecialchars($doc['caminho']) ?>')"
+                  class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition text-sm"
+                  title="Visualizar imagem">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+                <!-- Botão Download Imagem -->
+                <a href="<?= htmlspecialchars($doc['caminho']) ?>" target="_blank" download
+                  class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg transition text-sm"
+                  title="Baixar imagem">
+                  <i class="fa-solid fa-download"></i>
+                </a>
+              <?php else: ?>
+                <!-- Botão Visualizar PDF -->
+                <button onclick="visualizarDocumentoPDF('<?= htmlspecialchars($doc['caminho']) ?>')"
+                  class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-lg transition text-sm"
+                  title="Visualizar PDF">
+                  <i class="fa-solid fa-eye"></i>
+                </button>
+                <!-- Botão Download PDF -->
+                <a href="<?= htmlspecialchars($doc['caminho']) ?>" target="_blank" download
+                  class="bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg transition text-sm"
+                  title="Baixar PDF">
+                  <i class="fa-solid fa-download"></i>
+                </a>
+              <?php endif; ?>
+              <button onclick="excluirDocumento(<?= $doc['id'] ?>, <?= $pessoa['id'] ?>)"
+                class="bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition text-sm"
+                title="Excluir documento">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        <?php endforeach; ?>
+      <?php endif; ?>
+    </div>
+  </div>
+</div>
+
+
+<!-- Modal de Crop de Documento -->
+<div id="crop-modal-documento" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-lg max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-semibold">Ajustar Documento</h3>
+      <button onclick="fecharCropModalDocumento()" class="text-red-600 hover:text-red-800 text-lg">
+        <i class="fa-solid fa-window-close"></i>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-hidden mb-4 max-h-[70vh]">
+      <img id="crop-image-documento" src="#" alt="Documento para crop" class="max-w-full max-h-full object-contain">
+    </div>
+
+    <div class="flex gap-2 justify-end">
+      <button id="cancel-crop-documento"
+        class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-900 transition font-semibold">
+        Cancelar
+      </button>
+      <button id="apply-crop-documento"
+        class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold">
+        Salvar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Motivo de Bloqueio -->
+<div id="modal-motivo-bloqueio" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
+    <button onclick="fecharModalMotivoBloqueio()" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg z-10">
+      <i class="fa-solid fa-window-close"></i>
+    </button>
+
+    <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+      <i class="fa-solid fa-ban text-red-600"></i>
+      Motivo do Bloqueio
+    </h2>
+
+    <div class="space-y-4">
+      <div>
+        <p class="text-sm text-gray-600 mb-2">Este participante não pode ser vinculado a novos rituais pelo seguinte motivo:</p>
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <p class="text-gray-800 whitespace-pre-wrap"><?= htmlspecialchars($pessoa['motivo_bloqueio_vinculacao'] ?? 'Motivo não informado') ?></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Motivo de Bloqueio para Participantes (usada na lista de rituais) -->
+<div id="modal-motivo-bloqueio-participante" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
+    <button onclick="fecharModalMotivoBloqueioParticipante()" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg z-10">
+      <i class="fa-solid fa-window-close"></i>
+    </button>
+
+    <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+      <i class="fa-solid fa-ban text-red-600"></i>
+      Motivo do Bloqueio
+    </h2>
+
+    <div class="space-y-4">
+      <div>
+        <p class="text-sm text-gray-600 mb-2">Este participante não pode ser vinculado a novos rituais pelo seguinte motivo:</p>
+        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+          <p id="motivo-bloqueio-participante-content" class="text-gray-800 whitespace-pre-wrap"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Assinatura Digital -->
+<div id="modal-assinatura" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] hidden">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative mx-4">
+    <button onclick="fecharModalAssinatura()"
+      class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg z-10">
+      <i class="fa-solid fa-window-close"></i>
+    </button>
+
+    <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+      <i class="fa-solid fa-signature text-blue-600"></i>
+      Assinatura Digital
+    </h2>
+
+    <div class="mb-4">
+      <p class="text-sm text-gray-600 mb-2">Desenhe sua assinatura abaixo:</p>
+      <canvas id="canvas-assinatura" class="w-full"></canvas>
+    </div>
+
+    <div class="flex justify-end gap-3">
+      <button onclick="limparAssinatura()"
+        class="px-4 py-2 bg-gray-600 text-white rounded hover:bg-gray-700 transition font-semibold">
+        <i class="fa-solid fa-eraser mr-2"></i> Limpar
+      </button>
+      <button onclick="fecharModalAssinatura()"
+        class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition font-semibold">
+        <i class="fa-solid fa-times mr-2"></i> Cancelar
+      </button>
+      <button id="btn-salvar-assinatura" onclick="salvarAssinatura()"
+        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition font-semibold disabled:opacity-50 disabled:cursor-not-allowed">
+        <i class="fa-solid fa-check mr-2"></i> Salvar
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const participanteId = <?= json_encode($id) ?>;
+  const documentosCount = <?= count($documentos) ?>;
+</script>
+<link rel="stylesheet" href="/assets/css/assinatura.css">
+<!-- PhotoSwipe CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
+<!-- PhotoSwipe JS -->
+<script type="module">
+  import PhotoSwipeLightbox from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.js';
+
+  // Função para verificar se é celular em modo retrato
+  function isPhonePortrait() {
+    return window.matchMedia('(max-width: 600px) and (orientation: portrait)').matches;
+  }
+
+  // Inicializar PhotoSwipe com zoom dinâmico
+  window.photoSwipeLightbox = new PhotoSwipeLightbox({
+    gallery: '#documentos-gallery',
+    children: 'a',
+
+    initialZoomLevel: (zoomLevelObject) => {
+      if (isPhonePortrait()) {
+        return zoomLevelObject.vFill; // Preencher 100% da altura em retrato
+      } else {
+        return zoomLevelObject.fit; // Ajustar à viewport em outros casos
+      }
+    },
+    secondaryZoomLevel: (zoomLevelObject) => {
+      if (isPhonePortrait()) {
+        return zoomLevelObject.fit; // Ajustar em retrato
+      } else {
+        return zoomLevelObject.wFill; // Tamanho original em outros casos
+      }
+    },
+    // Calcula zoom máximo dinamicamente baseado no tamanho da imagem
+    // Permite zoom mesmo quando a imagem é menor que a viewport
+    maxZoomLevel: (zoomLevelObject, itemData, pswp) => {
+      // Se pswp ainda não estiver disponível, retorna um valor padrão seguro
+      if (!pswp || !pswp.viewportSize) {
+        return 5; // Permite zoom até 5x como padrão seguro
+      }
+
+      const viewportWidth = pswp.viewportSize.x;
+      const viewportHeight = pswp.viewportSize.y;
+      const imageWidth = itemData.width || itemData.w || viewportWidth;
+      const imageHeight = itemData.height || itemData.h || viewportHeight;
+
+      // Se a imagem é menor que a viewport, permite zoom maior
+      if (imageWidth < viewportWidth && imageHeight < viewportHeight) {
+        const zoomX = viewportWidth / imageWidth;
+        const zoomY = viewportHeight / imageHeight;
+        // Retorna o maior zoom necessário para preencher a viewport, com limite de 5x
+        return Math.min(Math.max(zoomX, zoomY), 5);
+      }
+
+      // Para imagens maiores, permite zoom até 2x
+      return 2;
+    },
+
+    pswpModule: () => import('https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.esm.js')
+  });
+
+  window.photoSwipeLightbox.init();
+</script>
+<script src="/assets/js/documentos.js"></script>
 <script src="/assets/js/participante-visualizar.js"></script>
 <script src="/assets/js/modal.js"></script>
 <script src="/assets/js/relatorios.js"></script>
+<script src="/assets/js/assinatura.js"></script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

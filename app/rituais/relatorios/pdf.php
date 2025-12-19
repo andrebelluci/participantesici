@@ -31,11 +31,12 @@ if (!$ritual) {
 
 // Buscar todos os participantes do ritual
 $sql_participantes = "
-    SELECT p.*, i.presente, i.observacao,
+    SELECT p.*, i.id as inscricao_id, i.presente, i.observacao,
            i.primeira_vez_instituto, i.primeira_vez_ayahuasca,
            i.doenca_psiquiatrica, i.nome_doenca,
            i.uso_medicao, i.nome_medicao, i.mensagem,
-           i.salvo_em, i.obs_salvo_em
+           i.salvo_em, i.obs_salvo_em,
+           i.assinatura, i.assinatura_data
     FROM inscricoes i
     JOIN participantes p ON i.participante_id = p.id
     WHERE i.ritual_id = ?
@@ -46,12 +47,14 @@ $stmt_participantes->execute([$id]);
 $participantes = $stmt_participantes->fetchAll();
 
 // Função para formatar CPF
-function formatarCPF($cpf) {
+function formatarCPF($cpf)
+{
     return substr($cpf, 0, 3) . '.' . substr($cpf, 3, 3) . '.' . substr($cpf, 6, 3) . '-' . substr($cpf, 9, 2);
 }
 
 // Função para formatar telefone
-function formatarTelefone($telefone) {
+function formatarTelefone($telefone)
+{
     $telefone = preg_replace('/\D/', '', $telefone);
     if (strlen($telefone) == 11) {
         return '(' . substr($telefone, 0, 2) . ') ' . substr($telefone, 2, 5) . '-' . substr($telefone, 7, 4);
@@ -59,10 +62,117 @@ function formatarTelefone($telefone) {
     return $telefone;
 }
 
+// Função para processar assinatura e salvar arquivo temporário para TCPDF
+function processarAssinaturaParaPDF($assinatura_base64, $inscricao_id, $pdf)
+{
+    if (empty($assinatura_base64)) {
+        return null;
+    }
+
+    try {
+        // Decodificar base64
+        $image_data = base64_decode(preg_replace('/^data:image\/\w+;base64,/', '', $assinatura_base64));
+        if (!$image_data) {
+            error_log("[PDF] Erro ao decodificar base64 da assinatura");
+            return null;
+        }
+
+        // Criar imagem a partir dos dados
+        $source = @imagecreatefromstring($image_data);
+        if (!$source) {
+            error_log("[PDF] Erro ao criar imagem a partir dos dados");
+            return null;
+        }
+
+        // Redimensionar para tamanho maior para melhor qualidade
+        $width = imagesx($source);
+        $height = imagesy($source);
+        $new_width = 70;
+        $new_height = 30;
+
+        // Criar imagem temporária maior para melhor qualidade
+        $temp_thumb = imagecreatetruecolor($new_width, $new_height);
+        imagealphablending($temp_thumb, false);
+        imagesavealpha($temp_thumb, true);
+
+        // Preencher com branco (fundo branco)
+        $white = imagecolorallocate($temp_thumb, 255, 255, 255);
+        imagefill($temp_thumb, 0, 0, $white);
+
+        // Redimensionar com melhor qualidade
+        imagecopyresampled($temp_thumb, $source, 0, 0, 0, 0, $new_width, $new_height, $width, $height);
+
+        // Criar imagem final com fundo branco sólido
+        $thumb = imagecreatetruecolor($new_width, $new_height);
+        imagealphablending($thumb, false);
+        imagesavealpha($thumb, false);
+
+        // Preencher com branco
+        $white_bg = imagecolorallocate($thumb, 255, 255, 255);
+        imagefill($thumb, 0, 0, $white_bg);
+
+        // Converter para preto usando threshold suave
+        // Percorrer pixels e converter para preto se não for muito claro
+        for ($x = 0; $x < $new_width; $x++) {
+            for ($y = 0; $y < $new_height; $y++) {
+                $rgb = imagecolorat($temp_thumb, $x, $y);
+                $a = ($rgb >> 24) & 0xFF;
+
+                // Se não for transparente
+                if ($a < 127) {
+                    $r = ($rgb >> 16) & 0xFF;
+                    $g = ($rgb >> 8) & 0xFF;
+                    $b = $rgb & 0xFF;
+
+                    // Calcular luminosidade
+                    $luminance = ($r * 0.299 + $g * 0.587 + $b * 0.114);
+
+                    // Threshold mais suave: se for mais escuro que 240 (muito claro), vira preto
+                    // Isso preserva a assinatura mas escurece ela
+                    if ($luminance < 240) {
+                        // Escurecer proporcionalmente: quanto mais escuro, mais preto
+                        $intensity = 255 - (int) (($luminance / 240) * 255);
+                        $intensity = max(0, min(255, $intensity));
+                        $color = imagecolorallocate($thumb, $intensity, $intensity, $intensity);
+                        imagesetpixel($thumb, $x, $y, $color);
+                    }
+                }
+            }
+        }
+
+        imagedestroy($temp_thumb);
+
+        // Salvar em arquivo temporário
+        $temp_file = sys_get_temp_dir() . '/assinatura_' . $inscricao_id . '_' . uniqid() . '.png';
+        if (!imagepng($thumb, $temp_file)) {
+            error_log("[PDF] Erro ao salvar arquivo de assinatura: $temp_file");
+            imagedestroy($source);
+            imagedestroy($thumb);
+            return null;
+        }
+
+        imagedestroy($source);
+        imagedestroy($thumb);
+
+        // Ler arquivo e converter para base64
+        $thumb_data = file_get_contents($temp_file);
+        @unlink($temp_file); // Limpar imediatamente
+
+        return 'data:image/png;base64,' . base64_encode($thumb_data);
+    } catch (Exception $e) {
+        error_log("[PDF] Exceção ao processar assinatura: " . $e->getMessage());
+        return null;
+    }
+}
+
 // Contar estatísticas
 $total_participantes = count($participantes);
-$presentes = array_filter($participantes, function($p) { return $p['presente'] === 'Sim'; });
-$ausentes = array_filter($participantes, function($p) { return $p['presente'] === 'Não'; });
+$presentes = array_filter($participantes, function ($p) {
+    return $p['presente'] === 'Sim';
+});
+$ausentes = array_filter($participantes, function ($p) {
+    return $p['presente'] === 'Não';
+});
 $total_presentes = count($presentes);
 $total_ausentes = count($ausentes);
 
@@ -81,7 +191,7 @@ $pdf->setPrintFooter(false);
 
 // Configurar margens
 $pdf->SetMargins(15, 20, 15);
-$pdf->SetAutoPageBreak(TRUE, margin: 25);
+$pdf->SetAutoPageBreak(TRUE, 25);
 
 // Adicionar página
 $pdf->AddPage();
@@ -197,21 +307,39 @@ if (!empty($participantes)) {
     $html_participantes = '
     <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
         <tr style="background-color: #0066cc; color: white;">
-            <th width="25%" style="text-align: center;"><strong>Nome</strong></th>
+            <th width="22%" style="text-align: center;"><strong>Nome</strong></th>
             <th width="13%" style="text-align: center;"><strong>CPF</strong></th>
             <th width="14%" style="text-align: center;"><strong>Celular</strong></th>
             <th width="9%" style="text-align: center;"><strong>Presente</strong></th>
             <th width="7%" style="text-align: center;"><strong>1ª Vez</strong></th>
-            <th width="30%" style="text-align: center;"><strong>Observação</strong></th>
+            <th width="10%" style="text-align: center;"><strong>Assinatura</strong></th>
+            <th width="24%" style="text-align: center;"><strong>Observação</strong></th>
         </tr>';
 
     $row_color = true;
+
     foreach ($participantes as $participante) {
         $bg_color = $row_color ? '#f8f9fa' : '#ffffff';
         $presente_color = $participante['presente'] === 'Sim' ? '#d4edda' : '#f8d7da';
         $presente_text_color = $participante['presente'] === 'Sim' ? '#155724' : '#721c24';
         $primeira_vez_color = $participante['primeira_vez_instituto'] === 'Sim' ? '#fff3cd' : '#e2e3e5';
         $primeira_vez_text_color = $participante['primeira_vez_instituto'] === 'Sim' ? '#856404' : '#6c757d';
+
+        $assinatura_html = '';
+        if (!empty($participante['assinatura'])) {
+            // Tentar processar assinatura
+            $thumb_base64 = processarAssinaturaParaPDF($participante['assinatura'], $participante['inscricao_id'] ?? uniqid(), $pdf);
+            if ($thumb_base64) {
+                // Tentar usar base64 inline - TCPDF pode ou não suportar
+                // Se não funcionar, o usuário verá "SIM" como fallback
+                $assinatura_html = '<img src="' . htmlspecialchars($thumb_base64, ENT_QUOTES, 'UTF-8') . '" width="70" height="30" border="0" />';
+            } else {
+                // Fallback: mostrar "SIM" quando houver assinatura mas não conseguir processar
+                $assinatura_html = '<span style="color: #999; font-size: 8px;">SIM</span>';
+            }
+        } else {
+            $assinatura_html = '<span style="font-size: 8px;">NÃO</span>';
+        }
 
         $html_participantes .= '
         <tr style="background-color: ' . $bg_color . ';">
@@ -220,7 +348,8 @@ if (!empty($participantes)) {
             <td style="text-align: center;">' . formatarTelefone($participante['celular']) . '</td>
             <td style="text-align: center; background-color: ' . $presente_color . '; color: ' . $presente_text_color . ';"><strong>' . ($participante['presente'] === 'Sim' ? 'SIM' : 'NÃO') . '</strong></td>
             <td style="text-align: center; background-color: ' . $primeira_vez_color . '; color: ' . $primeira_vez_text_color . ';"><strong>' . ($participante['primeira_vez_instituto'] === 'Sim' ? 'SIM' : 'NÃO') . '</strong></td>
-            <td style="font-size: 7px;">' . htmlspecialchars(mb_substr($participante['observacao'] ?: 'Nenhuma observação', 0, 60)) . '</td>
+            <td style="text-align: center; vertical-align: middle;">' . $assinatura_html . '</td>
+            <td style="font-size: 7px;">' . htmlspecialchars(mb_substr($participante['observacao'] ?: 'Nenhuma observação', 0, 50)) . '</td>
         </tr>';
         $row_color = !$row_color;
     }

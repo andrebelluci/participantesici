@@ -61,12 +61,44 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $estado = $_POST['estado'];
   $bairro = $_POST['bairro'];
   $sobre_participante = $_POST['sobre_participante'];
+  $pode_vincular_rituais = $_POST['pode_vincular_rituais'] ?? 'Sim';
+  $motivo_bloqueio_vinculacao = $_POST['motivo_bloqueio_vinculacao'] ?? null;
+
+  // Se pode vincular é "Sim", limpar motivo
+  if ($pode_vincular_rituais === 'Sim') {
+    $motivo_bloqueio_vinculacao = null;
+  }
 
   // ✅ GERENCIAMENTO DE IMAGENS MELHORADO
   $foto = $pessoa['foto']; // Mantém a foto atual por padrão
 
-  // Verifica se há imagem cropada (prioridade)
-  if (!empty($_POST['foto_cropada'])) {
+  // ✅ PROCESSAR IMAGEM COMPRIMIDA (PRIORIDADE MÁXIMA)
+  if (!empty($_POST['foto_comprimida'])) {
+    // Exclui fotos antigas baseadas no CPF
+    excluirFotoAntigaParticipante($cpf);
+
+    // Processa imagem comprimida (base64)
+    $imageData = $_POST['foto_comprimida'];
+    if (preg_match('/^data:image\/(\w+);base64,/', $imageData, $matches)) {
+      $imageType = $matches[1];
+      $imageData = substr($imageData, strpos($imageData, ',') + 1);
+      $imageData = base64_decode($imageData);
+
+      $foto_nome = gerarNomeArquivoParticipante($cpf, $imageType);
+      $foto_destino = __DIR__ . '/../../../public_html/storage/uploads/participantes/' . $foto_nome;
+
+      if (!is_dir(dirname($foto_destino))) {
+        mkdir(dirname($foto_destino), 0755, true);
+      }
+
+      if (file_put_contents($foto_destino, $imageData)) {
+        $foto = '/storage/uploads/participantes/' . $foto_nome;
+        error_log("✅ Imagem comprimida atualizada: $foto");
+      }
+    }
+  }
+  // ✅ FALLBACK: PROCESSAR IMAGEM CROPADA (sem compressão)
+  elseif (!empty($_POST['foto_cropada'])) {
     // Exclui fotos antigas baseadas no CPF
     excluirFotoAntigaParticipante($cpf);
 
@@ -153,7 +185,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     UPDATE participantes SET
         foto = ?, nome_completo = ?, nascimento = ?, sexo = ?, cpf = ?, rg = ?, passaporte = ?,
         celular = ?, email = ?, como_soube = ?, cep = ?, endereco_rua = ?, endereco_numero = ?,
-        endereco_complemento = ?, cidade = ?, estado = ?, bairro = ?, sobre_participante = ?
+        endereco_complemento = ?, cidade = ?, estado = ?, bairro = ?, sobre_participante = ?,
+        pode_vincular_rituais = ?, motivo_bloqueio_vinculacao = ?
     WHERE id = ?
   ");
 
@@ -176,6 +209,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $estado,
     $bairro,
     $sobre_participante,
+    $pode_vincular_rituais,
+    $motivo_bloqueio_vinculacao,
     $id
   ]);
 

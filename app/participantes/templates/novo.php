@@ -10,8 +10,7 @@ require_once __DIR__ . '/../../includes/header.php';
         // Verifica se há um parâmetro 'redirect' na URL
         $redirect = isset($_GET['redirect']) ? htmlspecialchars($_GET['redirect']) : '/participantes';
         ?>
-        <a href="<?= $redirect ?>"
-            class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
+        <a href="<?= $redirect ?>" class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
             <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
         </a>
 
@@ -51,7 +50,8 @@ require_once __DIR__ . '/../../includes/header.php';
 
             <!-- Dados Pessoais -->
             <div>
-                <h2 class="text-lg font-semibold text-gray-700 mb-4"><i class="fa-solid fa-id-card text-purple-500"></i> Dados Pessoais</h2>
+                <h2 class="text-lg font-semibold text-gray-700 mb-4"><i class="fa-solid fa-id-card text-purple-500"></i>
+                    Dados Pessoais</h2>
 
                 <div class="mb-6 w-full md:w-1/6">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Foto do Participante:</label>
@@ -173,7 +173,8 @@ require_once __DIR__ . '/../../includes/header.php';
 
             <!-- Endereço -->
             <div>
-                <h2 class="text-lg font-semibold text-gray-700 mb-4"><i class="fa-solid fa-location-dot text-red-500"></i> Endereço</h2>
+                <h2 class="text-lg font-semibold text-gray-700 mb-4"><i
+                        class="fa-solid fa-location-dot text-red-500"></i> Endereço</h2>
 
                 <div class="grid grid-cols-2 lg:grid-cols-6 gap-4">
 
@@ -264,7 +265,8 @@ require_once __DIR__ . '/../../includes/header.php';
 
             <!-- Informações Adicionais -->
             <div>
-                <h2 class="text-lg font-semibold text-gray-700 mb-4"><i class="fa-solid fa-info-circle text-yellow-700"></i> Informações Adicionais</h2>
+                <h2 class="text-lg font-semibold text-gray-700 mb-4"><i
+                        class="fa-solid fa-info-circle text-yellow-700"></i> Informações Adicionais</h2>
 
                 <div class="grid md:grid-cols-2 gap-4">
                     <div>
@@ -279,6 +281,30 @@ require_once __DIR__ . '/../../includes/header.php';
                             Participante:</label>
                         <textarea name="sobre_participante" id="sobre_participante"
                             class="w-full border border-gray-300 rounded px-3 py-2" rows="4"></textarea>
+                    </div>
+                </div>
+
+                <div class="grid md:grid-cols-3 gap-4 mt-4">
+                    <div class="md:col-span-1">
+                        <label for="pode_vincular_rituais" class="block text-sm font-medium text-gray-700 mb-1">Permite
+                            vincular a novos rituais:</label>
+                        <select name="pode_vincular_rituais" id="pode_vincular_rituais" required
+                            class="w-full border border-gray-300 rounded px-3 py-2 bg-white">
+                            <option value="Sim" selected>Sim</option>
+                            <option value="Não">Não</option>
+                        </select>
+                    </div>
+
+                    <!-- Campo de motivo (sempre visível, bloqueado quando "Sim", obrigatório quando "Não") -->
+                    <div id="campo-motivo-bloqueio" class="md:col-span-2">
+                        <label for="motivo_bloqueio_vinculacao"
+                            class="block text-sm font-medium text-gray-700 mb-1">Motivo
+                            do bloqueio:</label>
+                        <textarea name="motivo_bloqueio_vinculacao" id="motivo_bloqueio_vinculacao" rows="3"
+                            class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed"
+                            placeholder="Digite o motivo pelo qual este participante não pode ser vinculado a novos rituais..."
+                            disabled></textarea>
+                        <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
                     </div>
                 </div>
             </div>
@@ -326,6 +352,36 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 </div>
 
+<script>
+    // Controlar campo de motivo: sempre visível, bloqueado quando "Sim", disponível e obrigatório quando "Não"
+    document.addEventListener('DOMContentLoaded', function () {
+        const selectVinculacao = document.getElementById('pode_vincular_rituais');
+        const motivoTextarea = document.getElementById('motivo_bloqueio_vinculacao');
+
+        if (selectVinculacao && motivoTextarea) {
+            function atualizarCampoMotivo() {
+                if (selectVinculacao.value === 'Sim') {
+                    motivoTextarea.disabled = true;
+                    motivoTextarea.removeAttribute('required');
+                    motivoTextarea.classList.add('bg-gray-100', 'cursor-not-allowed');
+                    motivoTextarea.classList.remove('bg-white');
+                    motivoTextarea.value = ''; // Limpar ao trocar para "Sim"
+                } else {
+                    motivoTextarea.disabled = false;
+                    motivoTextarea.setAttribute('required', 'required');
+                    motivoTextarea.classList.remove('bg-gray-100', 'cursor-not-allowed');
+                    motivoTextarea.classList.add('bg-white');
+                }
+            }
+
+            // Aplicar estado inicial
+            atualizarCampoMotivo();
+
+            // Atualizar ao mudar seleção
+            selectVinculacao.addEventListener('change', atualizarCampoMotivo);
+        }
+    });
+</script>
 <script src="/assets/js/participante-novo.js"></script>
 <script src="/assets/js/participante.js"></script>
 <script src="/assets/js/busca-cep.js"></script>
