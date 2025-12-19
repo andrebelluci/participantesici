@@ -129,26 +129,32 @@ if (!isset($_SESSION['user_id'])) {
 $tem_cookie_lembrar = isset($_COOKIE['remember_token']);
 $login_via_remember = isset($_SESSION['login_method']) && $_SESSION['login_method'] === 'remember_me';
 
-// Timeout apenas para login normal (sem "manter conectado")
-$timeout_normal = 8 * 60 * 60; // 8 horas para login normal
+if (isset($_SESSION['last_activity'])) {
+    // ✅ Define timeout baseado no método de login
+    $timeout_atual = ($tem_cookie_lembrar || $login_via_remember) ? $timeout_remember : $timeout_normal;
 
-if (isset($_SESSION['last_activity']) && !$tem_cookie_lembrar && !$login_via_remember) {
-    // Aplica timeout apenas se NÃO tiver cookie de manter conectado
-    if ((time() - $_SESSION['last_activity']) > $timeout_normal) {
-        error_log("[SESSION] Timeout de sessão normal - fazendo logout");
+    if ((time() - $_SESSION['last_activity']) > $timeout_atual) {
+        if ($tem_cookie_lembrar) {
+            // Se tem cookie, tenta renovar sessão ao invés de logout
+            error_log("[SESSION] Tentando renovar sessão via remember token...");
+
+            if (verificarTokenLembrarMe($pdo)) {
+                error_log("[SESSION] Sessão renovada com sucesso");
+                $_SESSION['last_activity'] = time();
+            } else {
+                error_log("[SESSION] Falha ao renovar - fazendo logout");
                 session_unset();
                 session_destroy();
                 header("Location: /login?timeout=1");
                 exit;
             }
-} else if ($tem_cookie_lembrar && isset($_SESSION['last_activity'])) {
-    // Se tem cookie mas sessão expirou, tenta renovar automaticamente
-    // Não aplica timeout rigoroso - cookie mantém conectado
-    if ((time() - $_SESSION['last_activity']) > (24 * 60 * 60)) { // Renova se inativo por mais de 24h
-        error_log("[SESSION] Renovando sessão via cookie de manter conectado...");
-        if (verificarTokenLembrarMe($pdo)) {
-            error_log("[SESSION] Sessão renovada com sucesso");
-            $_SESSION['last_activity'] = time();
+        } else {
+            // Sem cookie de lembrar-me - timeout normal
+            error_log("[SESSION] Timeout de sessão - fazendo logout");
+            session_unset();
+            session_destroy();
+            header("Location: /login?timeout=1");
+            exit;
         }
     }
 }
