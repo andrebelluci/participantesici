@@ -167,7 +167,7 @@ function processarAssinaturaParaPDF($assinatura_base64, $inscricao_id, $pdf)
 
 // Contar estatísticas
 $total_participantes = count($participantes);
-<<<<<<< HEAD
+
 $masculinos = array_filter($participantes, function ($p) {
     return $p['sexo'] === 'M';
 });
@@ -176,8 +176,7 @@ $femininos = array_filter($participantes, function ($p) {
 });
 $total_masculinos = count($masculinos);
 $total_femininos = count($femininos);
-=======
->>>>>>> 17c2916 (feat: Melhorias no sistema de inscrições e visualização de documentos)
+
 $presentes = array_filter($participantes, function ($p) {
     return $p['presente'] === 'Sim';
 });

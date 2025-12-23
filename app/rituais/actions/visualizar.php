@@ -97,7 +97,6 @@ $stmt_total_inscritos = $pdo->prepare($sql_total_inscritos);
 $stmt_total_inscritos->execute([$id]);
 $total_inscritos = $stmt_total_inscritos->fetch()['total_inscritos'];
 
-<<<<<<< HEAD
 // Buscar contagem de participantes por sexo (independente da paginação)
 $sql_masculinos = "
     SELECT COUNT(*) AS total_masculinos
@@ -119,15 +118,16 @@ $stmt_femininos = $pdo->prepare($sql_femininos);
 $stmt_femininos->execute([$id]);
 $total_femininos = $stmt_femininos->fetch()['total_femininos'];
 
-=======
->>>>>>> 17c2916 (feat: Melhorias no sistema de inscrições e visualização de documentos)
 // Função para verificar se os detalhes obrigatórios estão preenchidos
-function temDetalhesCompletos($inscricao) {
+function temDetalhesCompletos($inscricao)
+{
   // Campos obrigatórios básicos
-  if (empty($inscricao['primeira_vez_instituto']) ||
-      empty($inscricao['primeira_vez_ayahuasca']) ||
-      empty($inscricao['doenca_psiquiatrica']) ||
-      empty($inscricao['uso_medicao'])) {
+  if (
+    empty($inscricao['primeira_vez_instituto']) ||
+    empty($inscricao['primeira_vez_ayahuasca']) ||
+    empty($inscricao['doenca_psiquiatrica']) ||
+    empty($inscricao['uso_medicao'])
+  ) {
     return false;
   }
 
