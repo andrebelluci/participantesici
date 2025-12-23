@@ -58,6 +58,14 @@ function formatarTelefone($telefone)
 
 // Contar estatísticas
 $total_participantes = count($participantes);
+$masculinos = array_filter($participantes, function ($p) {
+  return $p['sexo'] === 'M';
+});
+$femininos = array_filter($participantes, function ($p) {
+  return $p['sexo'] === 'F';
+});
+$total_masculinos = count($masculinos);
+$total_femininos = count($femininos);
 $presentes = array_filter($participantes, function ($p) {
   return $p['presente'] === 'Sim';
 });
@@ -173,6 +181,24 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
     .stats-taxa {
       background-color: #fff3cd;
       color: #856404;
+      text-align: center;
+      font-weight: bold;
+      padding: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .stats-masculino {
+      background-color: #e1f5fe;
+      color: #0277bd;
+      text-align: center;
+      font-weight: bold;
+      padding: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .stats-feminino {
+      background-color: #fce4ec;
+      color: #c2185b;
       text-align: center;
       font-weight: bold;
       padding: 8px;
@@ -297,6 +323,14 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
     <tr>
       <td class="field-name">Total de Participantes:</td>
       <td class="stats-total"><?= $total_participantes ?></td>
+    </tr>
+    <tr>
+      <td class="field-name">Masculino:</td>
+      <td class="stats-masculino"><?= $total_masculinos ?></td>
+    </tr>
+    <tr>
+      <td class="field-name">Feminino:</td>
+      <td class="stats-feminino"><?= $total_femininos ?></td>
     </tr>
     <tr>
       <td class="field-name">Presentes:</td>

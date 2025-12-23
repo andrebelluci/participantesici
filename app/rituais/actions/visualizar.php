@@ -97,6 +97,27 @@ $stmt_total_inscritos = $pdo->prepare($sql_total_inscritos);
 $stmt_total_inscritos->execute([$id]);
 $total_inscritos = $stmt_total_inscritos->fetch()['total_inscritos'];
 
+// Buscar contagem de participantes por sexo (independente da paginação)
+$sql_masculinos = "
+    SELECT COUNT(*) AS total_masculinos
+    FROM inscricoes i
+    JOIN participantes p ON i.participante_id = p.id
+    WHERE i.ritual_id = ? AND p.sexo = 'M'
+";
+$stmt_masculinos = $pdo->prepare($sql_masculinos);
+$stmt_masculinos->execute([$id]);
+$total_masculinos = $stmt_masculinos->fetch()['total_masculinos'];
+
+$sql_femininos = "
+    SELECT COUNT(*) AS total_femininos
+    FROM inscricoes i
+    JOIN participantes p ON i.participante_id = p.id
+    WHERE i.ritual_id = ? AND p.sexo = 'F'
+";
+$stmt_femininos = $pdo->prepare($sql_femininos);
+$stmt_femininos->execute([$id]);
+$total_femininos = $stmt_femininos->fetch()['total_femininos'];
+
 // Função para verificar se os detalhes obrigatórios estão preenchidos
 function temDetalhesCompletos($inscricao) {
   // Campos obrigatórios básicos
