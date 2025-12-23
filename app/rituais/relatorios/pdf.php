@@ -167,6 +167,14 @@ function processarAssinaturaParaPDF($assinatura_base64, $inscricao_id, $pdf)
 
 // Contar estatísticas
 $total_participantes = count($participantes);
+$masculinos = array_filter($participantes, function ($p) {
+    return $p['sexo'] === 'M';
+});
+$femininos = array_filter($participantes, function ($p) {
+    return $p['sexo'] === 'F';
+});
+$total_masculinos = count($masculinos);
+$total_femininos = count($femininos);
 $presentes = array_filter($participantes, function ($p) {
     return $p['presente'] === 'Sim';
 });
@@ -275,6 +283,14 @@ $html_stats = '
     <tr style="background-color: #e8f4fd;">
         <td width="35%" style="border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;"><strong style="color: #0066cc;">Total de Participantes:</strong></td>
         <td width="65%" style="border-bottom: 1px solid #ddd; text-align: center; font-size: 14px;"><strong>' . $total_participantes . '</strong></td>
+    </tr>
+    <tr style="background-color: #e1f5fe;">
+        <td style="border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;"><strong style="color: #0277bd;">Masculino:</strong></td>
+        <td style="border-bottom: 1px solid #ddd; text-align: center; font-size: 14px; color: #0277bd;"><strong>' . $total_masculinos . '</strong></td>
+    </tr>
+    <tr style="background-color: #fce4ec;">
+        <td style="border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;"><strong style="color: #c2185b;">Feminino:</strong></td>
+        <td style="border-bottom: 1px solid #ddd; text-align: center; font-size: 14px; color: #c2185b;"><strong>' . $total_femininos . '</strong></td>
     </tr>
     <tr style="background-color: #d4edda;">
         <td style="border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;"><strong style="color: #155724;">Presentes:</strong></td>

@@ -30,6 +30,16 @@ if (!isset($ritual)) {
               <?= $total_inscritos ?>
             </span>
           </p>
+          <p><span class="font-semibold">Masculino:</span>
+            <span class="text-blue-600 px-2 py-1 rounded font-bold">
+              <?= $total_masculinos ?>
+            </span>
+          </p>
+          <p><span class="font-semibold">Feminino:</span>
+            <span class="text-pink-600 px-2 py-1 rounded font-bold">
+              <?= $total_femininos ?>
+            </span>
+          </p>
           <p><span class="font-semibold">Presentes:</span>
             <span class="text-green-700 px-2 py-1 rounded font-bold">
               <?= $total_presentes ?>
