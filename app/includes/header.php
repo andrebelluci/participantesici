@@ -129,9 +129,8 @@ if (!isset($_SESSION['user_id'])) {
 $tem_cookie_lembrar = isset($_COOKIE['remember_token']);
 $login_via_remember = isset($_SESSION['login_method']) && $_SESSION['login_method'] === 'remember_me';
 
-if (isset($_SESSION['last_activity'])) {
-    // ✅ Define timeout baseado no método de login
-    $timeout_atual = ($tem_cookie_lembrar || $login_via_remember) ? $timeout_remember : $timeout_normal;
+// Timeout apenas para login normal (sem "manter conectado")
+$timeout_normal = 8 * 60 * 60; // 8 horas para login normal
 
 if (isset($_SESSION['last_activity']) && !$tem_cookie_lembrar && !$login_via_remember) {
     // Aplica timeout apenas se NÃO tiver cookie de manter conectado
