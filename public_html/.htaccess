@@ -47,6 +47,8 @@ RewriteRule ^api/participante/buscar-ritual/?$ /app/participantes/api/buscar_rit
 RewriteRule ^api/participante/dados-vinculacao/?$ /app/participantes/api/dados-vinculacao.php [L]
 RewriteRule ^api/participantes/baixar-documentos/?$ /app/participantes/api/baixar_documentos.php [L,QSA]
 RewriteRule ^api/participantes/listar-documentos/?$ /app/participantes/api/listar_documentos.php [L,QSA]
+RewriteRule ^api/participantes/upload-documento/?$ /app/participantes/api/upload_documento.php [L,QSA]
+RewriteRule ^api/participantes/excluir-documento/?$ /app/participantes/api/excluir_documento.php [L,QSA]
 
 # ============= URL AMIGÁVEL PARA USUÁRIOS =============
 RewriteRule ^usuarios/?$ /app/usuarios/actions/listar.php [L,QSA]

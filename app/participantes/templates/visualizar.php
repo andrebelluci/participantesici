@@ -69,12 +69,12 @@ if (!isset($pessoa)) {
           <span>Cadastro</span>
         </button>
 
-        <button onclick="abrirModalDocumentos(<?= $pessoa['id'] ?>)"
-          class="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg flex items-center gap-2 transition">
+        <button onclick="abrirModalDocumentos(<?= $pessoa['id'] ?>, '<?= htmlspecialchars($pessoa['nome_completo'], ENT_QUOTES) ?>')"
+          class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-4 py-2 rounded-lg flex items-center gap-2 transition">
           <i class="fa-solid fa-file-lines"></i>
           <span>Documentos</span>
           <span id="documentos-count-<?= $pessoa['id'] ?>"
-            class="bg-green-500 text-white px-1.5 py-0.5 rounded text-xs <?= count($documentos) > 0 ? '' : 'hidden' ?>"><?= count($documentos) ?></span>
+            class="bg-orange-500 text-white px-1.5 py-0.5 rounded text-xs <?= count($documentos) > 0 ? '' : 'hidden' ?>"><?= count($documentos) ?></span>
       </button>
       </div>
 
@@ -963,21 +963,14 @@ if (!isset($pessoa)) {
 
       <!-- Seleção de Nome do Arquivo -->
       <div class="mb-4 space-y-3">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Nome do arquivo:</label>
+        <label for="tipo-nome-documento" class="block text-sm font-medium text-gray-700 mb-2">Nome do arquivo:</label>
 
-        <div class="space-y-2">
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="tipo_nome_documento" value="ficha" id="tipo-nome-ficha" checked
-              class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
-            <span class="text-sm text-gray-700">Ficha de inscrição</span>
-          </label>
-
-          <label class="flex items-center gap-2 cursor-pointer">
-            <input type="radio" name="tipo_nome_documento" value="outro" id="tipo-nome-outro"
-              class="w-4 h-4 text-blue-600 border-gray-300 focus:ring-blue-500">
-            <span class="text-sm text-gray-700">Outro</span>
-          </label>
-        </div>
+        <select id="tipo-nome-documento" name="tipo_nome_documento"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+          <option value="ficha">Ficha de inscrição</option>
+          <option value="rg_cnh">RG/CNH</option>
+          <option value="outro">Outro</option>
+        </select>
 
         <div id="campo-nome-outro" class="hidden">
           <input type="text" id="nome-outro-input" placeholder="Digite o nome do arquivo" required

@@ -24,11 +24,35 @@ function showToast(message, type = 'error') {
 }
 
 // Abrir modal de documentos
-function abrirModalDocumentos(participanteId) {
+function abrirModalDocumentos(participanteId, nomeCompleto = null) {
   participanteIdAtual = participanteId;
   const modal = document.getElementById('modal-documentos');
   modal.classList.remove('hidden');
   document.body.style.overflow = 'hidden';
+
+  // Definir participante_id no formulário
+  const participanteIdInput = document.getElementById('participante-id-documento');
+  if (participanteIdInput) {
+    participanteIdInput.value = participanteId;
+  }
+
+  // Atualizar título da modal com o nome do participante se fornecido
+  const modalTitulo = document.getElementById('modal-documentos-titulo');
+  if (modalTitulo && nomeCompleto) {
+    modalTitulo.innerHTML = `
+      <i class="fa-solid fa-file-lines text-blue-600"></i>
+      Documentos de ${nomeCompleto}
+    `;
+  } else if (modalTitulo) {
+    // Se não tiver nome, manter o padrão
+    modalTitulo.innerHTML = `
+      <i class="fa-solid fa-file-lines text-blue-600"></i>
+      Documentos do Participante
+    `;
+  }
+
+  // Carregar lista de documentos
+  recarregarListaDocumentos(participanteId);
 
   // Atualizar contador
   atualizarContadorDocumentos(participanteId);
@@ -210,25 +234,23 @@ function aplicarCropDocumento() {
   }
 
   // Validar nome do arquivo - sempre obrigatório
-  const tipoNomeFicha = document.getElementById('tipo-nome-ficha');
-  const tipoNomeOutro = document.getElementById('tipo-nome-outro');
+  const tipoNomeDocumento = document.getElementById('tipo-nome-documento');
   const nomeOutroInput = document.getElementById('nome-outro-input');
 
+  if (!tipoNomeDocumento) {
+    showToast('Erro: Campo de seleção não encontrado.', 'error');
+    fecharCropModalDocumento();
+    return;
+  }
+
   // Se "Outro" estiver selecionado, validar campo obrigatório
-  if (tipoNomeOutro && tipoNomeOutro.checked) {
+  if (tipoNomeDocumento.value === 'outro') {
     if (!nomeOutroInput || !nomeOutroInput.value.trim()) {
       showToast('Por favor, digite um nome para o arquivo.', 'error');
       fecharCropModalDocumento();
       if (nomeOutroInput) nomeOutroInput.focus();
       return;
     }
-  }
-
-  // Se nenhum estiver selecionado (não deveria acontecer, mas por segurança)
-  if ((!tipoNomeFicha || !tipoNomeFicha.checked) && (!tipoNomeOutro || !tipoNomeOutro.checked)) {
-    showToast('Por favor, selecione um tipo de nome para o arquivo.', 'error');
-    fecharCropModalDocumento();
-    return;
   }
 
   // Obter canvas cortado mantendo o tamanho original da área selecionada
@@ -376,23 +398,21 @@ async function processarArquivoDocumento(file) {
   if (!file) return;
 
   // Validar nome do arquivo - sempre obrigatório
-  const tipoNomeFicha = document.getElementById('tipo-nome-ficha');
-  const tipoNomeOutro = document.getElementById('tipo-nome-outro');
+  const tipoNomeDocumento = document.getElementById('tipo-nome-documento');
   const nomeOutroInput = document.getElementById('nome-outro-input');
 
+  if (!tipoNomeDocumento) {
+    showToast('Erro: Campo de seleção não encontrado.', 'error');
+    return;
+  }
+
   // Se "Outro" estiver selecionado, validar campo obrigatório
-  if (tipoNomeOutro && tipoNomeOutro.checked) {
+  if (tipoNomeDocumento.value === 'outro') {
     if (!nomeOutroInput || !nomeOutroInput.value.trim()) {
       showToast('Por favor, digite um nome para o arquivo.', 'error');
       if (nomeOutroInput) nomeOutroInput.focus();
       return;
     }
-  }
-
-  // Se nenhum estiver selecionado (não deveria acontecer, mas por segurança)
-  if ((!tipoNomeFicha || !tipoNomeFicha.checked) && (!tipoNomeOutro || !tipoNomeOutro.checked)) {
-    showToast('Por favor, selecione um tipo de nome para o arquivo.', 'error');
-    return;
   }
 
   // Validar tipo
@@ -432,7 +452,6 @@ async function processarArquivoDocumento(file) {
 
     // Criar FormData e adicionar o arquivo manualmente
     const formData = new FormData();
-    formData.append('upload_documento', '1');
     formData.append('documento', file);
 
     // Adicionar nome personalizado sempre (obrigatório)
@@ -443,9 +462,22 @@ async function processarArquivoDocumento(file) {
     }
     formData.append('nome_arquivo_personalizado', nomePersonalizado);
 
+    // Adicionar participante_id
+    formData.append('participante_id', participanteIdAtual);
+
+    // Determinar URL de destino: usar API se não estivermos em /participante/{id}
+    const currentPath = window.location.pathname;
+    const isVisualizarPage = /^\/participante\/\d+$/.test(currentPath);
+    const uploadUrl = isVisualizarPage ? window.location.href : `/api/participantes/upload-documento`;
+
+    // Se for visualizar page, adicionar upload_documento
+    if (isVisualizarPage) {
+      formData.append('upload_documento', '1');
+    }
+
     // Enviar via fetch diretamente
     try {
-      const response = await fetch(window.location.href, {
+      const response = await fetch(uploadUrl, {
         method: 'POST',
         body: formData,
         headers: {
@@ -484,14 +516,15 @@ async function processarArquivoDocumento(file) {
         const uploadInputCamera = document.getElementById('documento-upload-input-camera');
         if (uploadInputCamera) uploadInputCamera.value = '';
         // Resetar seleção de nome
-        const tipoNomeFicha = document.getElementById('tipo-nome-ficha');
-        if (tipoNomeFicha) tipoNomeFicha.checked = true;
-        const tipoNomeOutro = document.getElementById('tipo-nome-outro');
-        if (tipoNomeOutro) tipoNomeOutro.checked = false;
+        const tipoNomeDocumento = document.getElementById('tipo-nome-documento');
+        if (tipoNomeDocumento) tipoNomeDocumento.value = 'ficha';
         const campoNomeOutro = document.getElementById('campo-nome-outro');
         if (campoNomeOutro) campoNomeOutro.classList.add('hidden');
         const nomeOutroInput = document.getElementById('nome-outro-input');
-        if (nomeOutroInput) nomeOutroInput.value = '';
+        if (nomeOutroInput) {
+          nomeOutroInput.value = '';
+          nomeOutroInput.required = false;
+        }
 
         // Recarregar lista de documentos
         await recarregarListaDocumentos(participanteIdAtual);
@@ -507,19 +540,29 @@ async function processarArquivoDocumento(file) {
 
 // Função para obter o nome do arquivo escolhido pelo usuário
 function obterNomeArquivoPersonalizado() {
-  const tipoNomeFicha = document.getElementById('tipo-nome-ficha');
-  const tipoNomeOutro = document.getElementById('tipo-nome-outro');
+  const tipoNomeDocumento = document.getElementById('tipo-nome-documento');
   const nomeOutroInput = document.getElementById('nome-outro-input');
 
-  if (tipoNomeOutro && tipoNomeOutro.checked && nomeOutroInput) {
+  if (!tipoNomeDocumento) {
+    return null;
+  }
+
+  const valorSelecionado = tipoNomeDocumento.value;
+
+  if (valorSelecionado === 'outro' && nomeOutroInput) {
     const nomeDigitado = nomeOutroInput.value.trim();
     if (nomeDigitado) {
       return nomeDigitado;
     }
+    return null; // Campo obrigatório quando "Outro" está selecionado
   }
 
-  if (tipoNomeFicha && tipoNomeFicha.checked) {
+  if (valorSelecionado === 'ficha') {
     return 'Ficha de inscrição';
+  }
+
+  if (valorSelecionado === 'rg_cnh') {
+    return 'RG/CNH';
   }
 
   return null;
@@ -535,25 +578,34 @@ document.addEventListener('DOMContentLoaded', function () {
   const inputComprimido = document.getElementById('documento-comprimido');
 
   // Gerenciar exibição do campo "Outro"
-  const tipoNomeFicha = document.getElementById('tipo-nome-ficha');
-  const tipoNomeOutro = document.getElementById('tipo-nome-outro');
+  const tipoNomeDocumento = document.getElementById('tipo-nome-documento');
   const campoNomeOutro = document.getElementById('campo-nome-outro');
   const nomeOutroInput = document.getElementById('nome-outro-input');
 
-  if (tipoNomeFicha && tipoNomeOutro && campoNomeOutro) {
-    tipoNomeFicha.addEventListener('change', function() {
-      if (this.checked) {
-        campoNomeOutro.classList.add('hidden');
-        if (nomeOutroInput) nomeOutroInput.value = '';
-      }
-    });
-
-    tipoNomeOutro.addEventListener('change', function() {
-      if (this.checked) {
+  if (tipoNomeDocumento && campoNomeOutro) {
+    // Função para atualizar visibilidade do campo "Outro"
+    function atualizarCampoOutro() {
+      const valorSelecionado = tipoNomeDocumento.value;
+      if (valorSelecionado === 'outro') {
         campoNomeOutro.classList.remove('hidden');
-        if (nomeOutroInput) nomeOutroInput.focus();
+        if (nomeOutroInput) {
+          nomeOutroInput.focus();
+          nomeOutroInput.required = true;
+        }
+      } else {
+        campoNomeOutro.classList.add('hidden');
+        if (nomeOutroInput) {
+          nomeOutroInput.value = '';
+          nomeOutroInput.required = false;
+        }
       }
-    });
+    }
+
+    // Adicionar listener para mudanças no select
+    tipoNomeDocumento.addEventListener('change', atualizarCampoOutro);
+
+    // Verificar estado inicial
+    atualizarCampoOutro();
   }
 
   // Event listener para input de arquivo (desktop e escolher arquivo mobile)
@@ -649,7 +701,17 @@ async function enviarDocumentoAjax(form, participanteId) {
     }
     formData.set('nome_arquivo_personalizado', nomePersonalizado);
 
-    const response = await fetch(window.location.href, {
+    // Adicionar participante_id se não estiver presente
+    if (!formData.has('participante_id')) {
+      formData.set('participante_id', participanteId);
+    }
+
+    // Determinar URL de destino: usar API se não estivermos em /participante/{id}
+    const currentPath = window.location.pathname;
+    const isVisualizarPage = /^\/participante\/\d+$/.test(currentPath);
+    const uploadUrl = isVisualizarPage ? window.location.href : `/api/participantes/upload-documento`;
+
+    const response = await fetch(uploadUrl, {
       method: 'POST',
       body: formData,
       headers: {
@@ -798,10 +860,20 @@ async function excluirDocumento(documentoId, participanteId) {
   openConfirmModal('Tem certeza que deseja excluir este documento?', async () => {
     try {
       const formData = new FormData();
-      formData.append('excluir_documento', '1');
       formData.append('documento_id', documentoId);
+      formData.append('participante_id', participanteId);
 
-      const response = await fetch(window.location.href, {
+      // Determinar URL de destino: usar API se não estivermos em /participante/{id}
+      const currentPath = window.location.pathname;
+      const isVisualizarPage = /^\/participante\/\d+$/.test(currentPath);
+      const deleteUrl = isVisualizarPage ? window.location.href : `/api/participantes/excluir-documento`;
+
+      // Se for visualizar page, adicionar excluir_documento
+      if (isVisualizarPage) {
+        formData.append('excluir_documento', '1');
+      }
+
+      const response = await fetch(deleteUrl, {
         method: 'POST',
         body: formData,
         headers: {

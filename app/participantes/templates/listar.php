@@ -100,12 +100,21 @@ require_once __DIR__ . '/../../includes/header.php';
         <div class="flex justify-center gap-6 md:justify-end md:gap-2 mt-2 text-sm">
           <a href="/participante/<?= $pessoa['id'] ?>"
             class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
-            title="Gerenciar rituais">
+            title="Detalhes do participante">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
-              <i class="fa-solid fa-list-check text-lg"></i>
-              <span class="block sm:hidden text-xs mt-1">Rituais</span>
+              <i class="fa-solid fa-eye text-lg"></i>
+              <span class="block sm:hidden text-xs mt-1">Detalhes</span>
             </div>
           </a>
+          <button
+            onclick="abrirModalDocumentos(<?= $pessoa['id'] ?>, '<?= htmlspecialchars($pessoa['nome_completo'], ENT_QUOTES) ?>')"
+            class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded flex items-center gap-1"
+            title="Documentos">
+            <div class="flex flex-col items-center sm:flex-row sm:gap-1">
+              <i class="fa-solid fa-file-lines text-lg"></i>
+              <span class="block sm:hidden text-xs mt-1">Documentos</span>
+            </div>
+          </button>
           <a href="/participante/<?= $pessoa['id'] ?>/editar"
             class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
             title="Editar participante">
@@ -195,9 +204,15 @@ require_once __DIR__ . '/../../includes/header.php';
                   <div class="flex justify-center gap-2">
                     <a href="/participante/<?= $pessoa['id'] ?>"
                       class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
-                      title="Visualizar participante">
-                      <i class="fa-solid fa-list-check"></i>
+                      title="Detalhes do participante">
+                      <i class="fa-solid fa-eye"></i>
                     </a>
+                    <button
+                      onclick="abrirModalDocumentos(<?= $pessoa['id'] ?>, '<?= htmlspecialchars($pessoa['nome_completo'], ENT_QUOTES) ?>')"
+                      class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded flex items-center gap-1"
+                      title="Documentos">
+                      <i class="fa-solid fa-file-lines"></i>
+                    </button>
                     <a href="/participante/<?= $pessoa['id'] ?>/editar"
                       class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
                       title="Editar participante">
@@ -300,7 +315,178 @@ require_once __DIR__ . '/../../includes/header.php';
   </div>
 </div>
 
+<!-- Modal de Lista de Documentos -->
+<div id="modal-documentos" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
+  <div class="bg-white rounded-lg shadow-lg w-full max-w-2xl p-6 relative mx-4 max-h-[90vh] overflow-y-auto">
+    <button onclick="fecharModalDocumentos()"
+      class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg z-10">
+      <i class="fa-solid fa-window-close"></i>
+    </button>
+
+    <!-- Cabeçalho da Modal -->
+    <h2 id="modal-documentos-titulo" class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
+      <i class="fa-solid fa-file-lines text-blue-600"></i>
+      Documentos do Participante
+    </h2>
+
+    <!-- Botão Voltar (aparece quando visualizando imagem) -->
+    <button id="btn-voltar-lista-documentos" onclick="voltarParaListaDocumentos()"
+      class="hidden mb-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition font-medium flex items-center gap-2">
+      <i class="fa-solid fa-arrow-left"></i>
+      Voltar para lista
+    </button>
+
+    <!-- Formulário de Upload -->
+    <form method="POST" enctype="multipart/form-data" id="form-upload-documento"
+      class="mb-6 p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+      <!-- Input para câmera (mobile) -->
+      <input type="file" name="documento" id="documento-upload-input-camera" accept="image/*" capture="environment"
+        class="hidden">
+      <!-- Input para arquivo (desktop e mobile) -->
+      <input type="file" name="documento" id="documento-upload-input" accept="image/*,application/pdf" class="hidden">
+      <input type="hidden" name="documento_comprimido" id="documento-comprimido">
+      <input type="hidden" name="nome_arquivo_personalizado" id="nome-arquivo-personalizado">
+      <input type="hidden" name="participante_id" id="participante-id-documento">
+
+      <!-- Seleção de Nome do Arquivo -->
+      <div class="mb-4 space-y-3">
+        <label for="tipo-nome-documento" class="block text-sm font-medium text-gray-700 mb-2">Nome do arquivo:</label>
+
+        <select id="tipo-nome-documento" name="tipo_nome_documento"
+          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm">
+          <option value="ficha">Ficha de inscrição</option>
+          <option value="rg_cnh">RG/CNH</option>
+          <option value="outro">Outro</option>
+        </select>
+
+        <div id="campo-nome-outro" class="hidden">
+          <input type="text" id="nome-outro-input" placeholder="Digite o nome do arquivo" required
+            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
+            maxlength="100">
+          <p class="text-xs text-red-600 mt-1">* Campo obrigatório</p>
+        </div>
+      </div>
+
+      <!-- Botões Mobile (mostrar apenas no mobile) -->
+      <div class="flex flex-col gap-2 md:hidden">
+        <button type="button" onclick="document.getElementById('documento-upload-input-camera').click()"
+          class="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition font-medium flex items-center justify-center gap-2">
+          <i class="fa-solid fa-camera"></i>
+          Tirar Foto
+        </button>
+        <button type="button" onclick="document.getElementById('documento-upload-input').click()"
+          class="w-full bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition font-medium flex items-center justify-center gap-2">
+          <i class="fa-solid fa-folder-open"></i>
+          Escolher Arquivo
+        </button>
+      </div>
+
+      <!-- Botão Desktop (mostrar apenas no desktop) -->
+      <button type="button" onclick="document.getElementById('documento-upload-input').click()"
+        class="hidden md:flex w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition font-medium items-center justify-center gap-2">
+        <i class="fa-solid fa-plus"></i>
+        Adicionar Documento
+      </button>
+
+      <p class="text-xs text-gray-500 mt-2 text-center">Tirar foto ou escolher arquivo (Imagens ou PDF)</p>
+    </form>
+
+    <!-- Galeria PhotoSwipe para documentos (oculta, será usada pelo PhotoSwipe) -->
+    <div id="documentos-gallery" class="hidden"></div>
+
+    <!-- Lista de Documentos -->
+    <div id="documentos-lista" class="space-y-3">
+      <div class="text-center text-gray-500 py-8">
+        <i class="fa-solid fa-file-lines text-4xl mb-2"></i>
+        <p>Carregando documentos...</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal de Crop de Documento -->
+<div id="crop-modal-documento" class="fixed inset-0 bg-black/50 z-50 hidden flex items-center justify-center p-4">
+  <div class="bg-white rounded-lg max-w-4xl w-full p-6 max-h-[90vh] overflow-y-auto">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-lg font-semibold">Ajustar Documento</h3>
+      <button onclick="fecharCropModalDocumento()" class="text-red-600 hover:text-red-800 text-lg">
+        <i class="fa-solid fa-window-close"></i>
+      </button>
+    </div>
+
+    <div class="flex-1 overflow-hidden mb-4 max-h-[70vh]">
+      <img id="crop-image-documento" src="#" alt="Documento para crop" class="max-w-full max-h-full object-contain">
+    </div>
+
+    <div class="flex gap-2 justify-end">
+      <button id="cancel-crop-documento"
+        class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-900 transition font-semibold">
+        Cancelar
+      </button>
+      <button id="apply-crop-documento"
+        class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold">
+        Salvar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- PhotoSwipe CSS -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
+
 <script src="/assets/js/participantes.js"></script>
 <script src="/assets/js/modal.js"></script>
+<script src="/assets/js/documentos.js"></script>
+<script type="module">
+  import PhotoSwipeLightbox from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.js';
+
+  // Função para verificar se é celular em modo retrato
+  function isPhonePortrait() {
+    return window.matchMedia('(max-width: 600px) and (orientation: portrait)').matches;
+  }
+
+  // Inicializar PhotoSwipe com zoom dinâmico
+  window.photoSwipeLightbox = new PhotoSwipeLightbox({
+    gallery: '#documentos-gallery',
+    children: 'a',
+
+    initialZoomLevel: (zoomLevelObject) => {
+      if (isPhonePortrait()) {
+        return zoomLevelObject.vFill;
+      } else {
+        return zoomLevelObject.fit;
+      }
+    },
+    secondaryZoomLevel: (zoomLevelObject) => {
+      if (isPhonePortrait()) {
+        return zoomLevelObject.fit;
+      } else {
+        return zoomLevelObject.wFill;
+      }
+    },
+    maxZoomLevel: (zoomLevelObject, itemData, pswp) => {
+      if (!pswp || !pswp.viewportSize) {
+        return 5;
+      }
+
+      const viewportWidth = pswp.viewportSize.x;
+      const viewportHeight = pswp.viewportSize.y;
+      const imageWidth = itemData.width || itemData.w || viewportWidth;
+      const imageHeight = itemData.height || itemData.h || viewportHeight;
+
+      if (imageWidth < viewportWidth && imageHeight < viewportHeight) {
+        const zoomX = viewportWidth / imageWidth;
+        const zoomY = viewportHeight / imageHeight;
+        return Math.min(Math.max(zoomX, zoomY), 5);
+      }
+
+      return 2;
+    },
+
+    pswpModule: () => import('https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.esm.js')
+  });
+
+  window.photoSwipeLightbox.init();
+</script>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>
