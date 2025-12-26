@@ -1,5 +1,6 @@
 <?php
 // app/auth/templates/login.php - VERSÃO ATUALIZADA + CAPTCHA
+require_once __DIR__ . '/../../includes/asset_helper.php';
 if (session_status() === PHP_SESSION_NONE) {
   session_start();
 }
@@ -46,10 +47,10 @@ $tentativas = CaptchaService::obterTentativas($identificador);
   <link rel="icon" href="/favicon.ico" type="image/x-icon" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-  <link rel="stylesheet" href="/assets/css/mobile-fixes.css?v=1.0">
-  <link rel="stylesheet" href="/assets/css/tailwind.css?v=1.0">
-  <script src="/assets/js/global-scripts.js?t=<?= time() ?>"></script>
-  <script src="/assets/js/pwa.js"></script>
+  <?= asset_style('/assets/css/mobile-fixes.css?v=1.0') ?>
+  <?= asset_style('/assets/css/tailwind.css?v=1.0') ?>
+  <?= asset_script('/assets/js/global-scripts.js?t=<?= time() ?>') ?>
+  <?= asset_script('/assets/js/pwa.js') ?>
   <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
   <?php if ($mostrarCaptcha): ?>

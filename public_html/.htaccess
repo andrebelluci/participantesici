@@ -99,6 +99,22 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME}\.php -f
 RewriteRule ^([^/]+)$ $1.php [L]
 
+# ============= CACHE CONTROL PARA DESENVOLVIMENTO =============
+# Desabilita cache para arquivos JS e CSS durante desenvolvimento
+# Em produção, remova ou ajuste conforme necessário
+<IfModule mod_headers.c>
+    # Para desenvolvimento: força revalidação de JS/CSS
+    <FilesMatch "\.(js|css)$">
+        Header set Cache-Control "no-cache, no-store, must-revalidate"
+        Header set Pragma "no-cache"
+        Header set Expires "0"
+    </FilesMatch>
+
+    # Para produção, use algo como:
+    # Header set Cache-Control "public, max-age=31536000"
+    # E use versionamento de arquivos (?v=timestamp)
+</IfModule>
+
 # ============= PROTEÇÃO DE ARQUIVOS =============
 <Files ".htaccess">
     Order allow,deny

@@ -119,3 +119,7 @@ TODO.md
 NOTES.md
 ici-sistema-dev.sql
 COMMIT_MESSAGE.txt
+*.MD
+!README.md
+!CHANGELOG.md
+!LICENSE.md

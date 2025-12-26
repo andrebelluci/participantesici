@@ -382,9 +382,9 @@ require_once __DIR__ . '/../../includes/header.php';
         }
     });
 </script>
-<script src="/assets/js/participante-novo.js"></script>
-<script src="/assets/js/participante.js"></script>
-<script src="/assets/js/busca-cep.js"></script>
-<script src="/assets/js/modal.js"></script>
+<?= asset_script('/assets/js/participante-novo.js') ?>
+<?= asset_script('/assets/js/participante.js') ?>
+<?= asset_script('/assets/js/busca-cep.js') ?>
+<?= asset_script('/assets/js/modal.js') ?>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

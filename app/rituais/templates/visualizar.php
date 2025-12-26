@@ -870,10 +870,10 @@ if (!isset($ritual)) {
   </div>
 </div>
 
-<link rel="stylesheet" href="/assets/css/assinatura.css">
-<script src="/assets/js/ritual-visualizar.js"></script>
-<script src="/assets/js/modal.js"></script>
-<script src="/assets/js/relatorios.js"></script>
-<script src="/assets/js/assinatura.js"></script>
+<?= asset_style('/assets/css/assinatura.css') ?>
+<?= asset_script('/assets/js/ritual-visualizar.js') ?>
+<?= asset_script('/assets/js/modal.js') ?>
+<?= asset_script('/assets/js/relatorios.js') ?>
+<?= asset_script('/assets/js/assinatura.js') ?>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

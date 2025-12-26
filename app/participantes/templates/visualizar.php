@@ -1187,7 +1187,7 @@ if (!isset($pessoa)) {
   const participanteId = <?= json_encode($id) ?>;
   const documentosCount = <?= count($documentos) ?>;
 </script>
-<link rel="stylesheet" href="/assets/css/assinatura.css">
+<?= asset_style('/assets/css/assinatura.css') ?>
 <!-- PhotoSwipe CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
 <!-- PhotoSwipe JS -->
@@ -1248,10 +1248,10 @@ if (!isset($pessoa)) {
 
   window.photoSwipeLightbox.init();
 </script>
-<script src="/assets/js/documentos.js"></script>
-<script src="/assets/js/participante-visualizar.js"></script>
-<script src="/assets/js/modal.js"></script>
-<script src="/assets/js/relatorios.js"></script>
-<script src="/assets/js/assinatura.js"></script>
+<?= asset_script('/assets/js/documentos.js') ?>
+<?= asset_script('/assets/js/participante-visualizar.js') ?>
+<?= asset_script('/assets/js/modal.js') ?>
+<?= asset_script('/assets/js/relatorios.js') ?>
+<?= asset_script('/assets/js/assinatura.js') ?>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

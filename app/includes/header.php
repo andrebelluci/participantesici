@@ -23,6 +23,7 @@ if (session_status() === PHP_SESSION_NONE) {
 
 require_once __DIR__ . '/../functions/check_auth.php';
 require_once __DIR__ . '/../config/database.php';
+require_once __DIR__ . '/asset_helper.php';
 
 // ✅ FUNÇÃO MELHORADA PARA VERIFICAR TOKEN DE LEMBRAR-ME
 function verificarTokenLembrarMe($pdo)
@@ -217,10 +218,10 @@ if (isset($_SESSION['user_id'])) {
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
-    <link rel="stylesheet" href="/assets/css/tailwind.css?v=1.0">
-    <link rel="stylesheet" href="/assets/css/mobile-fixes.css?v=1.0">
-    <script src="/assets/js/global-scripts.js?t=<?= time() ?>"></script>
-    <script src="/assets/js/unsaved-changes-detector.js"></script>
+    <?= asset_style('/assets/css/tailwind.css') ?>
+    <?= asset_style('/assets/css/mobile-fixes.css') ?>
+    <?= asset_script('/assets/js/global-scripts.js') ?>
+    <?= asset_script('/assets/js/unsaved-changes-detector.js') ?>
 </head>
 
 <body class="bg-black min-h-screen flex flex-col mobile-viewport">

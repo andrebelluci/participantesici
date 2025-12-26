@@ -434,9 +434,9 @@ require_once __DIR__ . '/../../includes/header.php';
 <!-- PhotoSwipe CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
 
-<script src="/assets/js/participantes.js"></script>
-<script src="/assets/js/modal.js"></script>
-<script src="/assets/js/documentos.js"></script>
+<?= asset_script('/assets/js/participantes.js') ?>
+<?= asset_script('/assets/js/modal.js') ?>
+<?= asset_script('/assets/js/documentos.js') ?>
 <script type="module">
   import PhotoSwipeLightbox from 'https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe-lightbox.esm.js';
 

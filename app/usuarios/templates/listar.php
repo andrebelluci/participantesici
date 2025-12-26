@@ -282,7 +282,7 @@ require_once __DIR__ . '/../../includes/header.php';
   </div>
 </div>
 
-<script src="/assets/js/usuarios.js"></script>
-<script src="/assets/js/modal.js"></script>
+<?= asset_script('/assets/js/usuarios.js') ?>
+<?= asset_script('/assets/js/modal.js') ?>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

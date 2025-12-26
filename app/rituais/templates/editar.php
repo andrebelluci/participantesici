@@ -147,8 +147,8 @@ if (!isset($ritual)) {
   </div>
 </div>
 
-<script src="/assets/js/ritual.js"></script>
-<script src="/assets/js/ritual-editar.js"></script>
-<script src="/assets/js/modal.js"></script>
+<?= asset_script('/assets/js/ritual.js') ?>
+<?= asset_script('/assets/js/ritual-editar.js') ?>
+<?= asset_script('/assets/js/modal.js') ?>
 
 <?php require_once __DIR__ . '/../../includes/footer.php'; ?>

@@ -1,5 +1,6 @@
 <?php
 // app/auth/templates/esqueci_senha.php - LAYOUT ORIGINAL + CAPTCHA
+require_once __DIR__ . '/../../includes/asset_helper.php';
 session_start();
 require_once __DIR__ . '/../../services/CaptchaService.php';
 
@@ -30,8 +31,8 @@ $tentativas = CaptchaService::obterTentativas($identificador);
     <link rel="icon" href="/assets/images/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <script src="/assets/js/global-scripts.js?t=<?= time() ?>"></script>
-    <link rel="stylesheet" href="/assets/css/tailwind.css?v=1.0">
+    <?= asset_script('/assets/js/global-scripts.js?t=<?= time() ?>') ?>
+    <?= asset_style('/assets/css/tailwind.css?v=1.0') ?>
     <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
     <?php if ($mostrarCaptcha): ?>
