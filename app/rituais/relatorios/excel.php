@@ -56,6 +56,86 @@ function formatarTelefone($telefone)
   return $telefone;
 }
 
+// Função para verificar se aniversário está no intervalo do ritual
+function aniversarioNoIntervalo($nascimento, $dataRitual) {
+  if (empty($nascimento)) {
+    return false;
+  }
+
+  $dataRitualObj = new DateTime($dataRitual);
+  $nascimentoObj = new DateTime($nascimento);
+
+  // Extrair dia e mês do nascimento
+  $diaNascimento = (int)$nascimentoObj->format('d');
+  $mesNascimento = (int)$nascimentoObj->format('m');
+
+  // Calcular intervalo: 7 dias antes e depois da data do ritual
+  $dataInicio = clone $dataRitualObj;
+  $dataInicio->modify('-7 days');
+  $dataFim = clone $dataRitualObj;
+  $dataFim->modify('+7 days');
+
+  // Criar data de aniversário no ano do ritual para comparação
+  $anoRitual = (int)$dataRitualObj->format('Y');
+
+  // Verificar aniversário no ano do ritual
+  try {
+    $aniversarioAnoRitual = new DateTime("$anoRitual-$mesNascimento-$diaNascimento");
+    if ($aniversarioAnoRitual >= $dataInicio && $aniversarioAnoRitual <= $dataFim) {
+      return true;
+    }
+  } catch (Exception $e) {
+    // Data inválida (ex: 29/02 em ano não bissexto)
+  }
+
+  // Verificar aniversário no ano anterior (para casos próximos ao fim do ano)
+  try {
+    $aniversarioAnoAnterior = new DateTime(($anoRitual - 1) . "-$mesNascimento-$diaNascimento");
+    if ($aniversarioAnoAnterior >= $dataInicio && $aniversarioAnoAnterior <= $dataFim) {
+      return true;
+    }
+  } catch (Exception $e) {
+    // Data inválida
+  }
+
+  // Verificar aniversário no ano seguinte (para casos próximos ao início do ano)
+  try {
+    $aniversarioAnoSeguinte = new DateTime(($anoRitual + 1) . "-$mesNascimento-$diaNascimento");
+    if ($aniversarioAnoSeguinte >= $dataInicio && $aniversarioAnoSeguinte <= $dataFim) {
+      return true;
+    }
+  } catch (Exception $e) {
+    // Data inválida
+  }
+
+  return false;
+}
+
+// Função para formatar aniversário (DD/MM/AAAA)
+function formatarAniversario($nascimento) {
+  if (empty($nascimento)) {
+    return '-';
+  }
+
+  $nascimentoObj = new DateTime($nascimento);
+  return $nascimentoObj->format('d/m/Y');
+}
+
+// Função para retornar HTML do ícone de aniversário (imagem ao invés de emoji para Excel)
+function getIconeAniversarioHtml() {
+  // Para Excel, podemos usar emoji diretamente ou uma imagem
+  // Vamos usar emoji primeiro, mas preparar para usar imagem se necessário
+  $caminhoImagem = __DIR__ . '/../../../public_html/assets/images/party-hat.png';
+
+  if (file_exists($caminhoImagem)) {
+    // Se a imagem existir, usar tag img
+    return '<img src="/assets/images/party-hat.png" width="12" height="12" style="vertical-align: middle;" />';
+  } else {
+    // Fallback: usar emoji (funciona melhor no Excel que no PDF)
+    return '🎉';
+  }
+}
+
 // Contar estatísticas
 $total_participantes = count($participantes);
 $masculinos = array_filter($participantes, function ($p) {
@@ -352,21 +432,33 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
   <?php if (!empty($participantes)): ?>
     <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
       <tr>
-        <td colspan="8" class="section-header">LISTA DE PARTICIPANTES</td>
+        <td colspan="9" class="section-header">LISTA DE PARTICIPANTES</td>
       </tr>
       <tr>
-        <td class="table-header" width="18%">Nome Completo</td>
+        <td class="table-header" width="15%">Nome Completo</td>
+        <td class="table-header" width="8%">Nasc.</td>
         <td class="table-header" width="12%">CPF</td>
         <td class="table-header" width="12%">Celular</td>
         <td class="table-header" width="15%">E-mail</td>
         <td class="table-header" width="8%">Presente</td>
         <td class="table-header" width="8%">1ª Vez Instituto</td>
         <td class="table-header" width="8%">1ª Vez Ayahuasca</td>
-        <td class="table-header" width="19%">Observação</td>
+        <td class="table-header" width="14%">Observação</td>
       </tr>
       <?php foreach ($participantes as $participante): ?>
         <tr>
           <td class="table-cell"><?= htmlspecialchars($participante['nome_completo']) ?></td>
+          <td class="table-cell-center">
+            <?php
+            $nascimento = $participante['nascimento'] ?? null;
+            $aniversarioFormatado = formatarAniversario($nascimento);
+            $temAniversario = aniversarioNoIntervalo($nascimento, $ritual['data_ritual']);
+            if ($temAniversario) {
+              echo getIconeAniversarioHtml() . ' ';
+            }
+            echo htmlspecialchars($aniversarioFormatado);
+            ?>
+          </td>
           <td class="table-cell-center"><?= formatarCPF($participante['cpf']) ?></td>
           <td class="table-cell-center"><?= formatarTelefone($participante['celular']) ?></td>
           <td class="table-cell"><?= htmlspecialchars($participante['email'] ?: '-') ?></td>
@@ -392,7 +484,7 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
   <?php else: ?>
     <table width="100%" cellpadding="0" cellspacing="0" style="border-collapse: collapse;">
       <tr>
-        <td colspan="8" class="section-header">LISTA DE PARTICIPANTES</td>
+        <td colspan="9" class="section-header">LISTA DE PARTICIPANTES</td>
       </tr>
       <tr>
         <td class="table-cell-center" style="padding: 20px; font-style: italic; color: #666;">
@@ -405,7 +497,7 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
   <!-- Rodapé -->
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-top: 30px;">
     <tr>
-      <td colspan="8" class="footer-info">
+      <td colspan="9" class="footer-info">
         <strong>Relatório gerado em <?= date('d/m/Y H:i:s') ?> | Instituto Céu Interior - Gestão de
           Participantes</strong>
       </td>

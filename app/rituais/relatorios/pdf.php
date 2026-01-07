@@ -62,6 +62,85 @@ function formatarTelefone($telefone)
     return $telefone;
 }
 
+// Função para verificar se aniversário está no intervalo do ritual
+function aniversarioNoIntervalo($nascimento, $dataRitual)
+{
+    if (empty($nascimento)) {
+        return false;
+    }
+
+    $dataRitualObj = new DateTime($dataRitual);
+    $nascimentoObj = new DateTime($nascimento);
+
+    // Extrair dia e mês do nascimento
+    $diaNascimento = (int) $nascimentoObj->format('d');
+    $mesNascimento = (int) $nascimentoObj->format('m');
+
+    // Calcular intervalo: 7 dias antes e depois da data do ritual
+    $dataInicio = clone $dataRitualObj;
+    $dataInicio->modify('-7 days');
+    $dataFim = clone $dataRitualObj;
+    $dataFim->modify('+7 days');
+
+    // Criar data de aniversário no ano do ritual para comparação
+    $anoRitual = (int) $dataRitualObj->format('Y');
+
+    // Verificar aniversário no ano do ritual
+    try {
+        $aniversarioAnoRitual = new DateTime("$anoRitual-$mesNascimento-$diaNascimento");
+        if ($aniversarioAnoRitual >= $dataInicio && $aniversarioAnoRitual <= $dataFim) {
+            return true;
+        }
+    } catch (Exception $e) {
+        // Data inválida (ex: 29/02 em ano não bissexto)
+    }
+
+    // Verificar aniversário no ano anterior (para casos próximos ao fim do ano)
+    try {
+        $aniversarioAnoAnterior = new DateTime(($anoRitual - 1) . "-$mesNascimento-$diaNascimento");
+        if ($aniversarioAnoAnterior >= $dataInicio && $aniversarioAnoAnterior <= $dataFim) {
+            return true;
+        }
+    } catch (Exception $e) {
+        // Data inválida
+    }
+
+    // Verificar aniversário no ano seguinte (para casos próximos ao início do ano)
+    try {
+        $aniversarioAnoSeguinte = new DateTime(($anoRitual + 1) . "-$mesNascimento-$diaNascimento");
+        if ($aniversarioAnoSeguinte >= $dataInicio && $aniversarioAnoSeguinte <= $dataFim) {
+            return true;
+        }
+    } catch (Exception $e) {
+        // Data inválida
+    }
+
+    return false;
+}
+
+// Função para formatar aniversário (DD/MM/AAAA)
+function formatarAniversario($nascimento)
+{
+    if (empty($nascimento)) {
+        return '-';
+    }
+
+    $nascimentoObj = new DateTime($nascimento);
+    return $nascimentoObj->format('d/m/Y');
+}
+
+// Função para retornar HTML do ícone de aniversário (imagem)
+function getIconeAniversarioHtml()
+{
+    $caminhoImagem = __DIR__ . '/../../../public_html/assets/images/party-hat.png';
+
+    // Converter para base64 para incluir no PDF
+    $imageData = file_get_contents($caminhoImagem);
+    $base64 = base64_encode($imageData);
+    $mimeType = mime_content_type($caminhoImagem);
+    return '<img src="data:' . $mimeType . ';base64,' . $base64 . '" width="12" height="12" style="vertical-align: middle;" />';
+}
+
 // Função para processar assinatura e salvar arquivo temporário para TCPDF
 function processarAssinaturaParaPDF($assinatura_base64, $inscricao_id, $pdf)
 {
@@ -325,13 +404,14 @@ if (!empty($participantes)) {
     $html_participantes = '
     <table border="1" cellpadding="4" cellspacing="0" style="border-collapse: collapse;">
         <tr style="background-color: #0066cc; color: white;">
-            <th width="22%" style="text-align: center;"><strong>Nome</strong></th>
+            <th width="15%" style="text-align: center;"><strong>Nome</strong></th>
+            <th width="12%" style="text-align: center;"><strong>Nasc.</strong></th>
             <th width="13%" style="text-align: center;"><strong>CPF</strong></th>
-            <th width="14%" style="text-align: center;"><strong>Celular</strong></th>
+            <th width="12%" style="text-align: center;"><strong>Celular</strong></th>
             <th width="9%" style="text-align: center;"><strong>Presente</strong></th>
             <th width="7%" style="text-align: center;"><strong>1ª Vez</strong></th>
-            <th width="10%" style="text-align: center;"><strong>Assinatura</strong></th>
-            <th width="24%" style="text-align: center;"><strong>Observação</strong></th>
+            <th width="8%" style="text-align: center;"><strong>Ass.</strong></th>
+            <th width="25%" style="text-align: center;"><strong>Observação</strong></th>
         </tr>';
 
     $row_color = true;
@@ -359,9 +439,16 @@ if (!empty($participantes)) {
             $assinatura_html = '<span style="font-size: 8px;">NÃO</span>';
         }
 
+        // Processar aniversário
+        $nascimento = $participante['nascimento'] ?? null;
+        $aniversarioFormatado = formatarAniversario($nascimento);
+        $temAniversario = aniversarioNoIntervalo($nascimento, $ritual['data_ritual']);
+        $aniversarioHtml = htmlspecialchars($aniversarioFormatado) . ($temAniversario ? ' ' . getIconeAniversarioHtml() : '');
+
         $html_participantes .= '
         <tr style="background-color: ' . $bg_color . ';">
             <td>' . htmlspecialchars($participante['nome_completo']) . '</td>
+            <td style="text-align: center;">' . $aniversarioHtml . '</td>
             <td style="text-align: center;">' . formatarCPF($participante['cpf']) . '</td>
             <td style="text-align: center;">' . formatarTelefone($participante['celular']) . '</td>
             <td style="text-align: center; background-color: ' . $presente_color . '; color: ' . $presente_text_color . ';"><strong>' . ($participante['presente'] === 'Sim' ? 'SIM' : 'NÃO') . '</strong></td>

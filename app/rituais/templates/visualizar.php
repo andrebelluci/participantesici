@@ -5,6 +5,62 @@ require_once __DIR__ . '/../../includes/header.php';
 if (!isset($ritual)) {
   die("Ritual não encontrado.");
 }
+
+// Função para verificar se aniversário está no intervalo do ritual
+function aniversarioNoIntervalo($nascimento, $dataRitual)
+{
+    if (empty($nascimento)) {
+        return false;
+    }
+
+    $dataRitualObj = new DateTime($dataRitual);
+    $nascimentoObj = new DateTime($nascimento);
+
+    // Extrair dia e mês do nascimento
+    $diaNascimento = (int) $nascimentoObj->format('d');
+    $mesNascimento = (int) $nascimentoObj->format('m');
+
+    // Calcular intervalo: 7 dias antes e depois da data do ritual
+    $dataInicio = clone $dataRitualObj;
+    $dataInicio->modify('-7 days');
+    $dataFim = clone $dataRitualObj;
+    $dataFim->modify('+7 days');
+
+    // Criar data de aniversário no ano do ritual para comparação
+    $anoRitual = (int) $dataRitualObj->format('Y');
+
+    // Verificar aniversário no ano do ritual
+    try {
+        $aniversarioAnoRitual = new DateTime("$anoRitual-$mesNascimento-$diaNascimento");
+        if ($aniversarioAnoRitual >= $dataInicio && $aniversarioAnoRitual <= $dataFim) {
+            return true;
+        }
+    } catch (Exception $e) {
+        // Data inválida (ex: 29/02 em ano não bissexto)
+    }
+
+    // Verificar aniversário no ano anterior (para casos próximos ao fim do ano)
+    try {
+        $aniversarioAnoAnterior = new DateTime(($anoRitual - 1) . "-$mesNascimento-$diaNascimento");
+        if ($aniversarioAnoAnterior >= $dataInicio && $aniversarioAnoAnterior <= $dataFim) {
+            return true;
+        }
+    } catch (Exception $e) {
+        // Data inválida
+    }
+
+    // Verificar aniversário no ano seguinte (para casos próximos ao início do ano)
+    try {
+        $aniversarioAnoSeguinte = new DateTime(($anoRitual + 1) . "-$mesNascimento-$diaNascimento");
+        if ($aniversarioAnoSeguinte >= $dataInicio && $aniversarioAnoSeguinte <= $dataFim) {
+            return true;
+        }
+    } catch (Exception $e) {
+        // Data inválida
+    }
+
+    return false;
+}
 ?>
 
 <div class="max-w-screen-xl mx-auto px-4 py-6">
@@ -178,6 +234,18 @@ if (!isset($ritual)) {
               </a>
             </h3>
             <div class="text-sm text-gray-600 space-y-1">
+              <p>
+                <span class="font-semibold">Nasc.:</span>
+                <?php
+                $nascimento = $participante['nascimento'] ?? null;
+                $dataNascimento = $nascimento ? (new DateTime($nascimento))->format('d/m/Y') : '-';
+                $temAniversario = $nascimento ? aniversarioNoIntervalo($nascimento, $ritual['data_ritual']) : false;
+                ?>
+                <?= htmlspecialchars($dataNascimento) ?>
+                <?php if ($temAniversario): ?>
+                  <img src="/assets/images/party-hat.png" alt="Aniversário próximo" class="inline-block ml-1" style="width: 25px; height: 25px;" />
+                <?php endif; ?>
+              </p>
               <p><span class="font-semibold">CPF:</span>
                 <?php
                 $cpf = preg_replace('/[^0-9]/', '', $participante['cpf']);
@@ -397,7 +465,15 @@ if (!isset($ritual)) {
                     </a>
                   </div>
                   <div class="text-xs text-gray-500">
-                    <?= (new DateTime($participante['nascimento']))->format('d/m/Y') ?>
+                    <?php
+                    $nascimento = $participante['nascimento'] ?? null;
+                    $dataNascimento = $nascimento ? (new DateTime($nascimento))->format('d/m/Y') : '-';
+                    $temAniversario = $nascimento ? aniversarioNoIntervalo($nascimento, $ritual['data_ritual']) : false;
+                    ?>
+                    <?= htmlspecialchars($dataNascimento) ?>
+                    <?php if ($temAniversario): ?>
+                      <img src="/assets/images/party-hat.png" alt="Aniversário próximo" class="inline-block ml-1" style="width: 25px; height: 25px;" />
+                    <?php endif; ?>
                   </div>
                 </td>
 
