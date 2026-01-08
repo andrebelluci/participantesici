@@ -42,15 +42,82 @@ require_once __DIR__ . '/../../includes/header.php';
     </button>
     <!-- Botão limpar visível no mobile -->
     <a href="/participantes"
-      class="<?= empty($filtro_nome) && empty($filtro_cpf) ? 'hidden' : '' ?> bg-red-600 text-white px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-red-300 transition">
+      class="<?= empty($filtro_nome) && empty($filtro_cpf) && (!isset($_GET['filtro_aniversariantes']) || $_GET['filtro_aniversariantes'] != '1') ? 'hidden' : '' ?> bg-red-600 text-white px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-red-300 transition">
       <i class="fa-solid fa-broom mr-1"></i> Limpar Filtro
     </a>
   </div>
 
+  <!-- Indicador de Filtros Ativos -->
+  <?php
+  $tem_nome = !empty($filtro_nome);
+  $tem_cpf = !empty($filtro_cpf);
+  $tem_aniversario = isset($_GET['filtro_aniversariantes']) && $_GET['filtro_aniversariantes'] == '1';
+
+  if ($tem_nome || $tem_cpf || $tem_aniversario):
+    $meses = [
+      1 => 'Janeiro',
+      2 => 'Fevereiro',
+      3 => 'Março',
+      4 => 'Abril',
+      5 => 'Maio',
+      6 => 'Junho',
+      7 => 'Julho',
+      8 => 'Agosto',
+      9 => 'Setembro',
+      10 => 'Outubro',
+      11 => 'Novembro',
+      12 => 'Dezembro'
+    ];
+    $mes_selecionado = $tem_aniversario && isset($_GET['filtro_mes_aniversario'])
+      ? (int) $_GET['filtro_mes_aniversario']
+      : ($tem_aniversario ? (int) date('m') : null);
+    $mes_nome = $mes_selecionado ? strtolower($meses[$mes_selecionado]) : '';
+
+    // Construir mensagem baseada na combinação de filtros
+    $mensagem = '';
+    if ($tem_nome && $tem_cpf && $tem_aniversario) {
+      // 3 filtros
+      $mensagem = 'nome "' . htmlspecialchars($filtro_nome) . '", CPF "' . htmlspecialchars($filtro_cpf) . '" e aniversário no mês de ' . $mes_nome;
+    } elseif ($tem_nome && $tem_cpf) {
+      // Nome + CPF
+      $mensagem = 'nome "' . htmlspecialchars($filtro_nome) . '" e CPF "' . htmlspecialchars($filtro_cpf) . '"';
+    } elseif ($tem_nome && $tem_aniversario) {
+      // Nome + Aniversário
+      $mensagem = 'nome "' . htmlspecialchars($filtro_nome) . '" e aniversário no mês de ' . $mes_nome;
+    } elseif ($tem_cpf && $tem_aniversario) {
+      // CPF + Aniversário
+      $mensagem = 'CPF "' . htmlspecialchars($filtro_cpf) . '" e aniversário no mês de ' . $mes_nome;
+    } elseif ($tem_nome) {
+      // Só nome
+      $mensagem = 'nome "' . htmlspecialchars($filtro_nome) . '"';
+    } elseif ($tem_cpf) {
+      // Só CPF
+      $mensagem = 'CPF "' . htmlspecialchars($filtro_cpf) . '"';
+    } elseif ($tem_aniversario) {
+      // Só aniversário
+      $mensagem = 'aniversário no mês de ' . $mes_nome;
+    }
+    ?>
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded-r">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <i class="fa-solid fa-filter text-blue-500"></i>
+        </div>
+        <div class="ml-3 flex-1">
+          <p class="text-sm text-blue-700">
+            <strong>Filtro<?= ($tem_nome && $tem_cpf) || ($tem_nome && $tem_aniversario) || ($tem_cpf && $tem_aniversario) ? 's' : '' ?>
+              ativo<?= ($tem_nome && $tem_cpf) || ($tem_nome && $tem_aniversario) || ($tem_cpf && $tem_aniversario) ? 's' : '' ?>:</strong>
+            Exibindo participantes com <?= $mensagem ?>.
+          </p>
+        </div>
+      </div>
+    </div>
+  <?php endif; ?>
+
   <!-- Filtros -->
   <div class="form-container mobile-compact">
     <form id="filtros"
-      class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-white p-3 rounded-lg shadow border border-gray-200 mb-6 <?= empty($filtro_nome) && empty($filtro_cpf) ? 'hidden md:grid' : '' ?>"
+      class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-3 rounded-lg shadow border border-gray-200 mb-6 <?= empty($filtro_nome) && empty($filtro_cpf) && (!isset($_GET['filtro_aniversariantes']) || $_GET['filtro_aniversariantes'] != '1') ? 'hidden md:grid' : '' ?>"
       method="GET">
       <div>
         <label for="filtro_nome" class="block text-sm font-medium text-gray-700 mb-1">Nome:</label>
@@ -63,6 +130,43 @@ require_once __DIR__ . '/../../includes/header.php';
         <input type="text" inputmode="numeric" pattern="[0-9]\s\-]*" name="filtro_cpf" id="filtro_cpf"
           placeholder="___.___.___-__" value="<?= htmlspecialchars($filtro_cpf) ?>" oninput="mascaraCPF(this)"
           class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00bfff]">
+      </div>
+      <div>
+        <label for="filtro_aniversariantes" class="block text-sm font-medium text-gray-700 mb-1">
+          <i class="fa-solid fa-birthday-cake mr-1"></i> Aniversariantes:
+        </label>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" name="filtro_aniversariantes" id="filtro_aniversariantes" value="1"
+            <?= isset($_GET['filtro_aniversariantes']) && $_GET['filtro_aniversariantes'] == '1' ? 'checked' : '' ?>
+            onchange="document.getElementById('filtro_mes_aniversario').disabled = !this.checked;"
+            class="w-4 h-4 text-[#00bfff] border-gray-300 rounded focus:ring-[#00bfff]">
+          <label for="filtro_aniversariantes" class="text-sm text-gray-700 cursor-pointer flex-1">Ativar</label>
+          <select name="filtro_mes_aniversario" id="filtro_mes_aniversario" <?= (!isset($_GET['filtro_aniversariantes']) || $_GET['filtro_aniversariantes'] != '1') ? 'disabled' : '' ?>
+            class="flex-1 border border-gray-300 rounded px-2 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#00bfff] disabled:bg-gray-100 disabled:cursor-not-allowed">
+            <?php
+            $meses = [
+              1 => 'Janeiro',
+              2 => 'Fevereiro',
+              3 => 'Março',
+              4 => 'Abril',
+              5 => 'Maio',
+              6 => 'Junho',
+              7 => 'Julho',
+              8 => 'Agosto',
+              9 => 'Setembro',
+              10 => 'Outubro',
+              11 => 'Novembro',
+              12 => 'Dezembro'
+            ];
+            $mes_selecionado = isset($_GET['filtro_mes_aniversario']) ? (int) $_GET['filtro_mes_aniversario'] : (int) date('m');
+            foreach ($meses as $num => $nome):
+              ?>
+              <option value="<?= $num ?>" <?= $mes_selecionado == $num ? 'selected' : '' ?>>
+                <?= $nome ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
+        </div>
       </div>
       <div class="flex items-end gap-2">
         <button type="submit"
@@ -250,8 +354,23 @@ require_once __DIR__ . '/../../includes/header.php';
 
   <!-- Paginação -->
   <div class="flex justify-center mt-6 flex-wrap gap-2">
+    <?php
+    $params_paginacao = [];
+    if (!empty($filtro_nome)) {
+      $params_paginacao[] = 'filtro_nome=' . urlencode($filtro_nome);
+    }
+    if (!empty($filtro_cpf)) {
+      $params_paginacao[] = 'filtro_cpf=' . urlencode($filtro_cpf);
+    }
+    if (isset($_GET['filtro_aniversariantes']) && $_GET['filtro_aniversariantes'] == '1') {
+      $params_paginacao[] = 'filtro_aniversariantes=1';
+      $mes_aniversario = isset($_GET['filtro_mes_aniversario']) ? (int) $_GET['filtro_mes_aniversario'] : (int) date('m');
+      $params_paginacao[] = 'filtro_mes_aniversario=' . $mes_aniversario;
+    }
+    $query_string = !empty($params_paginacao) ? '&' . implode('&', $params_paginacao) : '';
+    ?>
     <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
-      <a href="?pagina=<?= $i ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&filtro_cpf=<?= htmlspecialchars($filtro_cpf) ?>"
+      <a href="?pagina=<?= $i ?><?= $query_string ?>"
         class="px-4 py-2 rounded border transition
           <?= $pagina == $i ? 'bg-[#00bfff] text-black font-semibold shadow' : 'bg-white text-gray-600 hover:bg-gray-100' ?>">
         <?= $i ?>

@@ -27,31 +27,13 @@ $offset = ($pagina - 1) * $itens_por_pagina;
 
 // Buscar participantes com filtro e dados completos de inscrição
 $filtro_nome = isset($_GET['filtro_nome']) ? trim($_GET['filtro_nome']) : '';
+$filtro_aniversariantes = isset($_GET['filtro_aniversariantes']) && $_GET['filtro_aniversariantes'] == '1';
 
 // ✅ ORDENAÇÃO - Adicionar estas variáveis
 $order_by = isset($_GET['order_by']) ? $_GET['order_by'] : 'nome_completo'; // Coluna padrão: nome_completo
 $order_dir = isset($_GET['order_dir']) ? $_GET['order_dir'] : 'ASC'; // Direção padrão: ASC
 
-// ✅ CONSULTA DE CONTAGEM - Para calcular total de páginas
-$sql_count = "
-    SELECT COUNT(*) AS total
-    FROM inscricoes i
-    JOIN participantes p ON i.participante_id = p.id
-    WHERE i.ritual_id = ?
-";
-$params_count = [$id];
-
-if (!empty($filtro_nome)) {
-  $sql_count .= " AND p.nome_completo LIKE ?";
-  $params_count[] = "%$filtro_nome%";
-}
-
-$stmt_count = $pdo->prepare($sql_count);
-$stmt_count->execute($params_count);
-$total_registros = $stmt_count->fetch()['total'];
-$total_paginas = ceil($total_registros / $itens_por_pagina);
-
-// ✅ CONSULTA PRINCIPAL - Modificar a consulta existente para incluir paginação
+// ✅ CONSULTA PRINCIPAL - Buscar todos os participantes (sem paginação) para aplicar filtro de aniversariantes
 $sql_participantes = "
     SELECT p.*, i.id as inscricao_id, i.presente, i.observacao,
            i.primeira_vez_instituto, i.primeira_vez_ayahuasca,
@@ -70,12 +52,30 @@ if (!empty($filtro_nome)) {
   $params[] = "%$filtro_nome%";
 }
 
-// ✅ Adicionar ordenação e paginação
-$sql_participantes .= " ORDER BY $order_by $order_dir LIMIT $itens_por_pagina OFFSET $offset";
+// Adicionar ordenação
+$sql_participantes .= " ORDER BY $order_by $order_dir";
 
 $stmt_participantes = $pdo->prepare($sql_participantes);
 $stmt_participantes->execute($params);
-$participantes = $stmt_participantes->fetchAll();
+$todos_participantes = $stmt_participantes->fetchAll();
+
+// Aplicar filtro de aniversariantes se necessário
+if ($filtro_aniversariantes) {
+  $todos_participantes = array_filter($todos_participantes, function($participante) use ($ritual) {
+    if (empty($participante['nascimento'])) {
+      return false;
+    }
+    return aniversarioNoIntervalo($participante['nascimento'], $ritual['data_ritual']);
+  });
+  $todos_participantes = array_values($todos_participantes);
+}
+
+// Calcular total após filtros
+$total_registros = count($todos_participantes);
+$total_paginas = ceil($total_registros / $itens_por_pagina);
+
+// Aplicar paginação
+$participantes = array_slice($todos_participantes, $offset, $itens_por_pagina);
 
 // Buscar contagem de participantes presentes (independente da paginação)
 $sql_presentes = "
@@ -117,6 +117,62 @@ $sql_femininos = "
 $stmt_femininos = $pdo->prepare($sql_femininos);
 $stmt_femininos->execute([$id]);
 $total_femininos = $stmt_femininos->fetch()['total_femininos'];
+
+// Função para verificar se aniversário está no intervalo do ritual
+function aniversarioNoIntervalo($nascimento, $dataRitual)
+{
+  if (empty($nascimento)) {
+    return false;
+  }
+
+  $dataRitualObj = new DateTime($dataRitual);
+  $nascimentoObj = new DateTime($nascimento);
+
+  // Extrair dia e mês do nascimento
+  $diaNascimento = (int) $nascimentoObj->format('d');
+  $mesNascimento = (int) $nascimentoObj->format('m');
+
+  // Calcular intervalo: 7 dias antes e depois da data do ritual
+  $dataInicio = clone $dataRitualObj;
+  $dataInicio->modify('-7 days');
+  $dataFim = clone $dataRitualObj;
+  $dataFim->modify('+7 days');
+
+  // Criar data de aniversário no ano do ritual para comparação
+  $anoRitual = (int) $dataRitualObj->format('Y');
+
+  // Verificar aniversário no ano do ritual
+  try {
+    $aniversarioAnoRitual = new DateTime("$anoRitual-$mesNascimento-$diaNascimento");
+    if ($aniversarioAnoRitual >= $dataInicio && $aniversarioAnoRitual <= $dataFim) {
+      return true;
+    }
+  } catch (Exception $e) {
+    // Data inválida (ex: 29/02 em ano não bissexto)
+  }
+
+  // Verificar aniversário no ano anterior (para casos próximos ao fim do ano)
+  try {
+    $aniversarioAnoAnterior = new DateTime(($anoRitual - 1) . "-$mesNascimento-$diaNascimento");
+    if ($aniversarioAnoAnterior >= $dataInicio && $aniversarioAnoAnterior <= $dataFim) {
+      return true;
+    }
+  } catch (Exception $e) {
+    // Data inválida
+  }
+
+  // Verificar aniversário no ano seguinte (para casos próximos ao início do ano)
+  try {
+    $aniversarioAnoSeguinte = new DateTime(($anoRitual + 1) . "-$mesNascimento-$diaNascimento");
+    if ($aniversarioAnoSeguinte >= $dataInicio && $aniversarioAnoSeguinte <= $dataFim) {
+      return true;
+    }
+  } catch (Exception $e) {
+    // Data inválida
+  }
+
+  return false;
+}
 
 // Função para verificar se os detalhes obrigatórios estão preenchidos
 function temDetalhesCompletos($inscricao)

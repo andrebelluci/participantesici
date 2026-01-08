@@ -18,6 +18,13 @@ $filtro_cpf = isset($_GET['filtro_cpf']) ? $_GET['filtro_cpf'] : '';
 // Remove a máscara do CPF (mantém só números)
 $filtro_cpf = preg_replace('/\D/', '', $filtro_cpf);
 
+// Filtro de aniversariantes
+$filtro_mes_aniversario = isset($_GET['filtro_mes_aniversario']) ? (int)$_GET['filtro_mes_aniversario'] : null;
+// Se não foi selecionado, usa o mês atual como padrão quando o filtro estiver ativo
+if ($filtro_mes_aniversario === null && isset($_GET['filtro_aniversariantes']) && $_GET['filtro_aniversariantes'] == '1') {
+  $filtro_mes_aniversario = (int)date('m');
+}
+
 // Monta cláusulas de filtro
 $where = "";
 $params = [];
@@ -28,6 +35,10 @@ if (!empty($filtro_nome)) {
 if (!empty($filtro_cpf)) {
   $where .= " AND cpf = ?"; // <- comparação exata
   $params[] = $filtro_cpf;
+}
+if ($filtro_mes_aniversario !== null && $filtro_mes_aniversario > 0 && $filtro_mes_aniversario <= 12) {
+  $where .= " AND MONTH(nascimento) = ?";
+  $params[] = $filtro_mes_aniversario;
 }
 
 // Consulta para contar o total de registros

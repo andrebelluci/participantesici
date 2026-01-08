@@ -5,62 +5,6 @@ require_once __DIR__ . '/../../includes/header.php';
 if (!isset($ritual)) {
   die("Ritual não encontrado.");
 }
-
-// Função para verificar se aniversário está no intervalo do ritual
-function aniversarioNoIntervalo($nascimento, $dataRitual)
-{
-    if (empty($nascimento)) {
-        return false;
-    }
-
-    $dataRitualObj = new DateTime($dataRitual);
-    $nascimentoObj = new DateTime($nascimento);
-
-    // Extrair dia e mês do nascimento
-    $diaNascimento = (int) $nascimentoObj->format('d');
-    $mesNascimento = (int) $nascimentoObj->format('m');
-
-    // Calcular intervalo: 7 dias antes e depois da data do ritual
-    $dataInicio = clone $dataRitualObj;
-    $dataInicio->modify('-7 days');
-    $dataFim = clone $dataRitualObj;
-    $dataFim->modify('+7 days');
-
-    // Criar data de aniversário no ano do ritual para comparação
-    $anoRitual = (int) $dataRitualObj->format('Y');
-
-    // Verificar aniversário no ano do ritual
-    try {
-        $aniversarioAnoRitual = new DateTime("$anoRitual-$mesNascimento-$diaNascimento");
-        if ($aniversarioAnoRitual >= $dataInicio && $aniversarioAnoRitual <= $dataFim) {
-            return true;
-        }
-    } catch (Exception $e) {
-        // Data inválida (ex: 29/02 em ano não bissexto)
-    }
-
-    // Verificar aniversário no ano anterior (para casos próximos ao fim do ano)
-    try {
-        $aniversarioAnoAnterior = new DateTime(($anoRitual - 1) . "-$mesNascimento-$diaNascimento");
-        if ($aniversarioAnoAnterior >= $dataInicio && $aniversarioAnoAnterior <= $dataFim) {
-            return true;
-        }
-    } catch (Exception $e) {
-        // Data inválida
-    }
-
-    // Verificar aniversário no ano seguinte (para casos próximos ao início do ano)
-    try {
-        $aniversarioAnoSeguinte = new DateTime(($anoRitual + 1) . "-$mesNascimento-$diaNascimento");
-        if ($aniversarioAnoSeguinte >= $dataInicio && $aniversarioAnoSeguinte <= $dataFim) {
-            return true;
-        }
-    } catch (Exception $e) {
-        // Data inválida
-    }
-
-    return false;
-}
 ?>
 
 <div class="max-w-screen-xl mx-auto px-4 py-6">
@@ -184,14 +128,47 @@ function aniversarioNoIntervalo($nascimento, $dataRitual)
       <i class="fa-solid fa-search"></i> Filtrar
     </button>
     <a href="/ritual/<?= $id ?>"
-      class="<?= empty($_GET['filtro_nome']) ? 'hidden' : '' ?> bg-red-600 text-white px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-red-300 transition">
+      class="<?= empty($_GET['filtro_nome'] ?? '') && (!isset($_GET['filtro_aniversariantes']) || $_GET['filtro_aniversariantes'] != '1') ? 'hidden' : '' ?> bg-red-600 text-white px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-red-300 transition">
       <i class="fa-solid fa-broom mr-1"></i> Limpar Filtro
     </a>
   </div>
 
+  <!-- Indicador de Filtros Ativos -->
+  <?php
+  $tem_nome = !empty($_GET['filtro_nome'] ?? '');
+  $tem_aniversario = isset($_GET['filtro_aniversariantes']) && $_GET['filtro_aniversariantes'] == '1';
+
+  if ($tem_nome || $tem_aniversario):
+    // Construir mensagem baseada na combinação de filtros
+    $mensagem = '';
+    if ($tem_nome && $tem_aniversario) {
+      // Nome + Aniversário
+      $mensagem = 'nome "' . htmlspecialchars($_GET['filtro_nome']) . '" e aniversário próximo à data do ritual';
+    } elseif ($tem_nome) {
+      // Só nome
+      $mensagem = 'nome "' . htmlspecialchars($_GET['filtro_nome']) . '"';
+    } elseif ($tem_aniversario) {
+      // Só aniversário
+      $mensagem = 'aniversário próximo à data do ritual';
+    }
+  ?>
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded-r">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <i class="fa-solid fa-filter text-blue-500"></i>
+        </div>
+        <div class="ml-3 flex-1">
+          <p class="text-sm text-blue-700">
+            <strong>Filtro<?= $tem_nome && $tem_aniversario ? 's' : '' ?> ativo<?= $tem_nome && $tem_aniversario ? 's' : '' ?>:</strong> Exibindo participantes com <?= $mensagem ?>.
+          </p>
+        </div>
+      </div>
+    </div>
+  <?php endif; ?>
+
   <div class="form-container mobile-compact">
     <form id="filtros" method="GET"
-      class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-3 rounded-lg shadow border border-gray-200 mb-6 <?= empty($_GET['filtro_nome']) ? 'hidden md:grid' : '' ?>">
+      class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-3 rounded-lg shadow border border-gray-200 mb-6 <?= (!empty($_GET['filtro_nome'] ?? '') || (isset($_GET['filtro_aniversariantes']) && $_GET['filtro_aniversariantes'] == '1')) ? 'hidden md:grid' : '' ?>">
       <input type="hidden" name="id" value="<?= $id ?>">
 
       <div class="md:col-span-2">
@@ -202,7 +179,21 @@ function aniversarioNoIntervalo($nascimento, $dataRitual)
           class="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#00bfff]">
       </div>
 
-      <div class="flex items-end gap-2 md:col-span-2">
+      <div class="flex flex-col gap-2">
+        <label class="block text-sm font-medium text-gray-700 mb-1">
+          <i class="fa-solid fa-birthday-cake mr-1"></i> Filtros rápidos:
+        </label>
+        <div class="flex items-center gap-2">
+          <input type="checkbox" name="filtro_aniversariantes" id="filtro_aniversariantes" value="1"
+            <?= isset($_GET['filtro_aniversariantes']) && $_GET['filtro_aniversariantes'] == '1' ? 'checked' : '' ?>
+            class="w-4 h-4 text-[#00bfff] border-gray-300 rounded focus:ring-[#00bfff]">
+          <label for="filtro_aniversariantes" class="text-sm text-gray-700 cursor-pointer">
+            Aniversariantes próximos
+          </label>
+        </div>
+      </div>
+
+      <div class="flex items-end gap-2">
         <button type="submit"
           class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
           <i class="fa-solid fa-search mr-1"></i> Buscar
@@ -610,8 +601,18 @@ function aniversarioNoIntervalo($nascimento, $dataRitual)
 
   <!-- Paginação (mesmo padrão do listar.php) -->
   <div class="flex justify-center mt-6 flex-wrap gap-2">
+    <?php
+    $params_paginacao = [];
+    if (!empty($_GET['filtro_nome'] ?? '')) {
+      $params_paginacao[] = 'filtro_nome=' . urlencode($_GET['filtro_nome']);
+    }
+    if (isset($_GET['filtro_aniversariantes']) && $_GET['filtro_aniversariantes'] == '1') {
+      $params_paginacao[] = 'filtro_aniversariantes=1';
+    }
+    $query_string = !empty($params_paginacao) ? '&' . implode('&', $params_paginacao) : '';
+    ?>
     <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
-      <a href="?pagina=<?= $i ?>&id=<?= $id ?>&filtro_nome=<?= htmlspecialchars($filtro_nome) ?>&order_by=<?= $order_by ?>&order_dir=<?= $order_dir ?>"
+      <a href="?pagina=<?= $i ?>&id=<?= $id ?><?= $query_string ?>&order_by=<?= $order_by ?>&order_dir=<?= $order_dir ?>"
         class="px-4 py-2 rounded border transition
                <?= $pagina == $i ? 'bg-[#00bfff] text-black font-semibold shadow' : 'bg-white text-gray-600 hover:bg-gray-100' ?>">
         <?= $i ?>

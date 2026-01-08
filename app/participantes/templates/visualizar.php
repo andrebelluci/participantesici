@@ -151,9 +151,25 @@ if (!isset($pessoa)) {
     </a>
   </div>
 
+  <!-- Indicador de Filtros Ativos -->
+  <?php if (!empty($filtro_nome)): ?>
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded-r">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <i class="fa-solid fa-filter text-blue-500"></i>
+        </div>
+        <div class="ml-3 flex-1">
+          <p class="text-sm text-blue-700">
+            <strong>Filtro ativo:</strong> Exibindo rituais com nome "<?= htmlspecialchars($filtro_nome) ?>".
+          </p>
+        </div>
+      </div>
+    </div>
+  <?php endif; ?>
+
   <div class="form-container mobile-compact">
     <form id="filtros" method="GET"
-      class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-3 rounded-lg shadow border border-gray-200 mb-6 <?= empty($filtro_nome) ? 'hidden md:grid' : '' ?>">
+      class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-3 rounded-lg shadow border border-gray-200 mb-6 <?= !empty($filtro_nome) ? 'hidden md:grid' : '' ?>">
       <input type="hidden" name="id" value="<?= $id ?>">
 
       <div class="md:col-span-2">

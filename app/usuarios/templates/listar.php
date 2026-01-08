@@ -39,11 +39,26 @@ require_once __DIR__ . '/../../includes/header.php';
     </button>
     <!-- Botão limpar visível no mobile -->
     <a href="/usuarios"
-      class="<?= empty($filtro_nome) && empty($filtro_cpf) ? 'hidden' : '' ?> bg-red-600 text-white px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-red-300 transition">
+      class="<?= empty($_GET['filtro_nome'] ?? '') ? 'hidden' : '' ?> bg-red-600 text-white px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-red-300 transition">
       <i class="fa-solid fa-broom mr-1"></i> Limpar Filtro
     </a>
   </div>
 
+  <!-- Indicador de Filtros Ativos -->
+  <?php if (!empty($_GET['filtro_nome'] ?? '')): ?>
+    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded-r">
+      <div class="flex items-start">
+        <div class="flex-shrink-0">
+          <i class="fa-solid fa-filter text-blue-500"></i>
+        </div>
+        <div class="ml-3 flex-1">
+          <p class="text-sm text-blue-700">
+            <strong>Filtro ativo:</strong> Exibindo usuários com nome ou usuário "<?= htmlspecialchars($_GET['filtro_nome']) ?>".
+          </p>
+        </div>
+      </div>
+    </div>
+  <?php endif; ?>
 
   <div class="form-container mobile-compact">
     <form id="filtro_nome"
