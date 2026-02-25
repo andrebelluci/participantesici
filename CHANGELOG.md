@@ -8,6 +8,24 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
 ## [Unreleased]
 
 ### Adicionado
+- Novo sistema de relatórios e exportação (PDF e Excel)
+  - Relatórios de listagem profissional para Participantes e Rituais
+  - Layout A4 Paisagem para PDFs com cabeçalhos azuis e logo centralizado
+  - Exportação Excel com bordas cinza claro (1.0pt) e alinhamento à direita
+  - Botão dropdown de exportação unificado em ambas as listagens principais
+  - Suporte a filtros dinâmicos (busca, data, etc.) nas exportações de lista
+  - Rodapé informativo com data e hora da geração do relatório
+- Novas rotas amigáveis para relatórios no .htaccess
+  - `/participantes/relatorio/pdf` e `/participantes/relatorio/excel`
+  - `/rituais/relatorio/pdf` e `/rituais/relatorio/excel`
+- Integração de `relatorios.js` para gerenciamento global de exportações
+
+### Modificado
+- Relatórios individuais (Excel) de Participantes e Rituais
+  - Seções de dados agora ocupam a largura total da tabela (colspan)
+  - Alinhamento de todos os valores à direita para melhor legibilidade
+  - Padronização de bordas e estilos com os relatórios de listagem
+
 - Sistema de cópia automática de dados entre inscrições
   - Ao adicionar ritual/participante, copia dados da última inscrição salva
   - Ao salvar uma inscrição, copia dados para outras inscrições não salvas do mesmo participante

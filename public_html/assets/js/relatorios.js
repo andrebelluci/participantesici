@@ -64,6 +64,56 @@ function exportarRitual(id, formato) {
   setTimeout(hideExportLoading, 2000);
 }
 
+// Função para exportar lista de participantes com filtros
+function exportarParticipantesList(formato) {
+  // Mostrar loading
+  showExportLoading();
+
+  // Obter filtros da página
+  const urlParams = new URLSearchParams(window.location.search);
+  const queryString = urlParams.toString();
+
+  // Construir URL de exportação
+  const url = `/participantes/relatorio/${formato}${queryString ? '?' + queryString : ''}`;
+
+  // Criar link temporário para download
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = '';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  // Esconder dropdown e loading
+  hideExportDropdown();
+  setTimeout(hideExportLoading, 2000);
+}
+
+// Função para exportar lista de rituais com filtros
+function exportarRituaisList(formato) {
+  // Mostrar loading
+  showExportLoading();
+
+  // Obter filtros da página
+  const urlParams = new URLSearchParams(window.location.search);
+  const queryString = urlParams.toString();
+
+  // Construir URL de exportação
+  const url = `/rituais/relatorio/${formato}${queryString ? '?' + queryString : ''}`;
+
+  // Criar link temporário para download
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = '';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+
+  // Esconder dropdown e loading
+  hideExportDropdown();
+  setTimeout(hideExportLoading, 2000);
+}
+
 // Função para esconder dropdown
 function hideExportDropdown() {
   const dropdown = document.getElementById('export-dropdown');

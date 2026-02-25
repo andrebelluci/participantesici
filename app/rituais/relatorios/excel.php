@@ -223,66 +223,69 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       font-weight: bold;
       color: #0066cc;
       padding: 8px;
-      width: 30%;
+      width: 25%;
+      border: 1.0pt solid #ccc;
     }
 
     .field-value {
       background-color: white;
       padding: 8px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
+      text-align: left;
     }
 
     .stats-total {
       background-color: #e8f4fd;
-      text-align: center;
+      color: #0066cc;
+      text-align: left;
       font-weight: bold;
       padding: 8px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
     }
 
     .stats-presente {
       background-color: #d4edda;
       color: #155724;
-      text-align: center;
+      text-align: left;
       font-weight: bold;
       padding: 8px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
     }
 
     .stats-ausente {
       background-color: #f8d7da;
       color: #721c24;
-      text-align: center;
+      text-align: left;
       font-weight: bold;
       padding: 8px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
     }
 
     .stats-taxa {
       background-color: #fff3cd;
       color: #856404;
-      text-align: center;
+      text-align: left;
       font-weight: bold;
       padding: 8px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
     }
 
     .stats-masculino {
       background-color: #e1f5fe;
       color: #0277bd;
-      text-align: center;
+      text-align: left;
       font-weight: bold;
       padding: 8px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
     }
 
     .stats-feminino {
       background-color: #fce4ec;
       color: #c2185b;
-      text-align: center;
+      text-align: left;
       font-weight: bold;
       padding: 8px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
     }
 
     .table-header {
@@ -291,18 +294,18 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       font-weight: bold;
       text-align: center;
       padding: 8px;
-      border: 1px solid #000;
+      border: 1.0pt solid #ccc;
     }
 
     .table-cell {
       padding: 6px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
       text-align: left;
     }
 
     .table-cell-center {
       padding: 6px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
       text-align: center;
     }
 
@@ -312,7 +315,7 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       font-weight: bold;
       text-align: center;
       padding: 6px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
     }
 
     .presente-nao {
@@ -321,7 +324,7 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       font-weight: bold;
       text-align: center;
       padding: 6px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
     }
 
     .primeira-vez-sim {
@@ -330,7 +333,7 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       font-weight: bold;
       text-align: center;
       padding: 6px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
     }
 
     .primeira-vez-nao {
@@ -339,7 +342,7 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       font-weight: bold;
       text-align: center;
       padding: 6px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
     }
 
     .footer-info {
@@ -369,60 +372,60 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
   <!-- Cabeçalho -->
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px;">
     <tr>
-      <td colspan="8" class="header-section">ICI PARTICIPANTES - INSTITUTO CÉU INTERIOR</td>
+      <td colspan="9" class="header-section">ICI PARTICIPANTES - INSTITUTO CÉU INTERIOR</td>
     </tr>
     <tr>
-      <td colspan="8" class="title-main">RELATÓRIO DO RITUAL</td>
+      <td colspan="9" class="title-main">RELATÓRIO DO RITUAL</td>
     </tr>
   </table>
 
   <!-- Dados do Ritual -->
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; border-collapse: collapse;">
     <tr>
-      <td colspan="8" class="section-header">DADOS DO RITUAL</td>
+      <td colspan="9" class="section-header">DADOS DO RITUAL</td>
     </tr>
     <tr>
       <td class="field-name">Nome:</td>
-      <td class="field-value"><?= htmlspecialchars($ritual['nome']) ?></td>
+      <td class="field-value" colspan="8" align="left"><?= htmlspecialchars($ritual['nome']) ?></td>
     </tr>
     <tr>
       <td class="field-name">Data:</td>
-      <td class="field-value"><?= (new DateTime($ritual['data_ritual']))->format('d/m/Y') ?></td>
+      <td class="field-value" colspan="8" align="left"><?= (new DateTime($ritual['data_ritual']))->format('d/m/Y') ?></td>
     </tr>
     <tr>
       <td class="field-name">Padrinho/Madrinha:</td>
-      <td class="field-value"><?= htmlspecialchars($ritual['padrinho_madrinha']) ?></td>
+      <td class="field-value" colspan="8" align="left"><?= htmlspecialchars($ritual['padrinho_madrinha']) ?></td>
     </tr>
   </table>
 
   <!-- Estatísticas -->
   <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom: 20px; border-collapse: collapse;">
     <tr>
-      <td colspan="8" class="section-header">ESTATÍSTICAS DE PARTICIPAÇÃO</td>
+      <td colspan="9" class="section-header">ESTATÍSTICAS DE PARTICIPAÇÃO</td>
     </tr>
     <tr>
       <td class="field-name">Total de Participantes:</td>
-      <td class="stats-total"><?= $total_participantes ?></td>
+      <td class="stats-total" colspan="8" align="left"><?= $total_participantes ?></td>
     </tr>
     <tr>
       <td class="field-name">Masculino:</td>
-      <td class="stats-masculino"><?= $total_masculinos ?></td>
+      <td class="stats-masculino" colspan="8" align="left"><?= $total_masculinos ?></td>
     </tr>
     <tr>
       <td class="field-name">Feminino:</td>
-      <td class="stats-feminino"><?= $total_femininos ?></td>
+      <td class="stats-feminino" colspan="8" align="left"><?= $total_femininos ?></td>
     </tr>
     <tr>
       <td class="field-name">Presentes:</td>
-      <td class="stats-presente"><?= $total_presentes ?></td>
+      <td class="stats-presente" colspan="8" align="left"><?= $total_presentes ?></td>
     </tr>
     <tr>
       <td class="field-name">Ausentes:</td>
-      <td class="stats-ausente"><?= $total_ausentes ?></td>
+      <td class="stats-ausente" colspan="8" align="left"><?= $total_ausentes ?></td>
     </tr>
     <tr>
       <td class="field-name">Taxa de Presença:</td>
-      <td class="stats-taxa">
+      <td class="stats-taxa" colspan="8" align="left">
         <?= $total_participantes > 0 ? round(($total_presentes / $total_participantes) * 100, 1) : 0 ?>%
       </td>
     </tr>
@@ -436,19 +439,19 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       </tr>
       <tr>
         <td class="table-header" width="15%">Nome Completo</td>
-        <td class="table-header" width="8%">Nasc.</td>
-        <td class="table-header" width="12%">CPF</td>
-        <td class="table-header" width="12%">Celular</td>
+        <td class="table-header" width="8%" align="center">Nasc.</td>
+        <td class="table-header" width="12%" align="center">CPF</td>
+        <td class="table-header" width="12%" align="center">Celular</td>
         <td class="table-header" width="15%">E-mail</td>
-        <td class="table-header" width="8%">Presente</td>
-        <td class="table-header" width="8%">1ª Vez Instituto</td>
-        <td class="table-header" width="8%">1ª Vez Ayahuasca</td>
+        <td class="table-header" width="8%" align="center">Presente</td>
+        <td class="table-header" width="8%" align="center">1ª Vez Instituto</td>
+        <td class="table-header" width="8%" align="center">1ª Vez Ayahuasca</td>
         <td class="table-header" width="14%">Observação</td>
       </tr>
       <?php foreach ($participantes as $participante): ?>
         <tr>
           <td class="table-cell"><?= htmlspecialchars($participante['nome_completo']) ?></td>
-          <td class="table-cell-center">
+          <td class="table-cell-center" align="center">
             <?php
             $nascimento = $participante['nascimento'] ?? null;
             $aniversarioFormatado = formatarAniversario($nascimento);
@@ -459,16 +462,16 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
             echo htmlspecialchars($aniversarioFormatado);
             ?>
           </td>
-          <td class="table-cell-center"><?= formatarCPF($participante['cpf']) ?></td>
-          <td class="table-cell-center"><?= formatarTelefone($participante['celular']) ?></td>
+          <td class="table-cell-center" align="center"><?= formatarCPF($participante['cpf']) ?></td>
+          <td class="table-cell-center" align="center"><?= formatarTelefone($participante['celular']) ?></td>
           <td class="table-cell"><?= htmlspecialchars($participante['email'] ?: '-') ?></td>
-          <td class="<?= $participante['presente'] === 'Sim' ? 'presente-sim' : 'presente-nao' ?>">
+          <td class="<?= $participante['presente'] === 'Sim' ? 'presente-sim' : 'presente-nao' ?>" align="center">
             <?= $participante['presente'] === 'Sim' ? 'SIM' : 'NÃO' ?>
           </td>
-          <td class="<?= $participante['primeira_vez_instituto'] === 'Sim' ? 'primeira-vez-sim' : 'primeira-vez-nao' ?>">
+          <td class="<?= $participante['primeira_vez_instituto'] === 'Sim' ? 'primeira-vez-sim' : 'primeira-vez-nao' ?>" align="center">
             <?= $participante['primeira_vez_instituto'] === 'Sim' ? 'SIM' : 'NÃO' ?>
           </td>
-          <td class="<?= $participante['primeira_vez_ayahuasca'] === 'Sim' ? 'primeira-vez-sim' : 'primeira-vez-nao' ?>">
+          <td class="<?= $participante['primeira_vez_ayahuasca'] === 'Sim' ? 'primeira-vez-sim' : 'primeira-vez-nao' ?>" align="center">
             <?= $participante['primeira_vez_ayahuasca'] === 'Sim' ? 'SIM' : 'NÃO' ?>
           </td>
           <td class="table-cell-multiline">

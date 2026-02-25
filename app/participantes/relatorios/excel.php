@@ -125,12 +125,14 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       color: #0066cc;
       padding: 8px;
       width: 30%;
+      border: 1.0pt solid #ccc;
     }
 
     .field-value {
       background-color: white;
       padding: 8px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
+      text-align: left;
     }
 
     .table-header {
@@ -139,18 +141,18 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       font-weight: bold;
       text-align: center;
       padding: 8px;
-      border: 1px solid #000;
+      border: 1.0pt solid #ccc;
     }
 
     .table-cell {
       padding: 6px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
       text-align: left;
     }
 
     .table-cell-center {
       padding: 6px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
       text-align: center;
     }
 
@@ -160,7 +162,7 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       font-weight: bold;
       text-align: center;
       padding: 6px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
     }
 
     .presente-nao {
@@ -169,7 +171,7 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       font-weight: bold;
       text-align: center;
       padding: 6px;
-      border: 1px solid #ccc;
+      border: 1.0pt solid #ccc;
     }
 
     .footer-info {
@@ -213,34 +215,34 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
     </tr>
     <tr>
       <td class="field-name">Nome Completo:</td>
-      <td class="field-value"><?= htmlspecialchars($participante['nome_completo']) ?></td>
+      <td class="field-value" colspan="4" align="left"><?= htmlspecialchars($participante['nome_completo']) ?></td>
     </tr>
     <tr>
       <td class="field-name">Data de Nascimento:</td>
-      <td class="field-value"><?= (new DateTime($participante['nascimento']))->format('d/m/Y') ?></td>
+      <td class="field-value" colspan="4" align="left"><?= (new DateTime($participante['nascimento']))->format('d/m/Y') ?></td>
     </tr>
     <tr>
       <td class="field-name">Sexo:</td>
-      <td class="field-value"><?= $participante['sexo'] === 'M' ? 'Masculino' : 'Feminino' ?></td>
+      <td class="field-value" colspan="4" align="left"><?= $participante['sexo'] === 'M' ? 'Masculino' : 'Feminino' ?></td>
     </tr>
     <tr>
       <td class="field-name">CPF:</td>
-      <td class="field-value"><?= formatarCPF($participante['cpf']) ?></td>
+      <td class="field-value" colspan="4" align="left"><?= formatarCPF($participante['cpf']) ?></td>
     </tr>
     <?php if (!empty($participante['rg'])): ?>
       <tr>
         <td class="field-name">RG:</td>
-        <td class="field-value"><?= htmlspecialchars($participante['rg']) ?></td>
+        <td class="field-value" colspan="4" align="left"><?= htmlspecialchars($participante['rg']) ?></td>
       </tr>
     <?php endif; ?>
     <tr>
       <td class="field-name">Celular:</td>
-      <td class="field-value"><?= formatarTelefone($participante['celular']) ?></td>
+      <td class="field-value" colspan="4" align="left"><?= formatarTelefone($participante['celular']) ?></td>
     </tr>
     <?php if (!empty($participante['email'])): ?>
       <tr>
         <td class="field-name">E-mail:</td>
-        <td class="field-value"><?= htmlspecialchars($participante['email']) ?></td>
+        <td class="field-value" colspan="4" align="left"><?= htmlspecialchars($participante['email']) ?></td>
       </tr>
     <?php endif; ?>
   </table>
@@ -253,27 +255,27 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       </tr>
       <tr>
         <td class="field-name">CEP:</td>
-        <td class="field-value"><?= htmlspecialchars($participante['cep']) ?></td>
+        <td class="field-value" colspan="4" align="left"><?= htmlspecialchars($participante['cep']) ?></td>
       </tr>
       <tr>
         <td class="field-name">Endereço:</td>
-        <td class="field-value"><?= htmlspecialchars($participante['endereco_rua']) ?>,
+        <td class="field-value" colspan="4" align="left"><?= htmlspecialchars($participante['endereco_rua']) ?>,
           <?= htmlspecialchars($participante['endereco_numero']) ?>
         </td>
       </tr>
       <?php if (!empty($participante['endereco_complemento'])): ?>
         <tr>
           <td class="field-name">Complemento:</td>
-          <td class="field-value"><?= htmlspecialchars($participante['endereco_complemento']) ?></td>
+          <td class="field-value" colspan="4" align="left"><?= htmlspecialchars($participante['endereco_complemento']) ?></td>
         </tr>
       <?php endif; ?>
       <tr>
         <td class="field-name">Bairro:</td>
-        <td class="field-value"><?= htmlspecialchars($participante['bairro']) ?></td>
+        <td class="field-value" colspan="4" align="left"><?= htmlspecialchars($participante['bairro']) ?></td>
       </tr>
       <tr>
         <td class="field-name">Cidade/UF:</td>
-        <td class="field-value">
+        <td class="field-value" colspan="4" align="left">
           <?= htmlspecialchars($participante['cidade']) ?>/<?= htmlspecialchars($participante['estado']) ?>
         </td>
       </tr>
@@ -288,17 +290,17 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       </tr>
       <tr>
         <td class="table-header" width="30%">Nome do Ritual</td>
-        <td class="table-header" width="15%">Data</td>
-        <td class="table-header" width="20%">Padrinho/Madrinha</td>
-        <td class="table-header" width="10%">Presente</td>
+        <td class="table-header" width="15%" align="center">Data</td>
+        <td class="table-header" width="20%" align="center">Padrinho/Madrinha</td>
+        <td class="table-header" width="10%" align="center">Presente</td>
         <td class="table-header" width="25%">Observação</td>
       </tr>
       <?php foreach ($rituais as $ritual): ?>
         <tr>
           <td class="table-cell"><?= htmlspecialchars($ritual['nome']) ?></td>
-          <td class="table-cell-center"><?= (new DateTime($ritual['data_ritual']))->format('d/m/Y') ?></td>
-          <td class="table-cell-center"><?= htmlspecialchars($ritual['padrinho_madrinha']) ?></td>
-          <td class="<?= $ritual['presente'] === 'Sim' ? 'presente-sim' : 'presente-nao' ?>">
+          <td class="table-cell-center" align="center"><?= (new DateTime($ritual['data_ritual']))->format('d/m/Y') ?></td>
+          <td class="table-cell-center" align="center"><?= htmlspecialchars($ritual['padrinho_madrinha']) ?></td>
+          <td class="<?= $ritual['presente'] === 'Sim' ? 'presente-sim' : 'presente-nao' ?>" align="center">
             <?= $ritual['presente'] === 'Sim' ? 'SIM' : 'NÃO' ?>
           </td>
           <td class="table-cell-multiline">

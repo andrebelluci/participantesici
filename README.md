@@ -74,9 +74,23 @@ O Sistema de Participantes ICI é uma aplicação web completa para gestão de p
 - ✅ Controle de presença (presente/ausente)
 - ✅ Vinculação de participantes
 - ✅ Upload de imagens dos rituais
-- ✅ Relatórios de participação
+- ✅ Relatórios de participação (PDF/Excel)
 - ✅ Sistema inteligente de inscrições com cópia automática de dados
 - ✅ Validação visual de campos obrigatórios
+
+### 📊 Sistema de Relatórios e Exportação
+- ✅ **Relatórios de Listagem (PDF/Excel)**
+  - Geração de listas profissionais para Participantes e Rituais
+  - Layout A4 Paisagem otimizado com cabeçalhos e logo centralizado
+  - Suporte total a filtros de busca dinâmicos nas exportações
+- ✅ **Relatórios Individuais (PDF/Excel)**
+  - Detalhamento completo de participantes e rituais
+  - Layout padronizado com bordas profissionais e alinhamento à direita
+- ✅ **Interface Unificada**
+  - Botão dropdown de exportação intuitivo em todas as listagens
+  - Feedback visual (loading) durante o processamento do relatório
+- ✅ **URLs Amigáveis**
+  - Rotas curtas e limpas via `.htaccess` para acesso direto aos relatórios
 
 ### 📋 Sistema de Inscrições
 - ✅ Lógica de "primeira vez" com campos condicionais

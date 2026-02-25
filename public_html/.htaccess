@@ -72,6 +72,10 @@ RewriteRule ^api/inscricoes/buscar-assinatura/?$ /app/inscricoes/api/buscar-assi
 RewriteRule ^api/inscricoes/excluir-assinatura/?$ /app/inscricoes/api/excluir_assinatura.php [L]
 
 # ============= RELATÓRIOS =============
+RewriteRule ^participantes/relatorio/pdf/?$ /app/participantes/relatorios/listar.php?formato=pdf [L,QSA]
+RewriteRule ^participantes/relatorio/excel/?$ /app/participantes/relatorios/listar.php?formato=excel [L,QSA]
+RewriteRule ^rituais/relatorio/pdf/?$ /app/rituais/relatorios/listar.php?formato=pdf [L,QSA]
+RewriteRule ^rituais/relatorio/excel/?$ /app/rituais/relatorios/listar.php?formato=excel [L,QSA]
 RewriteRule ^participante/([0-9]+)/relatorio/pdf/?$ /app/participantes/relatorios/visualizar.php?id=$1&formato=pdf [L]
 RewriteRule ^participante/([0-9]+)/relatorio/excel/?$ /app/participantes/relatorios/visualizar.php?id=$1&formato=excel [L]
 RewriteRule ^ritual/([0-9]+)/relatorio/pdf/?$ /app/rituais/relatorios/visualizar.php?id=$1&formato=pdf [L]

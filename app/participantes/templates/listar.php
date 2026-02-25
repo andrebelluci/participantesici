@@ -25,7 +25,38 @@ require_once __DIR__ . '/../../includes/header.php';
       <i class="fa-solid fa-users text-blue-500"></i>Participantes
     </h1>
 
-    <div class="flex justify-end md:mb-4">
+    <div class="flex justify-end md:mb-4 gap-2">
+
+      <?php if ($is_admin): ?>
+        <!-- Botão de Exportação (só para admins) -->
+        <div class="relative inline-block">
+          <button type="button" id="export-button" onclick="toggleExportDropdown(event)"
+            class="flex items-center justify-center bg-orange-100 text-orange-700 w-10 h-10 rounded hover:bg-orange-200 transition border border-orange-300"
+            title="Exportar lista de participantes">
+            <i class="fa-solid fa-file-export text-lg"></i>
+          </button>
+
+          <div id="export-dropdown"
+            class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
+            <div class="py-2">
+              <div class="px-4 py-2 text-sm font-medium text-gray-700 border-b border-gray-100">
+                Exportar como:
+              </div>
+              <button onclick="exportarParticipantesList('pdf')"
+                class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                <i class="fa-solid fa-file-pdf text-red-500"></i>
+                PDF
+              </button>
+              <button onclick="exportarParticipantesList('excel')"
+                class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                <i class="fa-solid fa-file-excel text-green-500"></i>
+                Excel
+              </button>
+            </div>
+          </div>
+        </div>
+      <?php endif; ?>
+
       <button type="button" id="view-toggle"
         class="hidden md:flex items-center justify-center bg-gray-100 text-gray-700 w-10 h-10 rounded hover:bg-gray-200 transition border border-gray-300"
         title="Alternar visualização">
@@ -554,6 +585,7 @@ require_once __DIR__ . '/../../includes/header.php';
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
 
 <?= asset_script('/assets/js/participantes.js') ?>
+<?= asset_script('/assets/js/relatorios.js') ?>
 <?= asset_script('/assets/js/modal.js') ?>
 <?= asset_script('/assets/js/documentos.js') ?>
 <script type="module">
