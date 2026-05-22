@@ -1,6 +1,14 @@
 <?php
 require_once __DIR__ . '/../../functions/check_auth.php';
+require_once __DIR__ . '/../../functions/participante_status.php';
+require_once __DIR__ . '/../../functions/listagem_retorno.php';
 require_once __DIR__ . '/../../includes/header.php';
+
+$urlRetornoParticipantes = listagemRetornoUrl('/participantes', LISTAGEM_PARTICIPANTES_KEYS);
+
+$labelsStatus = participanteStatusLabels();
+$filtroStatusSelecionados = $filtro_status_selecionados ?? [PARTICIPANTE_STATUS_ATIVO];
+$temFiltroStatusCustom = isset($_GET['filtro_status']) && is_array($_GET['filtro_status']);
 ?>
 
 <div class="max-w-screen-xl mx-auto px-4 py-6">
@@ -73,7 +81,7 @@ require_once __DIR__ . '/../../includes/header.php';
     </button>
     <!-- Botão limpar visível no mobile -->
     <a href="/participantes"
-      class="<?= empty($filtro_nome) && empty($filtro_cpf) && (!isset($_GET['filtro_aniversariantes']) || $_GET['filtro_aniversariantes'] != '1') ? 'hidden' : '' ?> bg-red-600 text-white px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-red-300 transition">
+      class="<?= empty($filtro_nome) && empty($filtro_cpf) && (!isset($_GET['filtro_aniversariantes']) || $_GET['filtro_aniversariantes'] != '1') && !$temFiltroStatusCustom ? 'hidden' : '' ?> bg-red-600 text-white px-4 py-2 rounded mb-4 flex items-center gap-2 text-sm shadow hover:bg-red-300 transition">
       <i class="fa-solid fa-broom mr-1"></i> Limpar Filtro
     </a>
   </div>
@@ -83,8 +91,9 @@ require_once __DIR__ . '/../../includes/header.php';
   $tem_nome = !empty($filtro_nome);
   $tem_cpf = !empty($filtro_cpf);
   $tem_aniversario = isset($_GET['filtro_aniversariantes']) && $_GET['filtro_aniversariantes'] == '1';
+  $tem_status = $temFiltroStatusCustom;
 
-  if ($tem_nome || $tem_cpf || $tem_aniversario):
+  if ($tem_nome || $tem_cpf || $tem_aniversario || $tem_status):
     $meses = [
       1 => 'Janeiro',
       2 => 'Fevereiro',
@@ -128,6 +137,11 @@ require_once __DIR__ . '/../../includes/header.php';
       // Só aniversário
       $mensagem = 'aniversário no mês de ' . $mes_nome;
     }
+    if ($tem_status) {
+      $statusNomes = array_map('participanteStatusLabel', $filtroStatusSelecionados);
+      $statusMsg = 'status: ' . implode(', ', $statusNomes);
+      $mensagem = $mensagem ? $mensagem . ' e ' . $statusMsg : $statusMsg;
+    }
     ?>
     <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4 rounded-r">
       <div class="flex items-start">
@@ -148,7 +162,7 @@ require_once __DIR__ . '/../../includes/header.php';
   <!-- Filtros -->
   <div class="form-container mobile-compact">
     <form id="filtros"
-      class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-white p-3 rounded-lg shadow border border-gray-200 mb-6 <?= empty($filtro_nome) && empty($filtro_cpf) && (!isset($_GET['filtro_aniversariantes']) || $_GET['filtro_aniversariantes'] != '1') ? 'hidden md:grid' : '' ?>"
+      class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-4 bg-white p-3 rounded-lg shadow border border-gray-200 mb-6 <?= empty($filtro_nome) && empty($filtro_cpf) && (!isset($_GET['filtro_aniversariantes']) || $_GET['filtro_aniversariantes'] != '1') && !$temFiltroStatusCustom ? 'hidden md:grid' : '' ?>"
       method="GET">
       <div>
         <label for="filtro_nome" class="block text-sm font-medium text-gray-700 mb-1">Nome:</label>
@@ -199,7 +213,23 @@ require_once __DIR__ . '/../../includes/header.php';
           </select>
         </div>
       </div>
-      <div class="flex items-end gap-2">
+      <div class="xl:col-span-2">
+        <span class="block text-sm font-medium text-gray-700 mb-2">
+          <i class="fa-solid fa-user-tag mr-1"></i> Status:
+        </span>
+        <div class="flex flex-wrap gap-3">
+          <?php foreach ($labelsStatus as $valor => $labelStatus): ?>
+            <label class="inline-flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
+              <input type="checkbox" name="filtro_status[]" value="<?= htmlspecialchars($valor) ?>"
+                <?= in_array($valor, $filtroStatusSelecionados, true) ? 'checked' : '' ?>
+                class="w-4 h-4 text-[#00bfff] border-gray-300 rounded focus:ring-[#00bfff]">
+              <?= htmlspecialchars($labelStatus) ?>
+            </label>
+          <?php endforeach; ?>
+        </div>
+        <p class="text-xs text-gray-500 mt-1">Padrão: somente Ativos, se nenhum for marcado na busca.</p>
+      </div>
+      <div class="flex items-end gap-2 xl:col-span-1">
         <button type="submit"
           class="bg-[#00bfff] text-black px-4 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
           <i class="fa-solid fa-search mr-1"></i> Buscar
@@ -222,7 +252,10 @@ require_once __DIR__ . '/../../includes/header.php';
             onclick="openImageModal(this.src)"
             onerror="this.src='/assets/images/no-image.png'; this.onclick=null; this.classList.remove('cursor-pointer');">
           <div class="text-sm text-gray-600 space-y-1">
-            <h2 class="text-lg font-bold text-gray-800"><?= htmlspecialchars($pessoa['nome_completo']) ?></h2>
+            <h2 class="text-lg font-bold text-gray-800 flex flex-wrap items-center gap-2">
+              <?= htmlspecialchars($pessoa['nome_completo']) ?>
+              <?php require __DIR__ . '/../includes/status_tag.php'; ?>
+            </h2>
             <p><span class="font-semibold">Nascimento:</span>
               <?= (new DateTime($pessoa['nascimento']))->format('d/m/Y') ?></p>
             <p><span class="font-semibold">CPF:</span> <?= formatarCPF($pessoa['cpf']) ?></p>
@@ -233,7 +266,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
         <!-- Ações: Desktop (topo) | Mobile (base do card) -->
         <div class="flex justify-center gap-6 md:justify-end md:gap-2 mt-2 text-sm">
-          <a href="/participante/<?= $pessoa['id'] ?>"
+          <a href="<?= htmlspecialchars(listagemUrlComRetornoLista('/participante/' . $pessoa['id'], '/participantes', LISTAGEM_PARTICIPANTES_KEYS)) ?>"
             class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
             title="Detalhes do participante">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
@@ -243,14 +276,14 @@ require_once __DIR__ . '/../../includes/header.php';
           </a>
           <button
             onclick="abrirModalDocumentos(<?= $pessoa['id'] ?>, '<?= htmlspecialchars($pessoa['nome_completo'], ENT_QUOTES) ?>')"
-            class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded flex items-center gap-1"
+            class="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-1 rounded flex items-center gap-1"
             title="Documentos">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
               <i class="fa-solid fa-file-lines text-lg"></i>
               <span class="block sm:hidden text-xs mt-1">Documentos</span>
             </div>
           </button>
-          <a href="/participante/<?= $pessoa['id'] ?>/editar"
+          <a href="/participante/<?= $pessoa['id'] ?>/editar?redirect=<?= rawurlencode($urlRetornoParticipantes) ?>"
             class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
             title="Editar participante">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
@@ -319,7 +352,10 @@ require_once __DIR__ . '/../../includes/header.php';
                     onerror="this.src='/assets/images/no-image.png'; this.onclick=null; this.classList.remove('cursor-pointer');">
                 </td>
                 <td class="px-4 py-3 text-sm font-medium text-gray-900">
-                  <?= htmlspecialchars($pessoa['nome_completo']) ?>
+                  <div class="flex flex-wrap items-center gap-2">
+                    <?= htmlspecialchars($pessoa['nome_completo']) ?>
+                    <?php require __DIR__ . '/../includes/status_tag.php'; ?>
+                  </div>
                   <div class="text-xs text-gray-500">
                     <?= (new DateTime($pessoa['nascimento']))->format('d/m/Y') ?>
                   </div>
@@ -337,7 +373,7 @@ require_once __DIR__ . '/../../includes/header.php';
                 </td>
                 <td class="px-4 py-3 text-center">
                   <div class="flex justify-center gap-2">
-                    <a href="/participante/<?= $pessoa['id'] ?>"
+                    <a href="<?= htmlspecialchars(listagemUrlComRetornoLista('/participante/' . $pessoa['id'], '/participantes', LISTAGEM_PARTICIPANTES_KEYS)) ?>"
                       class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
                       title="Detalhes do participante">
                       <i class="fa-solid fa-eye"></i>
@@ -348,7 +384,7 @@ require_once __DIR__ . '/../../includes/header.php';
                       title="Documentos">
                       <i class="fa-solid fa-file-lines"></i>
                     </button>
-                    <a href="/participante/<?= $pessoa['id'] ?>/editar"
+                    <a href="/participante/<?= $pessoa['id'] ?>/editar?redirect=<?= rawurlencode($urlRetornoParticipantes) ?>"
                       class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
                       title="Editar participante">
                       <i class="fa-solid fa-edit"></i>
@@ -397,6 +433,11 @@ require_once __DIR__ . '/../../includes/header.php';
       $params_paginacao[] = 'filtro_aniversariantes=1';
       $mes_aniversario = isset($_GET['filtro_mes_aniversario']) ? (int) $_GET['filtro_mes_aniversario'] : (int) date('m');
       $params_paginacao[] = 'filtro_mes_aniversario=' . $mes_aniversario;
+    }
+    if ($temFiltroStatusCustom) {
+      foreach ($filtroStatusSelecionados as $st) {
+        $params_paginacao[] = 'filtro_status[]=' . urlencode($st);
+      }
     }
     $query_string = !empty($params_paginacao) ? '&' . implode('&', $params_paginacao) : '';
     ?>
@@ -583,6 +624,8 @@ require_once __DIR__ . '/../../includes/header.php';
 
 <!-- PhotoSwipe CSS -->
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/photoswipe@5.4.4/dist/photoswipe.css">
+
+<?php require __DIR__ . '/../includes/modal_motivo_status.php'; ?>
 
 <?= asset_script('/assets/js/participantes.js') ?>
 <?= asset_script('/assets/js/relatorios.js') ?>

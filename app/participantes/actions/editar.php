@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../functions/check_auth.php';
+require_once __DIR__ . '/../../functions/participante_status.php';
 require_once __DIR__ . '/../../config/database.php';
 
 // Obtém o ID da pessoa a ser editada
@@ -61,13 +62,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $estado = $_POST['estado'];
   $bairro = $_POST['bairro'];
   $sobre_participante = $_POST['sobre_participante'];
-  $pode_vincular_rituais = $_POST['pode_vincular_rituais'] ?? 'Sim';
-  $motivo_bloqueio_vinculacao = $_POST['motivo_bloqueio_vinculacao'] ?? null;
-
-  // Se pode vincular é "Sim", limpar motivo
-  if ($pode_vincular_rituais === 'Sim') {
-    $motivo_bloqueio_vinculacao = null;
+  $statusProcessado = participanteProcessarStatusPost(
+    $_POST['status'] ?? null,
+    $_POST['motivo_status'] ?? null
+  );
+  if ($statusProcessado['error'] !== null) {
+    $_SESSION['error'] = $statusProcessado['error'];
+    header("Location: /participante/editar/$id");
+    exit;
   }
+  $status = $statusProcessado['status'];
+  $motivo_status = $statusProcessado['motivo_status'];
 
   // ✅ GERENCIAMENTO DE IMAGENS MELHORADO
   $foto = $pessoa['foto']; // Mantém a foto atual por padrão
@@ -186,7 +191,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         foto = ?, nome_completo = ?, nascimento = ?, sexo = ?, cpf = ?, rg = ?, passaporte = ?,
         celular = ?, email = ?, como_soube = ?, cep = ?, endereco_rua = ?, endereco_numero = ?,
         endereco_complemento = ?, cidade = ?, estado = ?, bairro = ?, sobre_participante = ?,
-        pode_vincular_rituais = ?, motivo_bloqueio_vinculacao = ?
+        status = ?, motivo_status = ?
     WHERE id = ?
   ");
 
@@ -209,8 +214,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $estado,
     $bairro,
     $sobre_participante,
-    $pode_vincular_rituais,
-    $motivo_bloqueio_vinculacao,
+    $status,
+    $motivo_status,
     $id
   ]);
 

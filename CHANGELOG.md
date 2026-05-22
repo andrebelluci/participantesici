@@ -53,12 +53,16 @@ e este projeto adere ao [Semantic Versioning](https://semver.org/lang/pt-BR/).
   - Visualização de documentos com PhotoSwipe
   - Download e exclusão de documentos com confirmação
   - Contador de documentos no card do participante
-- Sistema de bloqueio de vinculação a novos rituais
-  - Campo "Permite vincular a novos rituais" no editar participante
-  - Campo obrigatório de motivo quando bloqueado
-  - Validação e bloqueio ao tentar adicionar participante bloqueado
-  - Modal informativa mostrando motivo do bloqueio
-  - Indicador visual no card do participante (Sim/Não)
+- Status do participante (ativo / inativo / não pode participar)
+  - Substitui o controle "Permite vincular a novos rituais"
+  - Motivo opcional para inativo; obrigatório para não pode participar
+  - Novos cadastros sempre entram como ativo
+  - Filtro por status na listagem (padrão: somente ativos)
+  - Tags clicáveis na listagem e na visualização com modal de motivo
+  - Participantes não ativos não aparecem na busca ao adicionar ao ritual
+  - Validação no servidor ao vincular participante ↔ ritual
+  - Migration 4 com conversão de registros legados (`Não` → não pode participar)
+  - Status e motivo nos relatórios individual e de lista (PDF/Excel)
 - Zoom dinâmico no PhotoSwipe
   - Zoom máximo calculado dinamicamente baseado no tamanho da imagem
   - Permite zoom até 5x para imagens menores que a viewport

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../functions/check_auth.php';
+require_once __DIR__ . '/../../functions/participante_status.php';
 require_once __DIR__ . '/../../config/database.php';
 
 // Configurar fuso horário para Brasil (-3)
@@ -28,6 +29,9 @@ if (!$participante) {
   header('Location: /participantes');
   exit;
 }
+
+$statusParticipante = participanteNormalizarStatus($participante['status'] ?? null);
+$motivoParticipante = $participante['motivo_status'] ?? '';
 
 // Buscar todos os rituais que o participante participou
 $sql_rituais = "
@@ -247,7 +251,19 @@ $html = '
     <tr>
         <td style="border-bottom: 1px solid #ddd; border-right: 1px solid #ddd; background-color: #f8f9fa;"><strong style="color: #0066cc;">CPF:</strong></td>
         <td style="border-bottom: 1px solid #ddd;">' . formatarCPF($participante['cpf']) . '</td>
+    </tr>
+    <tr style="background-color: #f8f9fa;">
+        <td style="border-bottom: 1px solid #ddd; border-right: 1px solid #ddd;"><strong style="color: #0066cc;">Status:</strong></td>
+        <td style="border-bottom: 1px solid #ddd;">' . htmlspecialchars(participanteStatusLabel($statusParticipante)) . '</td>
     </tr>';
+
+if ($motivoParticipante !== null && trim($motivoParticipante) !== '') {
+  $html .= '
+    <tr>
+        <td style="border-bottom: 1px solid #ddd; border-right: 1px solid #ddd; background-color: #f8f9fa;"><strong style="color: #0066cc;">Motivo / observação:</strong></td>
+        <td style="border-bottom: 1px solid #ddd;">' . nl2br(htmlspecialchars($motivoParticipante)) . '</td>
+    </tr>';
+}
 
 $html .= '
     <tr>

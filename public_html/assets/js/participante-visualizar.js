@@ -916,6 +916,10 @@ function aplicarFocoModalAdicionar() {
 }
 
 function abrirModalAdicionar() {
+  if (typeof participantePodeAdicionarRitual !== 'undefined' && !participantePodeAdicionarRitual) {
+    showToast('Este participante não pode ser vinculado a novos rituais.', 'error');
+    return;
+  }
   disableScroll();
   document.getElementById('modal-adicionar').style.display = 'flex';
 
@@ -1505,20 +1509,7 @@ function pesquisarRituais() {
         listaRituais.appendChild(contadorResultados);
       }
 
-      // ✅ CORREÇÃO: Renderiza items COM DELAY para garantir dados
-      // Buscar dados do participante atual para verificar bloqueio
-      fetch(`/api/participante/dados-vinculacao?id=${pessoaId}`)
-        .then(response => response.json())
-        .then(dadosParticipante => {
-          const podeVincular = dadosParticipante.pode_vincular_rituais || 'Sim';
-          const motivoBloqueio = dadosParticipante.motivo_bloqueio_vinculacao || null;
-          renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesquisa, listaRituais, podeVincular, motivoBloqueio);
-        })
-        .catch(error => {
-          console.error('Erro ao buscar dados de vinculação:', error);
-          // Se der erro, assume que pode vincular
-          renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesquisa, listaRituais, 'Sim', null);
-        });
+      renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesquisa, listaRituais);
 
       // Feedback de sucesso
       showToast(`${rituaisFiltrados.length} ritual(is) encontrado(s)!`, 'success');
@@ -1551,13 +1542,7 @@ function pesquisarRituais() {
 }
 
 // ✅ NOVA FUNÇÃO: Renderiza rituais com verificação segura
-function renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesquisa, listaRituais, podeVincular = 'Sim', motivoBloqueio = null) {
-  console.log('📱 Iniciando renderização:', {
-    filtrados: rituaisFiltrados.length,
-    vinculados: rituaisVinculados
-  });
-
-  // ✅ Pequeno delay para garantir que dados estão prontos
+function renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesquisa, listaRituais) {
   setTimeout(() => {
     rituaisFiltrados.forEach((ritual, index) => {
       // ✅ SEGURANÇA: Converte IDs para mesmo tipo para comparação
@@ -1602,7 +1587,7 @@ function renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesq
               </p>
             </div>
             <div class="pt-1" id="acao-ritual-${ritualId}">
-              ${renderizarBotaoAcao(ritualId, jaAdicionado, podeVincular, motivoBloqueio)}
+              ${renderizarBotaoAcao(ritualId, jaAdicionado)}
             </div>
           </div>
         </div>
@@ -1612,16 +1597,14 @@ function renderizarRituaisComDelay(rituaisFiltrados, rituaisVinculados, nomePesq
         listaRituais.appendChild(li);
       }
 
-      // ✅ VERIFICAÇÃO ADICIONAL: Re-verifica após 100ms (mobile safety)
       setTimeout(() => {
         verificarEAtualizarBotao(ritualId, rituaisVinculadosInt);
-      }, 100 + (index * 10)); // Escalonado para evitar sobrecarga
+      }, 100 + (index * 10));
     });
-  }, 50); // Delay inicial pequeno
+  }, 50);
 }
 
-// ✅ NOVA FUNÇÃO: Renderiza botão/tag baseado no status
-function renderizarBotaoAcao(ritualId, jaAdicionado, podeVincular = 'Sim', motivoBloqueio = null) {
+function renderizarBotaoAcao(ritualId, jaAdicionado) {
   if (jaAdicionado) {
     return `
       <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -1629,72 +1612,25 @@ function renderizarBotaoAcao(ritualId, jaAdicionado, podeVincular = 'Sim', motiv
         Já adicionado
       </span>
     `;
-  } else if (podeVincular === 'Não') {
-    // Escapar o motivo corretamente para evitar problemas com aspas e quebras de linha
-    const motivoEscapado = motivoBloqueio
-      ? motivoBloqueio
-        .replace(/\\/g, '\\\\')  // Escapar barras invertidas primeiro
-        .replace(/'/g, "\\'")     // Escapar aspas simples
-        .replace(/"/g, '&quot;')  // Escapar aspas duplas
-        .replace(/\n/g, ' ')      // Substituir quebras de linha por espaços
-        .replace(/\r/g, '')       // Remover retornos de carro
-      : 'Motivo não informado';
-    return `
-      <button onclick="abrirModalMotivoBloqueioParticipante('${motivoEscapado}')"
-              class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded text-sm font-semibold transition-colors shadow-sm">
-        <i class="fa-solid fa-ban mr-1"></i>
-        Não pode adicionar (ver motivo)
-      </button>
-    `;
-  } else {
-    return `
-      <button onclick="adicionarRitual(${ritualId})"
-              class="bg-[#00bfff] hover:bg-yellow-400 text-black px-4 py-2 rounded text-sm font-semibold transition-colors shadow-sm">
-        <i class="fa-solid fa-plus mr-1"></i>
-        Adicionar
-      </button>
-    `;
   }
+  return `
+    <button onclick="adicionarRitual(${ritualId})"
+            class="bg-[#00bfff] hover:bg-yellow-400 text-black px-4 py-2 rounded text-sm font-semibold transition-colors shadow-sm">
+      <i class="fa-solid fa-plus mr-1"></i>
+      Adicionar
+    </button>
+  `;
 }
 
-// Funções de modal de motivo movidas para modal.js
-
-// ✅ NOVA FUNÇÃO: Verificação adicional para mobile
 function verificarEAtualizarBotao(ritualId, rituaisVinculados) {
   const containerAcao = document.getElementById(`acao-ritual-${ritualId}`);
   if (!containerAcao) return;
 
   const jaAdicionado = rituaisVinculados.includes(parseInt(ritualId));
-  const temBotaoAdicionar = containerAcao.querySelector('button');
-  const temTagAdicionado = containerAcao.querySelector('span.bg-green-100');
-
-  // Buscar dados do participante para verificar bloqueio
-  fetch(`/api/participante/dados-vinculacao?id=${pessoaId}`)
-    .then(response => response.json())
-    .then(dadosParticipante => {
-      const podeVincular = dadosParticipante.pode_vincular_rituais || 'Sim';
-      const motivoBloqueio = dadosParticipante.motivo_bloqueio_vinculacao || null;
-
-      // ✅ Sempre atualiza para garantir que o botão está correto
-      const botaoEsperado = renderizarBotaoAcao(ritualId, jaAdicionado, podeVincular, motivoBloqueio);
-      const botaoAtual = containerAcao.innerHTML.trim();
-
-      // Verifica se precisa atualizar
-      if (botaoAtual !== botaoEsperado.trim()) {
-        console.log(`📱 Atualizando botão - Ritual ${ritualId}`, {
-          jaAdicionado,
-          podeVincular,
-          temMotivo: !!motivoBloqueio
-        });
-        containerAcao.innerHTML = botaoEsperado;
-      }
-    })
-    .catch(error => {
-      console.error('Erro ao buscar dados de vinculação:', error);
-      // Se der erro, assume que pode vincular
-      const botaoEsperado = renderizarBotaoAcao(ritualId, jaAdicionado, 'Sim', null);
-      containerAcao.innerHTML = botaoEsperado;
-    });
+  const botaoEsperado = renderizarBotaoAcao(ritualId, jaAdicionado);
+  if (containerAcao.innerHTML.trim() !== botaoEsperado.trim()) {
+    containerAcao.innerHTML = botaoEsperado;
+  }
 }
 
 function toggleFiltroRitual() {

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../functions/check_auth.php';
+require_once __DIR__ . '/../../functions/participante_status.php';
 require_once __DIR__ . '/../../config/database.php';
 
 // Configurar fuso horário para Brasil (-3)
@@ -19,17 +20,21 @@ if ($filtro_mes_aniversario === null && isset($_GET['filtro_aniversariantes']) &
 $where = "";
 $params = [];
 if (!empty($filtro_nome)) {
-  $where .= " AND nome_completo LIKE ?";
+  $where .= " AND p.nome_completo LIKE ?";
   $params[] = "%$filtro_nome%";
 }
 if (!empty($filtro_cpf)) {
-  $where .= " AND cpf = ?";
+  $where .= " AND p.cpf = ?";
   $params[] = $filtro_cpf;
 }
 if ($filtro_mes_aniversario !== null && $filtro_mes_aniversario > 0 && $filtro_mes_aniversario <= 12) {
-  $where .= " AND MONTH(nascimento) = ?";
+  $where .= " AND MONTH(p.nascimento) = ?";
   $params[] = $filtro_mes_aniversario;
 }
+
+$filtroStatus = participanteFiltroStatusFromRequest();
+$where .= $filtroStatus['where'];
+$params = array_merge($params, $filtroStatus['params']);
 
 // Consulta para listar as pessoas
 $sql = "
@@ -38,7 +43,7 @@ $sql = "
     LEFT JOIN inscricoes i ON p.id = i.participante_id AND i.presente = 'Sim'
     WHERE 1=1 $where
     GROUP BY p.id
-    ORDER BY nome_completo ASC
+    ORDER BY p.nome_completo ASC
 ";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
@@ -116,9 +121,10 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       </th>
     </tr>
     <?php endif; ?>
-    <tr><td colspan="6"></td></tr>
+    <tr><td colspan="7"></td></tr>
     <tr>
       <th class="table-header">Nome Completo</th>
+      <th class="table-header" align="center">Status</th>
       <th class="table-header" align="center">CPF</th>
       <th class="table-header" align="center">Nascimento</th>
       <th class="table-header" align="center">Celular</th>
@@ -126,8 +132,12 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       <th class="table-header" align="center">Rituais Participados</th>
     </tr>
     <?php foreach ($pessoas as $pessoa): ?>
+      <?php
+      $st = participanteNormalizarStatus($pessoa['status'] ?? null);
+      ?>
       <tr>
         <td class="table-cell"><?= htmlspecialchars($pessoa['nome_completo']) ?></td>
+        <td class="table-cell-center" align="center"><?= htmlspecialchars(participanteStatusLabel($st)) ?></td>
         <td class="table-cell-center" align="center"><?= formatarCPF($pessoa['cpf']) ?></td>
         <td class="table-cell-center" align="center"><?= (new DateTime($pessoa['nascimento']))->format('d/m/Y') ?></td>
         <td class="table-cell-center" align="center"><?= formatarTelefone($pessoa['celular']) ?></td>

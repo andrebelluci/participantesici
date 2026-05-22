@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../functions/check_auth_api.php';
+require_once __DIR__ . '/../../functions/participante_status.php';
 require_once __DIR__ . '/../../config/database.php';
 
 $data = json_decode(file_get_contents('php://input'), true);
@@ -12,7 +13,31 @@ if (!$participante_id || !$ritual_id || !is_numeric($participante_id) || !is_num
 }
 
 try {
-  // Verifica se o participante já está inscrito neste ritual
+  $stmt = $pdo->prepare("SELECT status, motivo_status FROM participantes WHERE id = ?");
+  $stmt->execute([$participante_id]);
+  $participante = $stmt->fetch(PDO::FETCH_ASSOC);
+
+  if (!$participante) {
+    echo json_encode(['success' => false, 'error' => 'Participante não encontrado']);
+    exit;
+  }
+
+  $status = participanteNormalizarStatus($participante['status'] ?? null);
+
+  if (!participantePodeVincularRituais($status)) {
+    $motivo = $participante['motivo_status'] ?? null;
+    if ($motivo === null || trim($motivo) === '') {
+      $motivo = participanteStatusLabel($status);
+    }
+    echo json_encode([
+      'success' => false,
+      'error' => 'Este participante não pode ser vinculado a novos rituais (' . participanteStatusLabel($status) . ').',
+      'motivo_status' => $motivo,
+      'status' => $status,
+    ]);
+    exit;
+  }
+
   $stmt = $pdo->prepare("SELECT id FROM inscricoes WHERE participante_id = ? AND ritual_id = ?");
   $stmt->execute([$participante_id, $ritual_id]);
   if ($stmt->fetch()) {
@@ -20,7 +45,6 @@ try {
     exit;
   }
 
-  // Verifica se o participante já tem inscrições anteriores
   $stmt = $pdo->prepare("
     SELECT primeira_vez_instituto, primeira_vez_ayahuasca
     FROM inscricoes
@@ -33,19 +57,14 @@ try {
   $stmt->execute([$participante_id]);
   $inscricao_anterior = $stmt->fetch(PDO::FETCH_ASSOC);
 
-  // Se já tem inscrição anterior, usa lógica de negócio
   if ($inscricao_anterior) {
-    // Se na primeira vez foi "Sim", agora sempre será "Não"
-    // Se na primeira vez foi "Não", continua "Não"
-    $primeira_vez_instituto = ($inscricao_anterior['primeira_vez_instituto'] === 'Sim') ? 'Não' : 'Não';
-    $primeira_vez_ayahuasca = ($inscricao_anterior['primeira_vez_ayahuasca'] === 'Sim') ? 'Não' : 'Não';
+    $primeira_vez_instituto = 'Não';
+    $primeira_vez_ayahuasca = 'Não';
   } else {
-    // Se é a primeira inscrição, deixa NULL para ser preenchido depois
     $primeira_vez_instituto = null;
     $primeira_vez_ayahuasca = null;
   }
 
-  // Insere a nova inscrição
   $stmt = $pdo->prepare("
     INSERT INTO inscricoes (ritual_id, participante_id, primeira_vez_instituto, primeira_vez_ayahuasca)
     VALUES (?, ?, ?, ?)
@@ -54,7 +73,6 @@ try {
 
   $inscricao_id = $pdo->lastInsertId();
 
-  // Copia dados da última inscrição salva (se existir)
   $dadosCopiados = false;
   $ritualNomeOrigem = null;
   $stmt = $pdo->prepare("
@@ -71,7 +89,6 @@ try {
   $ultimaInscricao = $stmt->fetch(PDO::FETCH_ASSOC);
 
   if ($ultimaInscricao) {
-    // Copia os campos da última inscrição salva
     $stmt = $pdo->prepare("
       UPDATE inscricoes
       SET doenca_psiquiatrica = ?,
@@ -94,22 +111,14 @@ try {
   }
 
   $response = ['success' => true, 'inscricao_id' => $inscricao_id];
-
-  // Retorna informação se os dados vieram de inscrição anterior
+  $response['dados_anteriores'] = (bool) $inscricao_anterior;
   if ($inscricao_anterior) {
-    $response['dados_anteriores'] = true;
     $response['primeira_vez_instituto'] = $primeira_vez_instituto;
     $response['primeira_vez_ayahuasca'] = $primeira_vez_ayahuasca;
-  } else {
-    $response['dados_anteriores'] = false;
   }
-
-  // Retorna informação sobre cópia de dados
+  $response['dados_copiados'] = $dadosCopiados;
   if ($dadosCopiados) {
-    $response['dados_copiados'] = true;
     $response['ritual_nome_origem'] = $ritualNomeOrigem;
-  } else {
-    $response['dados_copiados'] = false;
   }
 
   echo json_encode($response);

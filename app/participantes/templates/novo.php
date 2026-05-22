@@ -284,29 +284,10 @@ require_once __DIR__ . '/../../includes/header.php';
                     </div>
                 </div>
 
-                <div class="grid md:grid-cols-3 gap-4 mt-4">
-                    <div class="md:col-span-1">
-                        <label for="pode_vincular_rituais" class="block text-sm font-medium text-gray-700 mb-1">Permite
-                            vincular a novos rituais:</label>
-                        <select name="pode_vincular_rituais" id="pode_vincular_rituais" required
-                            class="w-full border border-gray-300 rounded px-3 py-2 bg-white">
-                            <option value="Sim" selected>Sim</option>
-                            <option value="Não">Não</option>
-                        </select>
-                    </div>
-
-                    <!-- Campo de motivo (sempre visível, bloqueado quando "Sim", obrigatório quando "Não") -->
-                    <div id="campo-motivo-bloqueio" class="md:col-span-2">
-                        <label for="motivo_bloqueio_vinculacao"
-                            class="block text-sm font-medium text-gray-700 mb-1">Motivo
-                            do bloqueio:</label>
-                        <textarea name="motivo_bloqueio_vinculacao" id="motivo_bloqueio_vinculacao" rows="3"
-                            class="w-full border border-gray-300 rounded px-3 py-2 bg-gray-100 cursor-not-allowed"
-                            placeholder="Digite o motivo pelo qual este participante não pode ser vinculado a novos rituais..."
-                            disabled></textarea>
-                        <p class="text-red-500 text-sm mt-1 hidden">Campo obrigatório</p>
-                    </div>
-                </div>
+                <p class="text-sm text-gray-500 mt-2 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-check text-green-600"></i>
+                    Novos participantes são cadastrados com status <strong>Ativo</strong>.
+                </p>
             </div>
         </form>
     </div>
@@ -352,36 +333,6 @@ require_once __DIR__ . '/../../includes/header.php';
     </div>
 </div>
 
-<script>
-    // Controlar campo de motivo: sempre visível, bloqueado quando "Sim", disponível e obrigatório quando "Não"
-    document.addEventListener('DOMContentLoaded', function () {
-        const selectVinculacao = document.getElementById('pode_vincular_rituais');
-        const motivoTextarea = document.getElementById('motivo_bloqueio_vinculacao');
-
-        if (selectVinculacao && motivoTextarea) {
-            function atualizarCampoMotivo() {
-                if (selectVinculacao.value === 'Sim') {
-                    motivoTextarea.disabled = true;
-                    motivoTextarea.removeAttribute('required');
-                    motivoTextarea.classList.add('bg-gray-100', 'cursor-not-allowed');
-                    motivoTextarea.classList.remove('bg-white');
-                    motivoTextarea.value = ''; // Limpar ao trocar para "Sim"
-                } else {
-                    motivoTextarea.disabled = false;
-                    motivoTextarea.setAttribute('required', 'required');
-                    motivoTextarea.classList.remove('bg-gray-100', 'cursor-not-allowed');
-                    motivoTextarea.classList.add('bg-white');
-                }
-            }
-
-            // Aplicar estado inicial
-            atualizarCampoMotivo();
-
-            // Atualizar ao mudar seleção
-            selectVinculacao.addEventListener('change', atualizarCampoMotivo);
-        }
-    });
-</script>
 <?= asset_script('/assets/js/participante-novo.js') ?>
 <?= asset_script('/assets/js/participante.js') ?>
 <?= asset_script('/assets/js/busca-cep.js') ?>

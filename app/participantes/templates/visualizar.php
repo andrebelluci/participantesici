@@ -1,13 +1,19 @@
 <?php
 require_once __DIR__ . '/../../functions/check_auth.php';
+require_once __DIR__ . '/../../functions/participante_status.php';
+require_once __DIR__ . '/../../functions/listagem_retorno.php';
 require_once __DIR__ . '/../../includes/header.php';
 
 if (!isset($pessoa)) {
   die("Pessoa não encontrado.");
 }
+
+$urlVoltarParticipantes = listagemUrlFromRetorno($_GET['retorno_lista'] ?? null, '/participantes');
+$redirectEditarParticipante = listagemUrlPreservarRetorno('/participante/' . $pessoa['id']);
 ?>
 
 <div class="max-w-screen-xl mx-auto px-4 py-6">
+  <?php require __DIR__ . '/../includes/banner_status.php'; ?>
   <!-- Cabeçalho com foto, nome, CPF e data de nascimento -->
   <div class="bg-white p-6 rounded-lg shadow border border-gray-200 mb-6">
     <div class="flex flex-col md:flex-row items-center md:items-start gap-4 mb-4">
@@ -17,8 +23,9 @@ if (!isset($pessoa)) {
         onerror="this.src='/assets/images/no-image.png'; this.onclick=null; this.classList.remove('cursor-pointer');">
 
       <div class="text-center md:text-left flex-1">
-        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2">
+        <h1 class="text-2xl md:text-3xl font-bold text-gray-800 mb-2 flex flex-wrap items-center justify-center gap-2 md:block md:text-left">
           <?= htmlspecialchars($pessoa['nome_completo']) ?>
+          <?php require __DIR__ . '/../includes/status_tag.php'; ?>
         </h1>
         <div class="text-sm text-gray-600 space-y-1">
           <p><span class="font-semibold">CPF:</span> <?= formatarCPF(htmlspecialchars($pessoa['cpf'])) ?></p>
@@ -28,22 +35,13 @@ if (!isset($pessoa)) {
             echo $nascimento->format('d/m/Y');
             ?>
           </p>
-          <p><span class="font-semibold">Permite vincular a novos rituais:</span>
-            <?php
-            $podeVincular = $pessoa['pode_vincular_rituais'] ?? 'Sim';
-            $corBg = $podeVincular === 'Sim' ? 'bg-green-50' : 'bg-red-50';
-            $corTexto = $podeVincular === 'Sim' ? 'text-green-700' : 'text-red-700';
-            ?>
-            <span class="<?= $corBg ?> <?= $corTexto ?> px-2 py-1 rounded font-bold">
-              <?= $podeVincular ?>
+          <?php if ($participante_status === PARTICIPANTE_STATUS_ATIVO): ?>
+          <p><span class="font-semibold">Status:</span>
+            <span class="<?= participanteStatusBadgeClass($participante_status) ?> px-2 py-0.5 rounded font-semibold text-xs">
+              <?= htmlspecialchars(participanteStatusLabel($participante_status)) ?>
             </span>
-            <?php if ($podeVincular === 'Não' && !empty($pessoa['motivo_bloqueio_vinculacao'])): ?>
-              <button onclick="abrirModalMotivoBloqueio()"
-                class="ml-2 text-xs text-gray-600 hover:text-gray-800 underline">
-                Ver motivo
-              </button>
-            <?php endif; ?>
           </p>
+          <?php endif; ?>
           <p><span class="font-semibold">Inscrito:</span>
             <span class="text-blue-500 px-2 py-1 rounded font-bold">
               <?= $total_inscritos ?>
@@ -70,7 +68,7 @@ if (!isset($pessoa)) {
         </button>
 
         <button onclick="abrirModalDocumentos(<?= $pessoa['id'] ?>, '<?= htmlspecialchars($pessoa['nome_completo'], ENT_QUOTES) ?>')"
-          class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-4 py-2 rounded-lg flex items-center gap-2 transition">
+          class="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-4 py-2 rounded-lg flex items-center gap-2 transition">
           <i class="fa-solid fa-file-lines"></i>
           <span>Documentos</span>
           <span id="documentos-count-<?= $pessoa['id'] ?>"
@@ -82,14 +80,11 @@ if (!isset($pessoa)) {
 
     <!-- Botões de ação -->
     <div class="flex items-center justify-between mb-1">
-      <a href="/participantes" class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
+      <a href="<?= htmlspecialchars($urlVoltarParticipantes) ?>" class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
         <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
       </a>
 
-      <button onclick="abrirModalAdicionar()"
-        class="bg-[#00bfff] text-black px-2 md:px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
-        <i class="fa-solid fa-plus mr-2"></i> Adicionar ritual
-      </button>
+      <?php require __DIR__ . '/../includes/botao_adicionar_ritual.php'; ?>
     </div>
   </div>
 
@@ -357,10 +352,11 @@ if (!isset($pessoa)) {
           </div>
           <p class="text-gray-500 text-lg mb-2">Nenhum ritual encontrado</p>
           <p class="text-gray-400 text-sm">Este participante ainda não está inscrito em nenhum ritual.</p>
-          <button onclick="abrirModalAdicionar()"
-            class="mt-4 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
-            <i class="fa-solid fa-plus mr-2"></i> Adicionar primeiro ritual
-          </button>
+          <?php
+          $btnClass = 'mt-4 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow';
+          $label = 'Adicionar primeiro ritual';
+          require __DIR__ . '/../includes/botao_adicionar_ritual.php';
+          ?>
         <?php else: ?>
           <!-- Filtro não retornou resultados -->
           <div class="text-orange-400 mb-4">
@@ -373,10 +369,11 @@ if (!isset($pessoa)) {
               class="inline-flex items-center gap-2 bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition font-semibold shadow">
               <i class="fa-solid fa-list"></i> Ver todos os rituais
             </a>
-            <button onclick="abrirModalAdicionar()"
-              class="inline-flex items-center gap-2 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
-              <i class="fa-solid fa-plus"></i> Adicionar ritual
-            </button>
+            <?php
+            $btnClass = 'inline-flex items-center gap-2 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow';
+            $iconClass = 'fa-solid fa-plus';
+            require __DIR__ . '/../includes/botao_adicionar_ritual.php';
+            ?>
           </div>
         <?php endif; ?>
       </div>
@@ -408,10 +405,11 @@ if (!isset($pessoa)) {
                     </div>
                     <p class="text-gray-500 text-lg mb-2">Nenhum ritual encontrado</p>
                     <p class="text-gray-400 text-sm">Este participante ainda não está inscrito em nenhum ritual.</p>
-                    <button onclick="abrirModalAdicionar()"
-                      class="mt-4 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
-                      <i class="fa-solid fa-plus mr-2"></i> Adicionar primeiro ritual
-                    </button>
+                    <?php
+                    $btnClass = 'mt-4 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow';
+                    $label = 'Adicionar primeiro ritual';
+                    require __DIR__ . '/../includes/botao_adicionar_ritual.php';
+                    ?>
                   </div>
                 <?php else: ?>
                   <div class="text-center py-8">
@@ -420,15 +418,16 @@ if (!isset($pessoa)) {
                     </div>
                     <p class="text-gray-500 text-lg mb-2">Nenhum ritual encontrado com esse nome.</p>
                     <p class="text-gray-400 text-sm">Pesquise novamente, ou adicione o ritual pelo botão abaixo.</p>
-                    <div class="mt-4 flex gap-3 justify-center">
+                    <div class="mt-4 flex gap-3 justify-center flex-wrap">
                       <a href="/participante/<?= $id ?>"
                         class="inline-flex items-center gap-2 bg-gray-500 text-white px-6 py-2 rounded hover:bg-gray-600 transition font-semibold shadow">
                         <i class="fa-solid fa-list"></i> Ver todos os rituais
                       </a>
-                      <button onclick="abrirModalAdicionar()"
-                        class="inline-flex items-center gap-2 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow">
-                        <i class="fa-solid fa-plus"></i> Adicionar ritual
-                      </button>
+                      <?php
+                      $btnClass = 'inline-flex items-center gap-2 bg-[#00bfff] text-black px-6 py-2 rounded hover:bg-yellow-400 transition font-semibold shadow';
+                      $iconClass = 'fa-solid fa-plus';
+                      require __DIR__ . '/../includes/botao_adicionar_ritual.php';
+                      ?>
                     </div>
                   </div>
                 <?php endif; ?>
@@ -886,22 +885,19 @@ if (!isset($pessoa)) {
             <p class="mt-1 text-gray-600"><?= htmlspecialchars($pessoa['sobre_participante']) ?></p>
           </div>
         </div>
-        <div><strong>Permite vincular a novos rituais:</strong>
-          <?php
-          $podeVincular = $pessoa['pode_vincular_rituais'] ?? 'Sim';
-          $corTexto = $podeVincular === 'Sim' ? 'text-green-700' : 'text-red-700';
-          ?>
-          <span class="<?= $corTexto ?> font-semibold"><?= $podeVincular ?></span>
-          <?php if ($podeVincular === 'Não' && !empty($pessoa['motivo_bloqueio_vinculacao'])): ?>
-            <button onclick="abrirModalMotivoBloqueio()" class="ml-2 text-xs text-blue-600 hover:text-blue-800 underline">
-              Ver motivo
-            </button>
+        <div><strong>Status:</strong>
+          <?php if ($participante_status === PARTICIPANTE_STATUS_ATIVO): ?>
+            <span class="<?= participanteStatusBadgeClass($participante_status) ?> px-2 py-0.5 rounded font-semibold text-xs">
+              <?= htmlspecialchars(participanteStatusLabel($participante_status)) ?>
+            </span>
+          <?php else: ?>
+            <?php require __DIR__ . '/../includes/status_tag.php'; ?>
           <?php endif; ?>
         </div>
       </div>
 
       <div class="pt-4 border-t">
-        <a href="/participante/<?= $pessoa['id'] ?>/editar?redirect=/participante/<?= $pessoa['id'] ?>"
+        <a href="/participante/<?= $pessoa['id'] ?>/editar?redirect=<?= rawurlencode($redirectEditarParticipante) ?>"
           class="inline-flex items-center gap-2 bg-blue-100 hover:bg-blue-200 text-blue-700 text-md px-4 py-2 rounded transition">
           <i class="fa-solid fa-pen-to-square"></i>
           Editar dados do participante
@@ -932,6 +928,7 @@ if (!isset($pessoa)) {
 
 <script>
   const pessoaId = <?= json_encode($id) ?>;
+  const participantePodeAdicionarRitual = <?= json_encode($participante_pode_adicionar_ritual) ?>;
 </script>
 
 <style>
@@ -1118,51 +1115,7 @@ if (!isset($pessoa)) {
   </div>
 </div>
 
-<!-- Modal de Motivo de Bloqueio -->
-<div id="modal-motivo-bloqueio" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
-    <button onclick="fecharModalMotivoBloqueio()" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg z-10">
-      <i class="fa-solid fa-window-close"></i>
-    </button>
-
-    <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
-      <i class="fa-solid fa-ban text-red-600"></i>
-      Motivo do Bloqueio
-    </h2>
-
-    <div class="space-y-4">
-      <div>
-        <p class="text-sm text-gray-600 mb-2">Este participante não pode ser vinculado a novos rituais pelo seguinte motivo:</p>
-        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <p class="text-gray-800 whitespace-pre-wrap"><?= htmlspecialchars($pessoa['motivo_bloqueio_vinculacao'] ?? 'Motivo não informado') ?></p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Modal de Motivo de Bloqueio para Participantes (usada na lista de rituais) -->
-<div id="modal-motivo-bloqueio-participante" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
-    <button onclick="fecharModalMotivoBloqueioParticipante()" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg z-10">
-      <i class="fa-solid fa-window-close"></i>
-    </button>
-
-    <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
-      <i class="fa-solid fa-ban text-red-600"></i>
-      Motivo do Bloqueio
-    </h2>
-
-    <div class="space-y-4">
-      <div>
-        <p class="text-sm text-gray-600 mb-2">Este participante não pode ser vinculado a novos rituais pelo seguinte motivo:</p>
-        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <p id="motivo-bloqueio-participante-content" class="text-gray-800 whitespace-pre-wrap"></p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
+<?php require __DIR__ . '/../includes/modal_motivo_status.php'; ?>
 
 <!-- Modal de Assinatura Digital -->
 <div id="modal-assinatura" class="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] hidden">

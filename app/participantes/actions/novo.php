@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../functions/check_auth.php';
+require_once __DIR__ . '/../../functions/participante_status.php';
 require_once __DIR__ . '/../../config/database.php';
 
 // ✅ FUNÇÃO PARA GERAR NOME DE ARQUIVO INTELIGENTE
@@ -45,13 +46,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $estado = $_POST['estado'];
   $bairro = $_POST['bairro'];
   $sobre_participante = $_POST['sobre_participante'];
-  $pode_vincular_rituais = $_POST['pode_vincular_rituais'] ?? 'Sim';
-  $motivo_bloqueio_vinculacao = $_POST['motivo_bloqueio_vinculacao'] ?? null;
-
-  // Se pode vincular é "Sim", limpar motivo
-  if ($pode_vincular_rituais === 'Sim') {
-    $motivo_bloqueio_vinculacao = null;
-  }
+  $status = PARTICIPANTE_STATUS_ATIVO;
+  $motivo_status = null;
 
   $redirect = $_POST['redirect'] ?? $_GET['redirect'] ?? '/participantes';
 
@@ -153,7 +149,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     INSERT INTO participantes (
       foto, nome_completo, nascimento, sexo, cpf, rg, passaporte, celular, email, como_soube,
       cep, endereco_rua, endereco_numero, endereco_complemento, cidade, estado, bairro, sobre_participante,
-      pode_vincular_rituais, motivo_bloqueio_vinculacao
+      status, motivo_status
     ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   ");
 
@@ -176,8 +172,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
       $estado,
       $bairro,
       $sobre_participante,
-      $pode_vincular_rituais,
-      $motivo_bloqueio_vinculacao
+      $status,
+      $motivo_status
     ]);
 
     $novoParticipanteId = $pdo->lastInsertId();

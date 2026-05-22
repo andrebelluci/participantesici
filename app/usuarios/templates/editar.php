@@ -1,10 +1,13 @@
 <?php
+require_once __DIR__ . '/../../functions/listagem_retorno.php';
 require_once __DIR__ . '/../../includes/header.php';
+
+$urlVoltarUsuarios = listagemUrlFromRetorno($_GET['redirect'] ?? null, '/usuarios');
 ?>
 
 <div class="max-w-screen-md mx-auto px-4 py-6">
     <div class="flex items-center justify-between mb-6">
-        <a href="/usuarios"
+        <a href="<?= htmlspecialchars($urlVoltarUsuarios) ?>"
             class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
             <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
         </a>

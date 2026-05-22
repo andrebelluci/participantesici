@@ -1,10 +1,14 @@
 <?php
 require_once __DIR__ . '/../../functions/check_auth.php';
+require_once __DIR__ . '/../../functions/listagem_retorno.php';
 require_once __DIR__ . '/../../includes/header.php';
 
 if (!isset($ritual)) {
   die("Ritual não encontrado.");
 }
+
+$urlVoltarRituais = listagemUrlFromRetorno($_GET['retorno_lista'] ?? null, '/rituais');
+$redirectEditarRitual = listagemUrlPreservarRetorno('/ritual/' . $id);
 ?>
 
 <div class="max-w-screen-xl mx-auto px-4 py-6">
@@ -54,7 +58,7 @@ if (!isset($ritual)) {
       </div>
 
       <div class="flex gap-2">
-        <a href="/ritual/<?= $id ?>/editar?redirect=/ritual/<?= $id ?>"
+        <a href="/ritual/<?= $id ?>/editar?redirect=<?= rawurlencode($redirectEditarRitual) ?>"
           class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2 rounded-lg flex items-center gap-2 transition">
           <i class="fa-solid fa-pen-to-square"></i>
           <span>Editar ritual</span>
@@ -64,7 +68,7 @@ if (!isset($ritual)) {
 
     <!-- Botões de ação -->
     <div class="flex items-center justify-between">
-      <a href="/rituais" class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
+      <a href="<?= htmlspecialchars($urlVoltarRituais) ?>" class="flex items-center text-gray-600 hover:text-[#00bfff] transition text-sm">
         <i class="fa-solid fa-arrow-left mr-2"></i> Voltar
       </a>
 
@@ -923,29 +927,6 @@ if (!isset($ritual)) {
     overflow: hidden;
   }
 </style>
-
-<!-- Modal de Motivo de Bloqueio -->
-<div id="modal-motivo-bloqueio-ritual" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 hidden">
-  <div class="bg-white rounded-lg shadow-lg w-full max-w-md p-6 relative mx-4">
-    <button onclick="fecharModalMotivoBloqueioRitual()" class="absolute top-2 right-2 text-red-600 hover:text-red-800 text-lg z-10">
-      <i class="fa-solid fa-window-close"></i>
-    </button>
-
-    <h2 class="text-xl font-bold mb-4 text-gray-800 flex items-center gap-2">
-      <i class="fa-solid fa-ban text-red-600"></i>
-      Motivo do Bloqueio
-    </h2>
-
-    <div class="space-y-4">
-      <div>
-        <p class="text-sm text-gray-600 mb-2">Este participante não pode ser vinculado a novos rituais pelo seguinte motivo:</p>
-        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-          <p id="motivo-bloqueio-ritual-content" class="text-gray-800 whitespace-pre-wrap"></p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
 
 <?= asset_style('/assets/css/assinatura.css') ?>
 <?= asset_script('/assets/js/ritual-visualizar.js') ?>

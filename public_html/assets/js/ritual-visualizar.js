@@ -1573,7 +1573,7 @@ function renderizarParticipantesComDelay(participantesData, participantesVincula
               </p>
             </div>
             <div class="pt-1" id="acao-participante-${participanteId}">
-              ${renderizarBotaoAcaoParticipante(participanteId, jaAdicionado, participante.pode_vincular_rituais || 'Sim', participante.motivo_bloqueio_vinculacao || null)}
+              ${renderizarBotaoAcaoParticipante(participanteId, jaAdicionado)}
             </div>
           </div>
         </div>
@@ -1585,14 +1585,14 @@ function renderizarParticipantesComDelay(participantesData, participantesVincula
 
       // ✅ VERIFICAÇÃO ADICIONAL: Re-verifica após 100ms (mobile safety)
       setTimeout(() => {
-        verificarEAtualizarBotaoParticipante(participanteId, participantesVinculadosInt, participante.pode_vincular_rituais || 'Sim', participante.motivo_bloqueio_vinculacao || null);
+        verificarEAtualizarBotaoParticipante(participanteId, participantesVinculadosInt);
       }, 100 + (index * 10)); // Escalonado para evitar sobrecarga
     });
   }, 50); // Delay inicial pequeno
 }
 
 // ✅ NOVA FUNÇÃO: Renderiza botão/tag baseado no status do participante
-function renderizarBotaoAcaoParticipante(participanteId, jaAdicionado, podeVincular = 'Sim', motivoBloqueio = null) {
+function renderizarBotaoAcaoParticipante(participanteId, jaAdicionado) {
   if (jaAdicionado) {
     return `
       <span class="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
@@ -1600,50 +1600,24 @@ function renderizarBotaoAcaoParticipante(participanteId, jaAdicionado, podeVincu
         Já adicionado
       </span>
     `;
-  } else if (podeVincular === 'Não') {
-    // Escapar o motivo corretamente para evitar problemas com aspas e quebras de linha
-    const motivoEscapado = motivoBloqueio
-      ? motivoBloqueio
-        .replace(/\\/g, '\\\\')  // Escapar barras invertidas primeiro
-        .replace(/'/g, "\\'")     // Escapar aspas simples
-        .replace(/"/g, '&quot;')  // Escapar aspas duplas
-        .replace(/\n/g, ' ')      // Substituir quebras de linha por espaços
-        .replace(/\r/g, '')       // Remover retornos de carro
-      : 'Motivo não informado';
-    return `
-      <button onclick="abrirModalMotivoBloqueioRitual('${motivoEscapado}')"
-              class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded text-sm font-semibold transition-colors shadow-sm">
-        <i class="fa-solid fa-ban mr-1"></i>
-        Não pode adicionar (ver motivo)
-      </button>
-    `;
-  } else {
-    return `
-      <button onclick="adicionarParticipante(${participanteId})"
-              class="bg-[#00bfff] hover:bg-yellow-400 text-black px-4 py-2 rounded text-sm font-semibold transition-colors shadow-sm">
-        <i class="fa-solid fa-plus mr-1"></i>
-        Adicionar
-      </button>
-    `;
   }
+  return `
+    <button onclick="adicionarParticipante(${participanteId})"
+            class="bg-[#00bfff] hover:bg-yellow-400 text-black px-4 py-2 rounded text-sm font-semibold transition-colors shadow-sm">
+      <i class="fa-solid fa-plus mr-1"></i>
+      Adicionar
+    </button>
+  `;
 }
 
-// ✅ NOVA FUNÇÃO: Verificação adicional para mobile (participantes)
-function verificarEAtualizarBotaoParticipante(participanteId, participantesVinculados, podeVincular = 'Sim', motivoBloqueio = null) {
+function verificarEAtualizarBotaoParticipante(participanteId, participantesVinculados) {
   const containerAcao = document.getElementById(`acao-participante-${participanteId}`);
   if (!containerAcao) return;
 
   const jaAdicionado = participantesVinculados.includes(parseInt(participanteId));
-  const temBotaoAdicionar = containerAcao.querySelector('button');
-  const temTagAdicionado = containerAcao.querySelector('span.bg-green-100');
-
-  // ✅ Corrige inconsistências
-  if (jaAdicionado && temBotaoAdicionar) {
-    console.log(`📱 Corrigindo botão para "Já adicionado" - Participante ${participanteId}`);
-    containerAcao.innerHTML = renderizarBotaoAcaoParticipante(participanteId, true, podeVincular, motivoBloqueio);
-  } else if (!jaAdicionado && temTagAdicionado) {
-    console.log(`📱 Corrigindo tag para "Adicionar" - Participante ${participanteId}`);
-    containerAcao.innerHTML = renderizarBotaoAcaoParticipante(participanteId, false, podeVincular, motivoBloqueio);
+  const botaoEsperado = renderizarBotaoAcaoParticipante(participanteId, jaAdicionado);
+  if (containerAcao.innerHTML.trim() !== botaoEsperado.trim()) {
+    containerAcao.innerHTML = botaoEsperado;
   }
 }
 

@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../functions/check_auth.php';
+require_once __DIR__ . '/../../functions/participante_status.php';
 require_once __DIR__ . '/../../config/database.php';
 
 // Obter o ID do participante da URL
@@ -690,6 +691,10 @@ if ($is_participante && preg_match('/\/participante\/(\d+)/', $current_path, $ma
   $export_id = null;
   $export_type = null;
 }
+
+$participante_status = participanteNormalizarStatus($pessoa['status'] ?? null);
+$participante_motivo_status = $pessoa['motivo_status'] ?? null;
+$participante_pode_adicionar_ritual = participantePodeVincularRituais($participante_status);
 
 // Carregar template
 require_once __DIR__ . '/../templates/visualizar.php';

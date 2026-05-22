@@ -62,6 +62,8 @@ CREATE TABLE `participantes` (
   `foto` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `nome_completo` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
   `nascimento` date NOT NULL,
+  `status` enum('ativo','inativo','nao_pode_participar') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'ativo' COMMENT 'Status operacional do participante',
+  `motivo_status` text COLLATE utf8mb4_general_ci COMMENT 'Motivo/observação para inativo ou não pode participar',
   `sexo` enum('M','F') COLLATE utf8mb4_general_ci NOT NULL,
   `cpf` varchar(14) COLLATE utf8mb4_general_ci NOT NULL,
   `rg` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,

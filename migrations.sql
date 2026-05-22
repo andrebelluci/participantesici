@@ -36,3 +36,27 @@ ALTER TABLE `participantes`
 ADD COLUMN `pode_vincular_rituais` ENUM('Sim','Não') DEFAULT 'Sim' COMMENT 'Permite vincular participante a novos rituais' AFTER `nascimento`,
 ADD COLUMN `motivo_bloqueio_vinculacao` TEXT NULL COMMENT 'Motivo pelo qual não pode ser vinculado a novos rituais' AFTER `pode_vincular_rituais`;
 
+-- ============================================
+-- 4. STATUS DO PARTICIPANTE (substitui pode_vincular_rituais)
+-- Execute após a migration 3. Faça backup antes em produção.
+-- ============================================
+
+ALTER TABLE `participantes`
+ADD COLUMN `status` ENUM('ativo','inativo','nao_pode_participar') NOT NULL DEFAULT 'ativo'
+  COMMENT 'Status operacional do participante' AFTER `nascimento`;
+
+-- Migrar dados legados (se migration 3 já foi aplicada)
+UPDATE `participantes` SET `status` = 'nao_pode_participar' WHERE `pode_vincular_rituais` = 'Não';
+UPDATE `participantes` SET `status` = 'ativo' WHERE `pode_vincular_rituais` = 'Sim' OR `pode_vincular_rituais` IS NULL;
+
+ALTER TABLE `participantes`
+CHANGE COLUMN `motivo_bloqueio_vinculacao` `motivo_status` TEXT NULL
+  COMMENT 'Motivo/observação para inativo ou não pode participar';
+
+UPDATE `participantes`
+SET `motivo_status` = 'Não pode participar'
+WHERE `status` = 'nao_pode_participar'
+  AND (`motivo_status` IS NULL OR TRIM(`motivo_status`) = '');
+
+ALTER TABLE `participantes` DROP COLUMN `pode_vincular_rituais`;
+

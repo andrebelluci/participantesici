@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../functions/check_auth.php';
+require_once __DIR__ . '/../../functions/participante_status.php';
 require_once __DIR__ . '/../../config/database.php';
 
 // Configurar fuso horário para Brasil (-3)
@@ -23,6 +24,9 @@ if (!$participante) {
   header('Location: /participantes');
   exit;
 }
+
+$statusParticipante = participanteNormalizarStatus($participante['status'] ?? null);
+$motivoParticipante = $participante['motivo_status'] ?? '';
 
 // Buscar todos os rituais que o participante participou
 $sql_rituais = "
@@ -229,6 +233,16 @@ echo "\xEF\xBB\xBF"; // BOM para UTF-8
       <td class="field-name">CPF:</td>
       <td class="field-value" colspan="4" align="left"><?= formatarCPF($participante['cpf']) ?></td>
     </tr>
+    <tr>
+      <td class="field-name">Status:</td>
+      <td class="field-value" colspan="4" align="left"><?= htmlspecialchars(participanteStatusLabel($statusParticipante)) ?></td>
+    </tr>
+    <?php if ($motivoParticipante !== null && trim($motivoParticipante) !== ''): ?>
+      <tr>
+        <td class="field-name">Motivo / observação:</td>
+        <td class="field-value" colspan="4" align="left"><?= htmlspecialchars($motivoParticipante) ?></td>
+      </tr>
+    <?php endif; ?>
     <?php if (!empty($participante['rg'])): ?>
       <tr>
         <td class="field-name">RG:</td>

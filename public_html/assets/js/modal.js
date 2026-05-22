@@ -66,121 +66,86 @@ function closeConfirmModal() {
   document.body.style.overflow = 'auto';
 }
 
-document.getElementById('confirmModalBtn').addEventListener('click', () => {
-  if (typeof confirmCallback === 'function') {
-    confirmCallback();
-  }
-});
+// Modal unificada: motivo do status do participante
+function abrirModalMotivoStatus(tituloStatus, motivo) {
+  const modal = document.getElementById('modal-motivo-status');
+  const tituloEl = document.getElementById('modal-motivo-status-titulo');
+  const motivoContent = document.getElementById('modal-motivo-status-content');
 
-// Modal de Motivo de Bloqueio (Participantes)
+  if (modal && motivoContent) {
+    if (tituloEl) {
+      const span = tituloEl.querySelector('span');
+      if (span) {
+        span.textContent = tituloStatus || 'Status do participante';
+      }
+    }
+    motivoContent.textContent = motivo || 'Motivo não informado';
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+  }
+}
+
+function fecharModalMotivoStatus() {
+  const modal = document.getElementById('modal-motivo-status');
+  if (modal) {
+    modal.classList.add('hidden');
+    document.body.style.overflow = 'auto';
+  }
+}
+
+/** @deprecated Use abrirModalMotivoStatus */
 function abrirModalMotivoBloqueioParticipante(motivo) {
-  const modal = document.getElementById('modal-motivo-bloqueio-participante');
-  const motivoContent = document.getElementById('motivo-bloqueio-participante-content');
-
-  if (modal && motivoContent) {
-    motivoContent.textContent = motivo || 'Motivo não informado';
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
+  abrirModalMotivoStatus('Não pode participar', motivo);
 }
 
-function fecharModalMotivoBloqueioParticipante() {
-  const modal = document.getElementById('modal-motivo-bloqueio-participante');
-  if (modal) {
-    modal.classList.add('hidden');
-    document.body.style.overflow = 'auto';
-  }
-}
-
-// Modal de Motivo de Bloqueio (Rituais)
+/** @deprecated Use abrirModalMotivoStatus */
 function abrirModalMotivoBloqueioRitual(motivo) {
-  const modal = document.getElementById('modal-motivo-bloqueio-ritual');
-  const motivoContent = document.getElementById('motivo-bloqueio-ritual-content');
-
-  if (modal && motivoContent) {
-    motivoContent.textContent = motivo || 'Motivo não informado';
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
+  abrirModalMotivoStatus('Não pode participar', motivo);
 }
 
-function fecharModalMotivoBloqueioRitual() {
-  const modal = document.getElementById('modal-motivo-bloqueio-ritual');
-  if (modal) {
-    modal.classList.add('hidden');
-    document.body.style.overflow = 'auto';
-  }
-}
-
-// Modal de Motivo de Bloqueio (Visualizar Participante)
+/** @deprecated Use abrirModalMotivoStatus */
 function abrirModalMotivoBloqueio() {
-  const modal = document.getElementById('modal-motivo-bloqueio');
-  if (modal) {
-    modal.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
+  const el = document.getElementById('modal-motivo-status-content');
+  abrirModalMotivoStatus('Status do participante', el ? el.textContent : '');
 }
 
-function fecharModalMotivoBloqueio() {
-  const modal = document.getElementById('modal-motivo-bloqueio');
-  if (modal) {
-    modal.classList.add('hidden');
-    document.body.style.overflow = 'auto';
+document.addEventListener('click', function (event) {
+  const btnMotivo = event.target.closest('.js-abrir-motivo-status');
+  if (!btnMotivo) {
+    return;
   }
-}
+  event.preventDefault();
+  const titulo = btnMotivo.getAttribute('data-status-titulo') || 'Status do participante';
+  const motivo = btnMotivo.getAttribute('data-status-motivo') || 'Motivo não informado';
+  abrirModalMotivoStatus(titulo, motivo);
+});
 
-// Fechar modais de motivo ao clicar fora
-document.addEventListener("DOMContentLoaded", function () {
-  // Modal motivo-bloqueio-participante
-  const modalParticipante = document.getElementById('modal-motivo-bloqueio-participante');
-  if (modalParticipante) {
-    modalParticipante.addEventListener("click", function (event) {
-      if (event.target === modalParticipante) {
-        fecharModalMotivoBloqueioParticipante();
+document.addEventListener('DOMContentLoaded', function () {
+  const modalStatus = document.getElementById('modal-motivo-status');
+  if (modalStatus) {
+    modalStatus.addEventListener('click', function (event) {
+      if (event.target === modalStatus) {
+        fecharModalMotivoStatus();
       }
     });
   }
 
-  // Modal motivo-bloqueio-ritual
-  const modalRitual = document.getElementById('modal-motivo-bloqueio-ritual');
-  if (modalRitual) {
-    modalRitual.addEventListener("click", function (event) {
-      if (event.target === modalRitual) {
-        fecharModalMotivoBloqueioRitual();
-      }
-    });
-  }
-
-  // Modal motivo-bloqueio (visualizar)
-  const modalVisualizar = document.getElementById('modal-motivo-bloqueio');
-  if (modalVisualizar) {
-    modalVisualizar.addEventListener("click", function (event) {
-      if (event.target === modalVisualizar) {
-        fecharModalMotivoBloqueio();
+  const confirmBtn = document.getElementById('confirmModalBtn');
+  if (confirmBtn && !confirmBtn.dataset.listenerAttached) {
+    confirmBtn.dataset.listenerAttached = '1';
+    confirmBtn.addEventListener('click', () => {
+      if (typeof confirmCallback === 'function') {
+        confirmCallback();
       }
     });
   }
 });
 
-// Fechar modais de motivo com ESC
 document.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
-    const modalParticipante = document.getElementById('modal-motivo-bloqueio-participante');
-    if (modalParticipante && !modalParticipante.classList.contains('hidden')) {
-      fecharModalMotivoBloqueioParticipante();
-      return;
-    }
-
-    const modalRitual = document.getElementById('modal-motivo-bloqueio-ritual');
-    if (modalRitual && !modalRitual.classList.contains('hidden')) {
-      fecharModalMotivoBloqueioRitual();
-      return;
-    }
-
-    const modalVisualizar = document.getElementById('modal-motivo-bloqueio');
-    if (modalVisualizar && !modalVisualizar.classList.contains('hidden')) {
-      fecharModalMotivoBloqueio();
-      return;
+    const modalStatus = document.getElementById('modal-motivo-status');
+    if (modalStatus && !modalStatus.classList.contains('hidden')) {
+      fecharModalMotivoStatus();
     }
   }
 });

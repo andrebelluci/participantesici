@@ -1,5 +1,8 @@
 <?php
+require_once __DIR__ . '/../../functions/listagem_retorno.php';
 require_once __DIR__ . '/../../includes/header.php';
+
+$urlRetornoUsuarios = listagemRetornoUrl('/usuarios', LISTAGEM_USUARIOS_KEYS);
 ?>
 
 <div class="max-w-screen-xl mx-auto px-4 py-6">
@@ -125,7 +128,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
           <!-- Ações -->
           <div class="flex justify-center gap-6 md:justify-end md:gap-2 mt-2 text-sm">
-            <a href="/usuario/<?= $usuario['id'] ?>/editar"
+            <a href="/usuario/<?= $usuario['id'] ?>/editar?redirect=<?= rawurlencode($urlRetornoUsuarios) ?>"
               class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
               title="Editar usuário">
               <div class="flex flex-col items-center sm:flex-row sm:gap-1">
@@ -222,7 +225,7 @@ require_once __DIR__ . '/../../includes/header.php';
                 </td>
                 <td class="px-4 py-3 text-center">
                   <div class="flex justify-center gap-2">
-                    <a href="/usuario/<?= $usuario['id'] ?>/editar"
+                    <a href="/usuario/<?= $usuario['id'] ?>/editar?redirect=<?= rawurlencode($urlRetornoUsuarios) ?>"
                       class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
                       title="Editar usuário">
                       <i class="fa-solid fa-edit"></i>

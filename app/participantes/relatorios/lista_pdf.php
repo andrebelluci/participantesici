@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../functions/check_auth.php';
+require_once __DIR__ . '/../../functions/participante_status.php';
 require_once __DIR__ . '/../../config/database.php';
 
 // Configurar fuso horário para Brasil (-3)
@@ -24,17 +25,21 @@ if ($filtro_mes_aniversario === null && isset($_GET['filtro_aniversariantes']) &
 $where = "";
 $params = [];
 if (!empty($filtro_nome)) {
-  $where .= " AND nome_completo LIKE ?";
+  $where .= " AND p.nome_completo LIKE ?";
   $params[] = "%$filtro_nome%";
 }
 if (!empty($filtro_cpf)) {
-  $where .= " AND cpf = ?";
+  $where .= " AND p.cpf = ?";
   $params[] = $filtro_cpf;
 }
 if ($filtro_mes_aniversario !== null && $filtro_mes_aniversario > 0 && $filtro_mes_aniversario <= 12) {
-  $where .= " AND MONTH(nascimento) = ?";
+  $where .= " AND MONTH(p.nascimento) = ?";
   $params[] = $filtro_mes_aniversario;
 }
+
+$filtroStatus = participanteFiltroStatusFromRequest();
+$where .= $filtroStatus['where'];
+$params = array_merge($params, $filtroStatus['params']);
 
 // Consulta para listar as pessoas (sem limite de paginação para o relatório)
 $sql = "
@@ -43,7 +48,7 @@ $sql = "
     LEFT JOIN inscricoes i ON p.id = i.participante_id AND i.presente = 'Sim'
     WHERE 1=1 $where
     GROUP BY p.id
-    ORDER BY nome_completo ASC
+    ORDER BY p.nome_completo ASC
 ";
 $stmt = $pdo->prepare($sql);
 $stmt->execute($params);
@@ -155,12 +160,13 @@ $pdf->SetFont('helvetica', '', 9);
 $html = '<table border="1" cellpadding="6" cellspacing="0" style="border-collapse: collapse;">
     <thead>
         <tr style="background-color: #0066cc; color: white;">
-            <th width="25%" style="text-align: center;"><strong>Nome Completo</strong></th>
-            <th width="15%" style="text-align: center;"><strong>CPF</strong></th>
-            <th width="12%" style="text-align: center;"><strong>Nascimento</strong></th>
-            <th width="15%" style="text-align: center;"><strong>Celular</strong></th>
-            <th width="23%" style="text-align: center;"><strong>Cidade/UF</strong></th>
-            <th width="10%" style="text-align: center;"><strong>Rituais</strong></th>
+            <th width="22%" style="text-align: center;"><strong>Nome Completo</strong></th>
+            <th width="12%" style="text-align: center;"><strong>Status</strong></th>
+            <th width="14%" style="text-align: center;"><strong>CPF</strong></th>
+            <th width="11%" style="text-align: center;"><strong>Nascimento</strong></th>
+            <th width="14%" style="text-align: center;"><strong>Celular</strong></th>
+            <th width="20%" style="text-align: center;"><strong>Cidade/UF</strong></th>
+            <th width="7%" style="text-align: center;"><strong>Rituais</strong></th>
         </tr>
     </thead>
     <tbody>';
@@ -169,13 +175,15 @@ $row_color = true;
 foreach ($pessoas as $pessoa) {
   $bg_color = $row_color ? '#f8f9fa' : '#ffffff';
   $nascimento = (new DateTime($pessoa['nascimento']))->format('d/m/Y');
+  $st = participanteNormalizarStatus($pessoa['status'] ?? null);
   $html .= '<tr style="background-color: ' . $bg_color . ';">
-        <td width="25%" style="text-align: center;">' . htmlspecialchars($pessoa['nome_completo']) . '</td>
-        <td width="15%" style="text-align: center;">' . formatarCPF($pessoa['cpf']) . '</td>
-        <td width="12%" style="text-align: center;">' . $nascimento . '</td>
-        <td width="15%" style="text-align: center;">' . formatarTelefone($pessoa['celular']) . '</td>
-        <td width="23%" style="text-align: center;">' . htmlspecialchars($pessoa['cidade']) . '/' . htmlspecialchars($pessoa['estado']) . '</td>
-        <td width="10%" style="text-align: center;">' . $pessoa['rituais_participados'] . '</td>
+        <td width="22%" style="text-align: center;">' . htmlspecialchars($pessoa['nome_completo']) . '</td>
+        <td width="12%" style="text-align: center;">' . htmlspecialchars(participanteStatusLabel($st)) . '</td>
+        <td width="14%" style="text-align: center;">' . formatarCPF($pessoa['cpf']) . '</td>
+        <td width="11%" style="text-align: center;">' . $nascimento . '</td>
+        <td width="14%" style="text-align: center;">' . formatarTelefone($pessoa['celular']) . '</td>
+        <td width="20%" style="text-align: center;">' . htmlspecialchars($pessoa['cidade']) . '/' . htmlspecialchars($pessoa['estado']) . '</td>
+        <td width="7%" style="text-align: center;">' . $pessoa['rituais_participados'] . '</td>
     </tr>';
   $row_color = !$row_color;
 }

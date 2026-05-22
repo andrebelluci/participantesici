@@ -1,5 +1,6 @@
 <?php
 require_once __DIR__ . '/../../functions/check_auth.php';
+require_once __DIR__ . '/../../functions/participante_status.php';
 require_once __DIR__ . '/../../config/database.php';
 
 // Paginação
@@ -29,20 +30,25 @@ if ($filtro_mes_aniversario === null && isset($_GET['filtro_aniversariantes']) &
 $where = "";
 $params = [];
 if (!empty($filtro_nome)) {
-  $where .= " AND nome_completo LIKE ?";
+  $where .= " AND p.nome_completo LIKE ?";
   $params[] = "%$filtro_nome%";
 }
 if (!empty($filtro_cpf)) {
-  $where .= " AND cpf = ?"; // <- comparação exata
+  $where .= " AND p.cpf = ?";
   $params[] = $filtro_cpf;
 }
 if ($filtro_mes_aniversario !== null && $filtro_mes_aniversario > 0 && $filtro_mes_aniversario <= 12) {
-  $where .= " AND MONTH(nascimento) = ?";
+  $where .= " AND MONTH(p.nascimento) = ?";
   $params[] = $filtro_mes_aniversario;
 }
 
+$filtroStatus = participanteFiltroStatusFromRequest();
+$filtro_status_selecionados = $filtroStatus['selecionados'];
+$where .= $filtroStatus['where'];
+$params = array_merge($params, $filtroStatus['params']);
+
 // Consulta para contar o total de registros
-$stmt_count = $pdo->prepare("SELECT COUNT(*) AS total FROM participantes WHERE 1=1 $where");
+$stmt_count = $pdo->prepare("SELECT COUNT(*) AS total FROM participantes p WHERE 1=1 $where");
 $stmt_count->execute($params);
 $total_registros = $stmt_count->fetch()['total'];
 $total_paginas = ceil($total_registros / $itens_por_pagina);

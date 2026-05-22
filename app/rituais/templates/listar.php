@@ -1,6 +1,9 @@
 <?php
 require_once __DIR__ . '/../../functions/check_auth.php';
+require_once __DIR__ . '/../../functions/listagem_retorno.php';
 require_once __DIR__ . '/../../includes/header.php';
+
+$urlRetornoRituais = listagemRetornoUrl('/rituais', LISTAGEM_RITUAIS_KEYS);
 ?>
 
 <div class="max-w-screen-xl mx-auto px-4 py-6">
@@ -249,7 +252,7 @@ require_once __DIR__ . '/../../includes/header.php';
 
         <!-- Ações -->
         <div class="flex justify-center gap-6 md:justify-end md:gap-2 mt-2 text-sm">
-          <a href="/ritual/<?= $ritual['id'] ?>"
+          <a href="<?= htmlspecialchars(listagemUrlComRetornoLista('/ritual/' . $ritual['id'], '/rituais', LISTAGEM_RITUAIS_KEYS)) ?>"
             class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
             title="Gerenciar participantes">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
@@ -257,7 +260,7 @@ require_once __DIR__ . '/../../includes/header.php';
               <span class="block sm:hidden text-xs mt-1">Participantes</span>
             </div>
           </a>
-          <a href="/ritual/<?= $ritual['id'] ?>/editar"
+          <a href="/ritual/<?= $ritual['id'] ?>/editar?redirect=<?= rawurlencode($urlRetornoRituais) ?>"
             class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
             title="Editar ritual">
             <div class="flex flex-col items-center sm:flex-row sm:gap-1">
@@ -356,12 +359,12 @@ require_once __DIR__ . '/../../includes/header.php';
                 </td>
                 <td class="px-4 py-3 text-center">
                   <div class="flex justify-center gap-2">
-                    <a href="/ritual/<?= $ritual['id'] ?>"
+                    <a href="<?= htmlspecialchars(listagemUrlComRetornoLista('/ritual/' . $ritual['id'], '/rituais', LISTAGEM_RITUAIS_KEYS)) ?>"
                       class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded flex items-center gap-1"
                       title="Gerenciar participantes">
                       <i class="fa-solid fa-user-group"></i>
                     </a>
-                    <a href="/ritual/<?= $ritual['id'] ?>/editar"
+                    <a href="/ritual/<?= $ritual['id'] ?>/editar?redirect=<?= rawurlencode($urlRetornoRituais) ?>"
                       class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded flex items-center gap-1"
                       title="Editar ritual">
                       <i class="fa-solid fa-pen-to-square"></i>

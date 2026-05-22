@@ -460,3 +460,17 @@ select:focus {
 form[autocomplete="off"] input {
   -webkit-text-security: none;
 }
+
+/* ============================================= */
+/* STATUS DO PARTICIPANTE — classes só em PHP   */
+/* (não entram no scan do Tailwind ao compilar) */
+/* ============================================= */
+.border-green-500 {
+  border-color: var(--color-green-500);
+}
+.border-orange-300 {
+  border-color: var(--color-orange-300);
+}
+.border-red-500 {
+  border-color: var(--color-red-500);
+}
