@@ -419,36 +419,33 @@ $temFiltroStatusCustom = isset($_GET['filtro_status']) && is_array($_GET['filtro
     <?php endif; ?>
   </div>
 
-  <!-- Paginação -->
-  <div class="flex justify-center mt-6 flex-wrap gap-2">
-    <?php
-    $params_paginacao = [];
-    if (!empty($filtro_nome)) {
-      $params_paginacao[] = 'filtro_nome=' . urlencode($filtro_nome);
-    }
-    if (!empty($filtro_cpf)) {
-      $params_paginacao[] = 'filtro_cpf=' . urlencode($filtro_cpf);
-    }
-    if (isset($_GET['filtro_aniversariantes']) && $_GET['filtro_aniversariantes'] == '1') {
-      $params_paginacao[] = 'filtro_aniversariantes=1';
-      $mes_aniversario = isset($_GET['filtro_mes_aniversario']) ? (int) $_GET['filtro_mes_aniversario'] : (int) date('m');
-      $params_paginacao[] = 'filtro_mes_aniversario=' . $mes_aniversario;
-    }
-    if ($temFiltroStatusCustom) {
-      foreach ($filtroStatusSelecionados as $st) {
-        $params_paginacao[] = 'filtro_status[]=' . urlencode($st);
-      }
-    }
-    $query_string = !empty($params_paginacao) ? '&' . implode('&', $params_paginacao) : '';
-    ?>
-    <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
-      <a href="?pagina=<?= $i ?><?= $query_string ?>"
-        class="px-4 py-2 rounded border transition
-          <?= $pagina == $i ? 'bg-[#00bfff] text-black font-semibold shadow' : 'bg-white text-gray-600 hover:bg-gray-100' ?>">
-        <?= $i ?>
-      </a>
-    <?php endfor; ?>
-  </div>
+  <?php
+  $paginacao_atual = $pagina;
+  $paginacao_total = $total_paginas;
+  $paginacao_params = [];
+  if (!empty($filtro_nome)) {
+    $paginacao_params['filtro_nome'] = $filtro_nome;
+  }
+  if (!empty($filtro_cpf)) {
+    $paginacao_params['filtro_cpf'] = $filtro_cpf;
+  }
+  if (isset($_GET['filtro_aniversariantes']) && $_GET['filtro_aniversariantes'] == '1') {
+    $paginacao_params['filtro_aniversariantes'] = '1';
+    $paginacao_params['filtro_mes_aniversario'] = isset($_GET['filtro_mes_aniversario'])
+      ? (int) $_GET['filtro_mes_aniversario']
+      : (int) date('m');
+  }
+  if ($temFiltroStatusCustom) {
+    $paginacao_params['filtro_status'] = $filtroStatusSelecionados;
+  }
+  if (!empty($order_by)) {
+    $paginacao_params['order_by'] = $order_by;
+  }
+  if (!empty($order_dir)) {
+    $paginacao_params['order_dir'] = $order_dir;
+  }
+  require __DIR__ . '/../../includes/paginacao.php';
+  ?>
 </div>
 
 <!-- Botão Voltar ao Topo -->

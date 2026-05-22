@@ -398,16 +398,13 @@ $urlRetornoRituais = listagemRetornoUrl('/rituais', LISTAGEM_RITUAIS_KEYS);
     <?php endif; ?>
   </div>
 
-  <!-- Paginação -->
-  <div class="flex justify-center mt-6 flex-wrap gap-2">
-    <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
-      <a href="?<?= http_build_query(array_merge($_GET, ['pagina' => $i])) ?>"
-        class="px-4 py-2 rounded border transition
-          <?= ($_GET['pagina'] ?? 1) == $i ? 'bg-[#00bfff] text-black font-semibold shadow' : 'bg-white text-gray-600 hover:bg-gray-100' ?>">
-        <?= $i ?>
-      </a>
-    <?php endfor; ?>
-  </div>
+  <?php
+  $paginacao_atual = $pagina;
+  $paginacao_total = $total_paginas;
+  $paginacao_params = $_GET;
+  unset($paginacao_params['pagina']);
+  require __DIR__ . '/../../includes/paginacao.php';
+  ?>
 </div>
 
 <!-- Botão Voltar ao Topo -->

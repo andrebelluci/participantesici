@@ -603,26 +603,25 @@ $redirectEditarRitual = listagemUrlPreservarRetorno('/ritual/' . $id);
     <?php endif; ?>
   </div>
 
-  <!-- Paginação (mesmo padrão do listar.php) -->
-  <div class="flex justify-center mt-6 flex-wrap gap-2">
-    <?php
-    $params_paginacao = [];
-    if (!empty($_GET['filtro_nome'] ?? '')) {
-      $params_paginacao[] = 'filtro_nome=' . urlencode($_GET['filtro_nome']);
-    }
-    if (isset($_GET['filtro_aniversariantes']) && $_GET['filtro_aniversariantes'] == '1') {
-      $params_paginacao[] = 'filtro_aniversariantes=1';
-    }
-    $query_string = !empty($params_paginacao) ? '&' . implode('&', $params_paginacao) : '';
-    ?>
-    <?php for ($i = 1; $i <= $total_paginas; $i++): ?>
-      <a href="?pagina=<?= $i ?>&id=<?= $id ?><?= $query_string ?>&order_by=<?= $order_by ?>&order_dir=<?= $order_dir ?>"
-        class="px-4 py-2 rounded border transition
-               <?= $pagina == $i ? 'bg-[#00bfff] text-black font-semibold shadow' : 'bg-white text-gray-600 hover:bg-gray-100' ?>">
-        <?= $i ?>
-      </a>
-    <?php endfor; ?>
-  </div>
+  <?php
+  $paginacao_atual = $pagina;
+  $paginacao_total = $total_paginas;
+  $paginacao_params = [
+    'id' => $id,
+    'order_by' => $order_by,
+    'order_dir' => $order_dir,
+  ];
+  if (!empty($_GET['filtro_nome'] ?? '')) {
+    $paginacao_params['filtro_nome'] = $_GET['filtro_nome'];
+  }
+  if (isset($_GET['filtro_aniversariantes']) && $_GET['filtro_aniversariantes'] == '1') {
+    $paginacao_params['filtro_aniversariantes'] = '1';
+  }
+  if (!empty($_GET['retorno_lista'])) {
+    $paginacao_params['retorno_lista'] = $_GET['retorno_lista'];
+  }
+  require __DIR__ . '/../../includes/paginacao.php';
+  ?>
 
 </div>
 

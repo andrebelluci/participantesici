@@ -474,3 +474,140 @@ form[autocomplete="off"] input {
 .border-red-500 {
   border-color: var(--color-red-500);
 }
+
+/* ============================================= */
+/* PAGINAÇÃO (classes em app/includes/paginacao.php) */
+/* ============================================= */
+.paginacao-nav {
+  width: 100%;
+  max-width: 100%;
+  margin-top: 1.5rem;
+  padding: 0 0.25rem;
+}
+
+.paginacao-nav__info {
+  text-align: center;
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin-bottom: 0.75rem;
+}
+
+.paginacao-nav__row {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  padding: 0.25rem 0.125rem 0.5rem;
+}
+
+.paginacao-nav__pages {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 0.5rem;
+  flex-shrink: 0;
+}
+
+.paginacao-nav__pages--desktop {
+  display: none;
+}
+
+@media (max-width: 639px) {
+  .paginacao-nav__row {
+    overflow-x: visible;
+  }
+}
+
+@media (min-width: 640px) {
+  .paginacao-nav__pages--mobile {
+    display: none;
+  }
+
+  .paginacao-nav__pages--desktop {
+    display: inline-flex;
+  }
+
+  .paginacao-nav__row {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    touch-action: pan-x;
+  }
+}
+
+.paginacao-nav__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 3rem;
+  height: 3rem;
+  padding: 0 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #d1d5db;
+  background: #fff;
+  color: #374151;
+  font-size: 1rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  touch-action: manipulation !important;
+}
+
+.paginacao-nav__btn:hover {
+  background: #f3f4f6;
+}
+
+.paginacao-nav__btn--ativo {
+  background: #00bfff;
+  border-color: #00bfff;
+  color: #000;
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  cursor: default;
+}
+
+.paginacao-nav__btn--disabled {
+  background: #f3f4f6;
+  border-color: #e5e7eb;
+  color: #9ca3af;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.paginacao-nav__ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 1.75rem;
+  height: 3rem;
+  color: #9ca3af;
+  font-size: 1.125rem;
+  user-select: none;
+}
+
+.paginacao-nav__btn i {
+  font-size: 1.125rem;
+  pointer-events: none !important;
+}
+
+@media (min-width: 640px) {
+  .paginacao-nav__btn {
+    min-width: 2.75rem;
+    height: 2.5rem;
+    font-size: 0.875rem;
+  }
+
+  .paginacao-nav__btn i {
+    font-size: 1rem;
+  }
+
+  .paginacao-nav__ellipsis {
+    height: 2.5rem;
+  }
+}
