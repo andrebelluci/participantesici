@@ -107,41 +107,53 @@ function participanteFiltroStatusFromRequest(): array
 
 function participanteStatusBadgeClass(string $status): string
 {
-  return match ($status) {
-    PARTICIPANTE_STATUS_INATIVO => 'bg-orange-100 text-orange-700 hover:bg-orange-200 border border-orange-300',
-    PARTICIPANTE_STATUS_NAO_PODE_PARTICIPAR => 'bg-red-100 text-red-700 hover:bg-red-200 border border-red-500',
-    default => 'bg-green-100 text-green-700',
-  };
+  switch ($status) {
+    case PARTICIPANTE_STATUS_INATIVO:
+      return 'bg-orange-100 text-orange-700 hover:bg-orange-200 border border-orange-300';
+    case PARTICIPANTE_STATUS_NAO_PODE_PARTICIPAR:
+      return 'bg-red-100 text-red-700 hover:bg-red-200 border border-red-500';
+    default:
+      return 'bg-green-100 text-green-700';
+  }
 }
 
 /** Banner no topo da visualização do participante (classes presentes no tailwind.css compilado). */
 function participanteStatusBannerClasses(string $status): string
 {
-  return match ($status) {
-    PARTICIPANTE_STATUS_NAO_PODE_PARTICIPAR => 'bg-red-100 border-l-4 border-red-500 text-red-800',
-    PARTICIPANTE_STATUS_INATIVO => 'bg-orange-100 border-l-4 border-orange-300 text-orange-700',
-    default => 'bg-gray-100 border-l-4 border-gray-300 text-gray-800',
-  };
+  switch ($status) {
+    case PARTICIPANTE_STATUS_NAO_PODE_PARTICIPAR:
+      return 'bg-red-100 border-l-4 border-red-500 text-red-800';
+    case PARTICIPANTE_STATUS_INATIVO:
+      return 'bg-orange-100 border-l-4 border-orange-300 text-orange-700';
+    default:
+      return 'bg-gray-100 border-l-4 border-gray-300 text-gray-800';
+  }
 }
 
 function participanteStatusBannerIconClass(string $status): string
 {
-  return match ($status) {
-    PARTICIPANTE_STATUS_NAO_PODE_PARTICIPAR => 'fa-ban text-red-700',
-    PARTICIPANTE_STATUS_INATIVO => 'fa-user-slash text-orange-700',
-    default => 'fa-circle-info text-gray-600',
-  };
+  switch ($status) {
+    case PARTICIPANTE_STATUS_NAO_PODE_PARTICIPAR:
+      return 'fa-ban text-red-700';
+    case PARTICIPANTE_STATUS_INATIVO:
+      return 'fa-user-slash text-orange-700';
+    default:
+      return 'fa-circle-info text-gray-600';
+  }
 }
 
 /** Botão "Ver motivo" no padrão Documentos (laranja / vermelho). */
 function participanteStatusMotivoBtnClasses(string $status): string
 {
   $base = 'js-abrir-motivo-status px-4 py-2 rounded-lg flex items-center gap-2 transition font-semibold text-sm shrink-0';
-  return match ($status) {
-    PARTICIPANTE_STATUS_NAO_PODE_PARTICIPAR => $base . ' bg-red-100 hover:bg-red-200 text-red-700 border border-red-500',
-    PARTICIPANTE_STATUS_INATIVO => $base . ' bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300',
-    default => $base . ' bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300',
-  };
+  switch ($status) {
+    case PARTICIPANTE_STATUS_NAO_PODE_PARTICIPAR:
+      return $base . ' bg-red-100 hover:bg-red-200 text-red-700 border border-red-500';
+    case PARTICIPANTE_STATUS_INATIVO:
+      return $base . ' bg-orange-100 hover:bg-orange-200 text-orange-700 border border-orange-300';
+    default:
+      return $base . ' bg-gray-100 hover:bg-gray-200 text-gray-700 border border-gray-300';
+  }
 }
 
 /**
@@ -154,11 +166,14 @@ function participanteMotivoParaModal(?string $motivo, string $status): string
     return $motivo;
   }
 
-  return match ($status) {
-    PARTICIPANTE_STATUS_INATIVO => 'Nenhuma observação registrada.',
-    PARTICIPANTE_STATUS_NAO_PODE_PARTICIPAR => 'Motivo não informado',
-    default => 'Motivo não informado',
-  };
+  switch ($status) {
+    case PARTICIPANTE_STATUS_INATIVO:
+      return 'Nenhuma observação registrada.';
+    case PARTICIPANTE_STATUS_NAO_PODE_PARTICIPAR:
+      return 'Motivo não informado';
+    default:
+      return 'Motivo não informado';
+  }
 }
 
 /** Escapa texto para data-status-motivo / data-status-titulo (evita quebrar HTML/JS). */

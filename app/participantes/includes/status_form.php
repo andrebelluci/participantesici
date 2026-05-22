@@ -16,18 +16,24 @@ $exibirCampoMotivo = $statusAtual !== PARTICIPANTE_STATUS_ATIVO;
         <?php foreach ($labels as $valor => $label): ?>
             <?php
             $checked = $statusAtual === $valor;
-            $borderClass = match ($valor) {
-                PARTICIPANTE_STATUS_ATIVO => 'border-green-500',
-                PARTICIPANTE_STATUS_INATIVO => 'border-orange-300',
-                PARTICIPANTE_STATUS_NAO_PODE_PARTICIPAR => 'border-red-500',
-                default => 'border-gray-300',
-            };
-            $icon = match ($valor) {
-                PARTICIPANTE_STATUS_ATIVO => 'fa-circle-check text-green-600',
-                PARTICIPANTE_STATUS_INATIVO => 'fa-user-slash text-orange-700',
-                PARTICIPANTE_STATUS_NAO_PODE_PARTICIPAR => 'fa-ban text-red-600',
-                default => 'fa-circle',
-            };
+            switch ($valor) {
+                case PARTICIPANTE_STATUS_ATIVO:
+                    $borderClass = 'border-green-500';
+                    $icon = 'fa-circle-check text-green-600';
+                    break;
+                case PARTICIPANTE_STATUS_INATIVO:
+                    $borderClass = 'border-orange-300';
+                    $icon = 'fa-user-slash text-orange-700';
+                    break;
+                case PARTICIPANTE_STATUS_NAO_PODE_PARTICIPAR:
+                    $borderClass = 'border-red-500';
+                    $icon = 'fa-ban text-red-600';
+                    break;
+                default:
+                    $borderClass = 'border-gray-300';
+                    $icon = 'fa-circle';
+                    break;
+            }
             ?>
             <label
                 class="status-radio-card relative flex flex-col items-center gap-2 p-4 border-2 rounded-lg cursor-pointer bg-white hover:bg-gray-50 transition <?= $checked ? $borderClass . ' ring-2' : 'border-gray-200' ?>">

@@ -1,0 +1,39 @@
+---
+description: Código PHP compatível com PHP 7.4 (versão de produção)
+alwaysApply: true
+---
+
+# PHP 7.4 — versão alvo do projeto
+
+Produção roda **PHP 7.4** (ex.: 7.4.33 no servidor). Todo código PHP novo ou alterado deve ser **compatível com 7.4** e testável nessa versão.
+
+## Proibido (sintaxe / recursos só do PHP 8+)
+
+- `match` — usar `switch` ou arrays de mapeamento
+- `str_contains()`, `str_starts_with()`, `str_ends_with()` — usar `strpos()` / `substr()` ou polyfill em `app/functions/php_compat.php` (já carregado em `check_auth.php` e `check_auth_api.php`)
+- Operador nullsafe `?->`
+- Named arguments
+- Union types em parâmetros/retorno (`string|int`)
+- `Throwable` em `catch` só se necessário; `Exception` é suficiente na maioria dos casos
+- Atributos `#[...]`, enums, `readonly`, promoted properties só no construtor
+
+## Permitido (PHP 7.4)
+
+- Tipos escalares e `?tipo`, `void`, retorno `: array`
+- Arrow functions `fn($x) => ...`
+- `??`, `?:`, destructuring de array
+- `require_once` e estrutura atual do projeto
+
+## Ao escrever código
+
+1. Preferir sintaxe que funcione em 7.4 sem polyfill.
+2. Se precisar de helper do PHP 8, adicionar em `php_compat.php` com `function_exists()` (padrão já usado no projeto).
+3. Não assumir PHP 8+ no servidor sem confirmar upgrade no cPanel.
+
+## Verificação rápida
+
+```bash
+php -l caminho/do/arquivo.php
+```
+
+No ambiente local, usar PHP 7.4 quando possível antes de deploy.

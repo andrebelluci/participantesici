@@ -5,6 +5,8 @@
  * Verificação de autenticação corrigida
  */
 
+require_once __DIR__ . '/php_compat.php';
+
 // Inicia sessão apenas se não estiver ativa
 if (session_status() === PHP_SESSION_NONE) {
   session_start();

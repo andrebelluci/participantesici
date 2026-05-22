@@ -1,5 +1,7 @@
 <?php
 
+require_once __DIR__ . '/php_compat.php';
+
 /** Parâmetros GET da listagem de participantes a preservar ao voltar. */
 const LISTAGEM_PARTICIPANTES_KEYS = [
   'pagina',
